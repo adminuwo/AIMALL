@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+:root {
+    /* Updated gradient to match the ethereal purple/blue look in the design */
+    --bg-gradient: linear-gradient(120deg, #E0C3FC 0%, #8EC5FC 100%);
+}
+
+html {
+    overflow-x: hidden;
+}
+
+@theme {
+    --font-sans: 'Inter', sans-serif;
+    --color-primary: #1A1A1A;
+    --color-secondary: #666666;
+    --color-accent-blue: #3B82F6;
+    --color-accent-purple: #8B5CF6;
+
+    /* Added some custom colors if needed for specific gradients */
+    --color-glass-white: rgba(255, 255, 255, 0.6);
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--color-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* Utilities for non-tailwind specifics if needed, but mostly relying on tailwind now */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Dreamy Glassmorphic Card Animations */
+@keyframes glass-card-float {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotateX(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotateX(2deg);
+    }
+}
+
+@keyframes orb-float-1 {
+
+    0%,
+    100% {
+        transform: translateZ(40px) translateY(0px) translateX(0px);
+    }
+
+    33% {
+        transform: translateZ(60px) translateY(-20px) translateX(10px);
+    }
+
+    66% {
+        transform: translateZ(50px) translateY(-10px) translateX(-5px);
+    }
+}
+
+@keyframes orb-float-2 {
+
+    0%,
+    100% {
+        transform: translateZ(20px) translateY(0px) scale(1);
+    }
+
+    50% {
+        transform: translateZ(30px) translateY(-25px) scale(1.1);
+    }
+}
+
+@keyframes orb-float-3 {
+
+    0%,
+    100% {
+        transform: translateZ(60px) translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateZ(70px) translateY(-15px) rotate(-10deg);
+    }
+}
+
+@keyframes particle-twinkle {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+.glass-card {
+    animation: glass-card-float 6s ease-in-out infinite;
+}
+
+.orb-1 {
+    animation: orb-float-1 7s ease-in-out infinite;
+}
+
+.orb-2 {
+    animation: orb-float-2 8s ease-in-out infinite;
+}
+
+.orb-3 {
+    animation: orb-float-3 9s ease-in-out infinite 0.5s;
+}
+
+.particle-1 {
+    animation: particle-twinkle 3s ease-in-out infinite;
+}
+
+.particle-2 {
+    animation: particle-twinkle 4s ease-in-out infinite 0.3s;
+}
+
+.particle-3 {
+    animation: particle-twinkle 5s ease-in-out infinite 0.6s;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee {
+    animation: marquee 40s linear infinite;
+}
+
+
+.animate-marquee:hover {
+    animation-play-state: paused;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes blob {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite alternate;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        filter: blur(20px);
+    }
+
+    50% {
+        opacity: 0.8;
+        filter: blur(30px);
+    }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+}

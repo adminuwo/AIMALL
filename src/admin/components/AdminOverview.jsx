@@ -1,0 +1,271 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Activity,
+    Search,
+    ShoppingBag,
+    ShieldCheck,
+    Globe,
+    Zap,
+    Users,
+    DollarSign,
+    Box,
+    CheckCircle,
+    ArrowUpRight,
+    Wallet
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import apiService from '../../services/apiService';
+import CreateAppModal from './CreateAppModal';
+
+const AdminOverview = () => {
+    const [statsData, setStatsData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+
+    const fetchStats = async () => {
+        try {
+            const data = await apiService.getAdminOverviewStats();
+            setStatsData(data);
+        } catch (err) {
+            console.error("Failed to fetch admin overview stats:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
+
+    const handleCreateApp = async (formData) => {
+        try {
+            const payload = { ...formData, url: formData.agentUrl };
+            delete payload.agentUrl;
+            await apiService.createAgent(payload);
+            await fetchStats();
+        } catch (error) {
+            console.error("Error creating agent:", error);
+            throw error;
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="h-[60vh] flex flex-col items-center justify-center bg-transparent gap-4">
+                <div className="w-16 h-16 rounded-[24px] bg-[#8b5cf6]/20 flex items-center justify-center animate-spin">
+                    <Activity className="w-8 h-8 text-[#8b5cf6]" />
+                </div>
+                <p className="text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.4em]">Loading Dashboard...</p>
+            </div>
+        );
+    }
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="space-y-4 pb-24"
+        >
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tighter mb-0.5">Dashboard Overview</h1>
+                    <p className="text-gray-500 font-medium text-sm">Welcome back, A-Series™. Here’s what’s happening today.</p>
+                </div>
+
+                <div className="relative group w-full lg:w-80">
+                    <input
+                        type="text"
+                        placeholder="Search your apps..."
+                        className="w-full bg-white/40 backdrop-blur-md border border-white/60 rounded-[16px] px-3 py-2.5 pl-9 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all font-medium text-sm text-gray-900 placeholder-gray-400"
+                    />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#8b5cf6] transition-colors" />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                        <span className="text-[9px] font-black text-gray-400">A-Series ™</span>
+                        <div className="w-5 h-5 rounded-md bg-[#8b5cf6]/10 flex items-center justify-center text-[9px] font-black text-[#8b5cf6]">A</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Systems Operational Card */}
+            <div className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[28px] p-5 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-green-400/20 transition-all duration-700" />
+
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-4 relative z-10">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-[18px] bg-red-50 flex items-center justify-center shadow-inner relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Activity className="w-6 h-6 text-red-500 relative z-10" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-gray-900 tracking-tight mb-1.5">Systems Operational</h2>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-gray-100/80 text-gray-500 px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-gray-200/50">System Ready</span>
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50/50 px-2.5 py-0.5 rounded-lg border border-blue-100/50">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></div>
+                                    Production v2.4
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 lg:border-l border-gray-200/50 lg:pl-6">
+                        <div>
+                            <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">Last Review</p>
+                            <div className="flex items-center gap-2">
+                                <Activity className="w-3 h-3 text-gray-900" />
+                                <span className="font-bold text-gray-900 text-sm">No recent reviews</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">Compliance</p>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+                                <span className="font-bold text-gray-900 text-sm">All Apps Approved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Performance Snapshot */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-3 border-l-4 border-[#8b5cf6] pl-3">
+                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-[0.2em] relative top-[1px]">Performance Snapshot</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Total Users */}
+                    <motion.div
+                        whileHover={{ y: -3 }}
+                        className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[24px] p-5 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] transition-all group"
+                    >
+                        <div className="flex justify-between items-start mb-3">
+                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Total Users</span>
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+                                <Activity className="w-2.5 h-2.5" /> 0%
+                            </div>
+                        </div>
+                        <div className="flex items-end justify-between">
+                            <p className="text-3xl font-black text-gray-900 tracking-tighter">{statsData?.activeUsers || 7}</p>
+                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8b5cf6] transition-colors">
+                                <Users className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Active Agents */}
+                    <motion.div
+                        whileHover={{ y: -3 }}
+                        className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[24px] p-5 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] transition-all group"
+                    >
+                        <div className="flex justify-between items-start mb-3">
+                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Active Agents</span>
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+                                <Activity className="w-2.5 h-2.5" /> 0%
+                            </div>
+                        </div>
+                        <div className="flex items-end justify-between">
+                            <p className="text-3xl font-black text-gray-900 tracking-tighter">{statsData?.totalAgents || 2}</p>
+                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8b5cf6] transition-colors">
+                                <Zap className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Revenue */}
+                    <motion.div
+                        whileHover={{ y: -3 }}
+                        className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[24px] p-5 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] transition-all group"
+                    >
+                        <div className="flex justify-between items-start mb-3">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Revenue (MTD)</span>
+                            <div className="flex items-center gap-1 text-[9px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+                                <Activity className="w-2.5 h-2.5" /> 0%
+                            </div>
+                        </div>
+                        <div className="flex items-end justify-between">
+                            <p className="text-3xl font-black text-gray-900 tracking-tighter">$0</p>
+                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8b5cf6] transition-colors">
+                                <DollarSign className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Financial Overview */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-3 border-l-4 border-[#8b5cf6] pl-3">
+                    <h3 className="text-xs font-black text-gray-900 uppercase tracking-[0.2em] relative top-[1px]">Financial Overview</h3>
+                </div>
+
+                <div className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[28px] p-5 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#8b5cf6]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+                    <div className="flex justify-between items-center mb-5 relative z-10">
+                        <div className="flex items-center gap-2 text-[#8b5cf6]">
+                            <Activity className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Financial Overview</span>
+                        </div>
+                        <div className="flex gap-3">
+                            <button className="text-[9px] font-bold text-blue-400 uppercase tracking-widest hover:text-blue-600 transition-colors flex items-center gap-2">
+                                Invoice <ArrowUpRight className="w-2.5 h-2.5" />
+                            </button>
+                            <Activity className="w-3.5 h-3.5 text-gray-300" />
+                            <Activity className="w-3.5 h-3.5 text-gray-300" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+                        <div className="bg-gray-50/50 rounded-[20px] p-4 border border-gray-100 hover:bg-white hover:shadow-lg transition-all group">
+                            <div className="flex items-center justify-between mb-3">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600">Gross Sales</p>
+                                <Wallet className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#8b5cf6]" />
+                            </div>
+                            <p className="text-2xl font-black text-gray-900 tracking-tighter">$0</p>
+                        </div>
+
+                        <div className="bg-gray-50/50 rounded-[20px] p-4 border border-gray-100 hover:bg-white hover:shadow-lg transition-all group">
+                            <div className="flex items-center justify-between mb-3">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600">Platform Fee (50%)</p>
+                                <Wallet className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#8b5cf6]" />
+                            </div>
+                            <p className="text-2xl font-black text-gray-900 tracking-tighter">$0</p>
+                        </div>
+
+                        <div className="bg-gray-50/50 rounded-[20px] p-4 border border-gray-100 hover:bg-white hover:shadow-lg transition-all group">
+                            <div className="flex items-center justify-between mb-3">
+                                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-gray-600">Net Earnings</p>
+                                <Wallet className="w-3.5 h-3.5 text-gray-300 group-hover:text-[#8b5cf6]" />
+                            </div>
+                            <p className="text-2xl font-black text-gray-900 tracking-tighter">$0</p>
+                        </div>
+
+                        <div className="pl-5 border-l border-gray-200/50 flex flex-col justify-between py-1">
+                            <div>
+                                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Status</p>
+                                <span className="inline-block bg-orange-100/80 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">N/A</span>
+                            </div>
+                            <div className="mt-2">
+                                <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">Next Payout</p>
+                                <p className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                                    Pending Sales
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <CreateAppModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onSubmit={handleCreateApp}
+            />
+        </motion.div>
+    );
+};
+
+export default AdminOverview;
