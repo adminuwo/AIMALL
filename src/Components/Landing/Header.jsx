@@ -2,7 +2,7 @@ import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { AppRoute } from '../../types';
-import logo from '../../../public/logo/logo.png';
+const logo = '/logo/logo.png';
 const Header = () => {
   const navigate = useNavigate();
 
