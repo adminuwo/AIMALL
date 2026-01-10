@@ -35,7 +35,7 @@ const Hero = () => {
                             AI Mall
                         </button>
                         <button
-                            onClick={() => window.location.href = "https://ai-mall.onrender.com/"}
+                            onClick={() => window.location.href = "https://a-series-bgve.onrender.com"}
                             className="px-8 py-3.5 rounded-full font-bold text-base text-white bg-[#3b82f6] hover:bg-[#2563eb] shadow-lg shadow-blue-500/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/60 active:scale-95 outline-none focus:ring-4 focus:ring-blue-400/50">
                             A Series
                         </button>
