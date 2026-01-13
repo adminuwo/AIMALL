@@ -57,23 +57,38 @@ const Notifications = () => {
 
     const markAsRead = async (id) => {
         try {
-            await axios.put(`${apis.notifications}/read/${id}`, {}, {
+            // Optimistically update the UI immediately
+            setNotifications(prevNotifications =>
+                prevNotifications.map(n => n._id === id ? { ...n, isRead: true } : n)
+            );
+
+            // Then sync with backend
+            await axios.put(`${apis.notifications}/${id}/read`, {}, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
         } catch (err) {
             console.error('Error marking as read:', err);
+            // If backend fails, revert the change
+            setNotifications(prevNotifications =>
+                prevNotifications.map(n => n._id === id ? { ...n, isRead: false } : n)
+            );
         }
     };
 
     const deleteNotification = async (id) => {
         try {
+            // Optimistically remove from UI immediately
+            const previousNotifications = notifications;
+            setNotifications(prevNotifications => prevNotifications.filter(n => n._id !== id));
+
+            // Then sync with backend
             await axios.delete(`${apis.notifications}/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            setNotifications(notifications.filter(n => n._id !== id));
         } catch (err) {
             console.error('Error deleting notification:', err);
+            // If backend fails, restore the notifications
+            setNotifications(notifications);
         }
     };
 
