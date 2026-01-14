@@ -231,9 +231,10 @@ const AdminSupport = () => {
                     )}
                 </div>
 
-                {/* Content Table */}
-                <div className="flex-1 bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-                    <div className="flex-1 overflow-y-auto">
+                {/* Content - Responsive View */}
+                <div className="flex-1 bg-white md:rounded-[32px] md:shadow-sm md:border border-slate-100 overflow-hidden flex flex-col">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block flex-1 overflow-y-auto">
                         <table className="w-full">
                             <thead className="bg-slate-50 sticky top-0 z-10">
                                 <tr>
@@ -286,32 +287,52 @@ const AdminSupport = () => {
                                         </tr>
                                     );
                                 })}
-                                {chatsList.length === 0 && (
-                                    <tr>
-                                        <td colSpan="6" className="text-center py-20">
-                                            <div className="flex flex-col items-center opacity-40">
-                                                <MessageSquare size={48} className="text-slate-300 mb-4" />
-                                                <p className="font-black text-slate-400 uppercase tracking-widest">No Support Tickets</p>
-                                                <button
-                                                    onClick={async () => {
-                                                        const chat = await apiService.getMySupportChat();
-                                                        if (chat) {
-                                                            setChatsList([chat]);
-                                                            setActiveChat(chat);
-                                                            setMessages(chat.messages || []);
-                                                        }
-                                                    }}
-                                                    className="mt-4 text-xs font-bold text-indigo-500 hover:underline"
-                                                >
-                                                    Create Ticket
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden flex-1 overflow-y-auto divide-y divide-slate-100 p-4">
+                        {chatsList.map((chat) => {
+                            const lastMsg = chat.messages?.[chat.messages.length - 1];
+                            return (
+                                <div
+                                    key={chat._id}
+                                    className="p-4 bg-white rounded-2xl mb-4 border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
+                                    onClick={() => { setActiveChat(chat); setMessages(chat.messages || []); }}
+                                >
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                                <Shield size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-900 text-sm">General Inquiry</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {chat._id.substring(0, 8)}</p>
+                                            </div>
+                                        </div>
+                                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[8px] font-black uppercase tracking-wider border border-amber-100">
+                                            Active
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-slate-600 line-clamp-2 mb-4">
+                                        {lastMsg?.text || 'No messages yet...'}
+                                    </p>
+                                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                        <span>{lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : '-'}</span>
+                                        <span className="text-indigo-600 flex items-center gap-1">Open Chat <MessageSquare size={12} /></span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {chatsList.length === 0 && (
+                        <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-40">
+                            <MessageSquare size={48} className="text-slate-300 mb-4" />
+                            <p className="font-black text-slate-400 uppercase tracking-widest">No Support Tickets</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* User Chat Modal - Using activeChat as trigger, but we need to manage it. */}
@@ -323,7 +344,7 @@ const AdminSupport = () => {
                                 initial={{ scale: 0.95, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
                                 exit={{ scale: 0.95, opacity: 0 }}
-                                className="bg-white rounded-[32px] shadow-2xl w-full max-w-4xl h-[80vh] overflow-hidden border border-white/50 flex flex-col"
+                                className="bg-white md:rounded-[32px] shadow-2xl w-full max-w-4xl h-full md:h-[80vh] overflow-hidden border border-white/50 flex flex-col"
                             >
                                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                                     <div className="flex items-center gap-4">
@@ -445,10 +466,10 @@ const AdminSupport = () => {
                 </button>
             </div>
 
-            {/* Content Table */}
-            <div className="flex-1 bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <div className="relative w-96">
+            {/* Content - Responsive View */}
+            <div className="flex-1 bg-white md:rounded-[32px] md:shadow-sm md:border border-slate-100 overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/50">
+                    <div className="relative w-full md:w-96">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                         <input
                             type="text"
@@ -460,7 +481,8 @@ const AdminSupport = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block flex-1 overflow-y-auto">
                     <table className="w-full">
                         <thead className="bg-slate-50 sticky top-0 z-10">
                             <tr>
@@ -475,7 +497,6 @@ const AdminSupport = () => {
                         <tbody className="divide-y divide-slate-100">
                             {filteredChats.map((chat) => {
                                 const lastMsg = chat.messages?.[chat.messages.length - 1];
-                                const isUnread = lastMsg && !lastMsg.isRead && lastMsg.senderId !== (user.id || user._id);
                                 return (
                                     <tr key={chat._id} className="hover:bg-slate-50/50 transition-colors group">
                                         <td className="px-8 py-5">
@@ -501,7 +522,6 @@ const AdminSupport = () => {
                                         </td>
                                         <td className="px-8 py-5">
                                             <span className="text-xs font-bold text-slate-500">
-                                                {/* {lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : '-'} */}
                                                 {lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString('en-US') : '-'}
                                             </span>
                                         </td>
@@ -522,19 +542,52 @@ const AdminSupport = () => {
                                     </tr>
                                 );
                             })}
-                            {filteredChats.length === 0 && (
-                                <tr>
-                                    <td colSpan="6" className="text-center py-20">
-                                        <div className="flex flex-col items-center opacity-40">
-                                            <MessageSquare size={48} className="text-slate-300 mb-4" />
-                                            <p className="font-black text-slate-400 uppercase tracking-widest">No Active Tickets</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden flex-1 overflow-y-auto divide-y divide-slate-100 p-4">
+                    {filteredChats.map((chat) => {
+                        const lastMsg = chat.messages?.[chat.messages.length - 1];
+                        return (
+                            <div
+                                key={chat._id}
+                                className="p-4 bg-white rounded-2xl mb-4 border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
+                                onClick={() => { setActiveChat(chat); setMessages(chat.messages || []); }}
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm">
+                                            {chat.userId?.name?.charAt(0) || 'U'}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-900 text-sm">{chat.userId?.name || 'Unknown'}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{chat.userId?.email || 'No Email'}</p>
+                                        </div>
+                                    </div>
+                                    <span className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[8px] font-black uppercase tracking-wider border border-amber-100">
+                                        Open
+                                    </span>
+                                </div>
+                                <p className="text-sm text-slate-600 line-clamp-2 mb-4">
+                                    {lastMsg?.text || 'No messages...'}
+                                </p>
+                                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <span>{lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : '-'}</span>
+                                    <span className="text-indigo-600 flex items-center gap-1 font-black">REPLY <Send size={12} /></span>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {filteredChats.length === 0 && (
+                    <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-40">
+                        <MessageSquare size={48} className="text-slate-300 mb-4" />
+                        <p className="font-black text-slate-400 uppercase tracking-widest">No Active Tickets</p>
+                    </div>
+                )}
             </div>
 
             {/* Reply Modal */}

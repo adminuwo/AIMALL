@@ -104,13 +104,13 @@ const UserProfile = () => {
     const totalSessions = user.chatSessions ? user.chatSessions.length : 0;
 
     return (
-        <div className="min-h-screen bg-white dark:bg-slate-950 p-8 transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-slate-950 px-4 py-8 md:p-8 transition-colors duration-300">
             <div className="max-w-3xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col items-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center text-white text-2xl font-black mb-4 shadow-lg shadow-teal-100 dark:shadow-teal-900/20">
+                    <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-[24px] flex items-center justify-center text-white text-2xl font-black mb-4 shadow-lg shadow-teal-100 dark:shadow-teal-900/20">
                         {user.avatar && user.avatar !== '/User.jpeg' ? (
-                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-2xl" />
+                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover rounded-[24px]" />
                         ) : (getInitials(user.name))}
                     </div>
                     <div className="text-center">
@@ -122,35 +122,35 @@ const UserProfile = () => {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-4 gap-4">
-                    <div className="text-center">
+                {/* Stats Grid - Responsive Column Count */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-3xl text-center border border-slate-100 dark:border-slate-800">
                         <div className="w-10 h-10 bg-blue-50 dark:bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-2 transition-colors">
                             <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Total Sessions</p>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white">{totalSessions}</p>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-widest">Sessions</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white">{totalSessions}</p>
                     </div>
-                    <div className="text-center">
+                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-3xl text-center border border-slate-100 dark:border-slate-800">
                         <div className="w-10 h-10 bg-cyan-50 dark:bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-2 transition-colors">
                             <Sparkles className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
                         </div>
-                        <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Pro Features</p>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white">Active</p>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-widest">Plan</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white">Pro</p>
                     </div>
-                    <div className="text-center">
+                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-3xl text-center border border-slate-100 dark:border-slate-800">
                         <div className="w-10 h-10 bg-purple-50 dark:bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-2 transition-colors">
                             <Settings className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
-                        <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Account Settings</p>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white">Configured</p>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-widest">Settings</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white">Active</p>
                     </div>
-                    <div className="text-center">
+                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-3xl text-center border border-slate-100 dark:border-slate-800">
                         <div className="w-10 h-10 bg-emerald-50 dark:bg-slate-800 rounded-xl flex items-center justify-center mx-auto mb-2 transition-colors">
                             <Infinity className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 uppercase mb-1">Credits</p>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white">{profile.stats.credits}</p>
+                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-widest">Credits</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white">{profile.stats.credits}</p>
                     </div>
                 </div>
 
