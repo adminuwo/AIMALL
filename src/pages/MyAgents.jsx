@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Settings, Trash2, Bot, Code, Edit3, Save, FileText, Download, Star, Play, Sparkles, Activity, ShieldCheck, Zap, ChevronRight } from 'lucide-react';
+import { Plus, Settings, Trash2, Bot, Code, Edit3, Save, FileText, Download, Star, Play, Sparkles, Activity, ShieldCheck, Zap, ChevronRight, Mail, RotateCcw, MessageCircle } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
 import { getUserData } from '../userStore/userData';
 import { useNavigate, Link } from 'react-router';
 import AgentModal from '../Components/AgentModal/AgentModal';
+import ContactVendorModal from '../Components/ContactVendorModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MyAgents = () => {
@@ -18,6 +19,10 @@ const MyAgents = () => {
     // Modal State
     const [selectedAgent, setSelectedAgent] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Contact Vendor Modal State
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [selectedAgentForContact, setSelectedAgentForContact] = useState(null);
 
     const user = getUserData("user")
     const navigate = useNavigate()
@@ -59,32 +64,28 @@ const MyAgents = () => {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto px-6 py-8 md:p-8 lg:p-12 no-scrollbar bg-transparent relative">
+        <div className="flex-1 overflow-y-auto p-8 lg:p-12 no-scrollbar bg-transparent relative">
             {/* Decorative Background Glows */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-                <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[10%] left-[-5%] w-[400px] h-[400px] bg-[#d946ef]/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-purple-200/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute top-[20%] right-[-5%] w-[40%] h-[40%] bg-blue-100/30 rounded-full blur-[100px]" />
+                <div className="absolute bottom-[-10%] left-[10%] w-[50%] h-[50%] bg-pink-100/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '3s' }} />
+                <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] bg-indigo-50/40 rounded-full blur-[100px]" />
             </div>
 
             {/* Header Section */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 md:mb-20 relative z-10">
-                <div className="space-y-2 md:space-y-4">
-                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-gray-900 tracking-tighter leading-tight">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-20 relative z-10">
+                <div className="space-y-4">
+                    <h1 className="text-5xl lg:text-7xl font-black text-gray-900 tracking-tighter leading-none">
                         My <span className="text-[#8b5cf6]">Agents.</span>
                     </h1>
-                    <p className="text-gray-400 font-bold text-lg md:text-xl tracking-tight max-w-xl opacity-70 leading-snug">
-                        Manage your personalized AI assistants.
+                    <p className="text-gray-500 font-bold text-lg tracking-tight max-w-xl opacity-70">
+                        Manage your collection of AI agents.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-6 w-full md:w-auto">
-                    <button
-                        onClick={() => navigate(AppRoute.MARKETPLACE)}
-                        className="w-full md:w-auto px-8 md:px-12 py-5 md:py-6 bg-gray-900 text-white font-black rounded-[24px] md:rounded-[32px] shadow-2xl transition-all hover:bg-[#8b5cf6] hover:scale-105 active:scale-95 uppercase text-[10px] md:text-xs tracking-[0.3em] flex items-center justify-center gap-3 md:gap-4 group"
-                    >
-                        <Zap className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                        Acquire New Agent
-                    </button>
+                <div className="flex items-center gap-6">
+                    {/* Inbox button removed */}
                 </div>
             </header>
 
@@ -100,7 +101,7 @@ const MyAgents = () => {
                     <p className="text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.5em] animate-pulse">Syncing Core Registry...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
                     <AnimatePresence mode="popLayout">
                         {/* Agents Grid */}
                         {agents.map((agent, index) => (
@@ -109,79 +110,89 @@ const MyAgents = () => {
                                 layout
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
+                                whileHover={{
+                                    y: [0, -10, 0],
+                                    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                                }}
                                 transition={{ delay: index * 0.05 }}
-                                whileHover={{ y: -10 }}
-                                className="bg-white/40 backdrop-blur-3xl border border-white/80 rounded-[40px] md:rounded-[56px] p-8 md:p-10 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-20px_rgba(139,92,246,0.15)] transition-all duration-700 group relative overflow-hidden flex flex-col h-full border-b-4 border-b-white/50"
+                                className="bg-white/40 backdrop-blur-3xl border border-white/80 rounded-[32px] p-6 shadow-[0_15px_35px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_60px_-15px_rgba(139,92,246,0.3)] hover:border-[#8b5cf6]/30 transition-all duration-500 group relative overflow-hidden flex flex-col h-full"
                             >
-                                {/* Decorative Glow */}
-                                <div className="absolute -top-32 -left-32 w-80 h-80 bg-[#8b5cf6]/5 rounded-full blur-[100px] group-hover:bg-[#8b5cf6]/10 transition-all duration-1000"></div>
+                                {/* Decorative Gradient Overlay & Glow */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+                                <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#8b5cf6]/10 rounded-full blur-[80px] group-hover:bg-[#8b5cf6]/20 transition-all duration-700" />
 
-                                <div className="flex justify-between items-start mb-8 md:mb-10 relative z-10">
-                                    <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-[24px] md:rounded-[32px] p-1.5 flex items-center justify-center shadow-2xl border border-gray-50 group-hover:scale-110 transition-all duration-700 overflow-hidden">
+                                <div className="flex justify-between items-start mb-6 relative z-10">
+                                    <div className="w-14 h-14 bg-white rounded-[20px] p-0.5 flex items-center justify-center shadow-xl border border-white group-hover:scale-110 transition-all duration-700 overflow-hidden relative">
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-gray-50 to-white opacity-50" />
                                         <img
                                             src={agent.avatar || `https://ui-avatars.com/api/?name=${agent.agentName}&background=8b5cf6&color=fff`}
-                                            className="w-full h-full object-cover rounded-[18px] md:rounded-[24px]"
+                                            className="w-full h-full object-cover rounded-[16px] relative z-10"
                                             alt={agent.agentName}
                                         />
                                     </div>
-                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="text-[8px] md:text-[10px] font-black text-emerald-700 tracking-widest uppercase">STABLE_LINK</span>
-                                    </div>
+
+                                    {/* Delete Action Overlay */}
+                                    <button
+                                        onClick={(e) => handleDelete(agent._id, e)}
+                                        className="w-10 h-10 rounded-xl bg-red-50/10 hover:bg-red-500 text-red-500 hover:text-white backdrop-blur-md border border-red-500/20 hover:border-red-500 transition-all duration-500 flex items-center justify-center group/delete shadow-lg hover:shadow-red-500/20"
+                                        title="Terminate Agent"
+                                    >
+                                        <Trash2 size={16} className="group-hover/delete:scale-110 transition-transform" />
+                                    </button>
                                 </div>
 
-                                <div className="flex-1 relative z-10 space-y-3 md:space-y-4">
+                                <div className="flex-1 relative z-10 space-y-4">
                                     <div className="flex items-center gap-2">
-                                        <h3 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tighter uppercase leading-none">{agent.agentName}</h3>
-                                        <span className="text-[10px] font-black text-[#8b5cf6] uppercase tracking-tighter border border-[#8b5cf6]/20 px-1.5 rounded-md">TM</span>
+                                        <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none group-hover:text-[#8b5cf6] transition-colors">{agent.agentName}</h3>
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.3em] opacity-80">
-                                        <Activity size={10} />
-                                        {agent.category || 'General Intel'}
+
+                                    <div className="flex items-center gap-2 text-[9px] font-black text-[#8b5cf6] uppercase tracking-[0.2em] opacity-80">
+                                        <Zap size={9} fill="currentColor" className="text-[#8b5cf6]" />
+                                        {agent.category || 'Business OS'}
                                     </div>
-                                    <p className="text-base md:text-lg text-gray-500 font-bold leading-relaxed mb-6 md:mb-10 h-24 line-clamp-3 opacity-70 group-hover:opacity-100 transition-opacity">
+
+                                    <p className="text-[12px] text-gray-500 font-bold leading-relaxed mb-8 h-20 line-clamp-3 opacity-60 group-hover:opacity-100 transition-opacity duration-500">
                                         {agent.description}
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between mt-6 md:mt-10 relative z-10 gap-4 md:gap-6 pt-6 border-t border-white/40">
+                                <div className="flex items-center justify-between mt-8 relative z-10 gap-4 pt-6 border-t border-white/60">
                                     <button
                                         onClick={() => {
                                             const targetUrl = (!agent?.url || agent.url.trim() === "") ? AppRoute.agentSoon : agent.url;
                                             setSelectedAgent({ ...agent, url: targetUrl });
                                             setIsModalOpen(true);
                                         }}
-                                        className="flex-1 py-6 bg-gray-900 text-white rounded-[28px] font-black text-[11px] shadow-2xl hover:bg-[#8b5cf6] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-4 uppercase tracking-[0.2em] group/launch"
+                                        className="flex-[2.5] py-3.5 bg-[#8b5cf6] text-white rounded-[24px] font-black text-[9px] shadow-[0_10px_30px_-10px_rgba(139,92,246,0.5)] hover:bg-emerald-500 hover:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] hover:scale-105 active:scale-95 transition-all duration-500 flex items-center justify-center gap-3 uppercase tracking-[0.2em] group/launch"
                                     >
-                                        <Play size={18} fill="currentColor" className="group-hover/launch:scale-110 transition-transform" />
-                                        Initialize Link
+                                        <Play size={14} fill="currentColor" className="group-hover/launch:scale-110 transition-transform" />
+                                        USE
                                     </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setSelectedAgentForContact(agent);
+                                            setIsContactModalOpen(true);
+                                        }}
+                                        className="w-12 h-12 rounded-[18px] bg-white/60 backdrop-blur-md border border-white text-gray-400 hover:text-[#8b5cf6] hover:bg-white transition-all duration-500 flex items-center justify-center group/chat relative"
+                                        title="Direct Protocol"
+                                    >
+                                        <MessageCircle size={18} className="group-hover/chat:scale-110 transition-transform" />
+                                        <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#d946ef] rounded-full border border-white shadow-sm" />
+                                    </button>
+
                                     <button
                                         onClick={() => navigate(AppRoute.INVOICES)}
-                                        className="w-16 h-16 rounded-[24px] bg-white/60 border border-white text-gray-400 hover:text-[#8b5cf6] hover:bg-white transition-all shadow-sm flex items-center justify-center group/btn"
-                                        title="View Registry Log"
+                                        className="w-12 h-12 rounded-[18px] bg-white/60 backdrop-blur-md border border-white text-gray-400 hover:text-[#8b5cf6] hover:bg-white transition-all duration-500 flex items-center justify-center group/doc"
+                                        title="Export Logs"
                                     >
-                                        <FileText size={22} className="group-hover/btn:scale-110 transition-transform" />
+                                        <FileText size={18} className="group-hover/doc:scale-110 transition-transform" />
                                     </button>
                                 </div>
                             </motion.div>
                         ))}
 
-                        {/* Empty State / Create Card */}
-                        <motion.div
-                            whileHover={{ y: -10 }}
-                            onClick={() => navigate(AppRoute.MARKETPLACE)}
-                            className="bg-white/20 backdrop-blur-3xl border-2 border-dashed border-gray-200/50 rounded-[56px] p-10 flex flex-col items-center justify-center text-center hover:border-[#8b5cf6]/50 hover:bg-white/40 transition-all duration-500 cursor-pointer group min-h-[450px]"
-                        >
-                            <div className="w-24 h-24 rounded-[32px] bg-white shadow-2xl flex items-center justify-center mb-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 border border-gray-50">
-                                <Plus className="w-10 h-10 text-gray-300 group-hover:text-[#8b5cf6] transition-colors" strokeWidth={3} />
-                            </div>
-                            <h3 className="text-2xl font-black text-gray-900 tracking-tighter uppercase mb-4">Extend Fleet</h3>
-                            <p className="text-lg text-gray-400 font-bold max-w-[240px] leading-tight">Identify and synchronize additional intelligence nodes from the global registry.</p>
-                            <div className="mt-10 flex items-center gap-3 text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
-                                Access Marketplace <ChevronRight size={14} />
-                            </div>
-                        </motion.div>
+
                     </AnimatePresence>
                 </div>
             )}
@@ -190,6 +201,13 @@ const MyAgents = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 agent={selectedAgent}
+            />
+
+            <ContactVendorModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+                agent={selectedAgentForContact}
+                user={user}
             />
         </div>
     );

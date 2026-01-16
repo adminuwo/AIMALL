@@ -42,7 +42,6 @@ const AgentCard = ({ agent }) => {
             <div className="flex-1 relative z-10">
                 <div className="flex items-center gap-1.5 mb-1">
                     <h3 className="text-xl font-black text-gray-900 tracking-tight uppercase leading-none">{agent.name}</h3>
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter mt-0.5">TM</span>
                 </div>
                 <p className="text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.2em] mb-4 opacity-80">{agent.category}</p>
                 <p className="text-[15px] text-gray-500 font-medium leading-relaxed mb-8">

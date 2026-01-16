@@ -16,79 +16,16 @@ import {
 import { motion } from 'framer-motion';
 import apiService from '../../services/apiService';
 import CreateAppModal from './CreateAppModal';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-);
 
 const AdminOverview = () => {
     const [statsData, setStatsData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-    const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-            {
-                label: 'Growth',
-                data: [12, 19, 15, 25, 22, 30, 45, 50, 48, 60, 75, 90],
-                fill: true,
-                backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                borderColor: '#8b5cf6',
-                borderWidth: 3,
-                tension: 0.4,
-                pointRadius: 0
-            }
-        ]
-    };
-
-    const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-        },
-        scales: {
-            x: { display: false },
-            y: { display: false }
-        }
-    };
-
     const fetchStats = async () => {
-        // Fetching stats...
         try {
-            const [data, allVendorsData] = await Promise.all([
-                apiService.getAdminOverviewStats(),
-                apiService.getAllVendors('approved')
-            ]);
-
-            const approvedCount = allVendorsData?.count || 0;
-
-            setStatsData({
-                ...data,
-                // Add activeVendors count to the stats data state
-                activeVendors: approvedCount
-            });
+            const data = await apiService.getAdminOverviewStats();
+            setStatsData(data);
         } catch (err) {
             console.error("Failed to fetch admin overview stats:", err);
         } finally {
@@ -146,20 +83,22 @@ const AdminOverview = () => {
                 </div>
             </div>
 
-            {/* Analysis Chart */}
-            <div className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[32px] p-8 shadow-sm overflow-hidden relative group h-48">
-                <div className="absolute inset-0 z-0 opacity-50">
-                    <Line data={chartData} options={chartOptions} />
-                </div>
-                <div className="relative z-10 flex flex-col justify-between h-full">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Growth Analysis</span>
+            {/* Systems Operational Card */}
+            <div className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[28px] p-5 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-green-400/20 transition-all duration-700" />
+
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-4 relative z-10">
+                    <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-[18px] bg-red-50 flex items-center justify-center shadow-inner relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <Activity className="w-6 h-6 text-red-500 relative z-10" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-gray-900 tracking-tight mb-1.5">Systems Operational</h2>
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="text-3xl font-black text-slate-900 tracking-tighter">+84.2%</h4>
-                        <p className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Growth optimized this month</p>
-                    </div>
+
+
                 </div>
             </div>
 
@@ -170,25 +109,6 @@ const AdminOverview = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Pending Approvals - NEW */}
-                    <motion.div
-                        whileHover={{ y: -3 }}
-                        className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[24px] p-5 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] transition-all group"
-                    >
-                        <div className="flex justify-between items-start mb-3">
-                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Pending Approvals</span>
-                            <div className="flex items-center gap-1 text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">
-                                <Activity className="w-2.5 h-2.5" /> Action
-                            </div>
-                        </div>
-                        <div className="flex items-end justify-between">
-                            <p className="text-3xl font-black text-gray-900 tracking-tighter">{statsData?.pendingApprovals || 0}</p>
-                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8b5cf6] transition-colors">
-                                <CheckCircle className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-                            </div>
-                        </div>
-                    </motion.div>
-
                     {/* Total Users */}
                     <motion.div
                         whileHover={{ y: -3 }}
@@ -215,23 +135,16 @@ const AdminOverview = () => {
                         </div>
                     </motion.div>
 
-                    {/* Registered Vendors */}
+                    {/* Active Agents */}
                     <motion.div
                         whileHover={{ y: -3 }}
                         className="bg-white/40 backdrop-blur-2xl border border-white/60 rounded-[24px] p-5 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] transition-all group"
                     >
                         <div className="flex justify-between items-start mb-3">
-                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Registered Vendors</span>
-                            <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">
-                                <Activity className="w-2.5 h-2.5" /> Active
-                            </div>
+                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Active Agents</span>
                         </div>
                         <div className="flex items-end justify-between">
-                            <p className="text-3xl font-black text-gray-900 tracking-tighter">{statsData?.activeVendors || 0}</p>
-                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8b5cf6] transition-colors">
-                                <ShieldCheck className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-                            </div>
-
+                            <p className="text-3xl font-black text-gray-900 tracking-tighter">{statsData?.activeAgents || 0}</p>
                         </div>
                     </motion.div>
 
@@ -244,11 +157,7 @@ const AdminOverview = () => {
                             <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest group-hover:text-[#8b5cf6] transition-colors">Total Revenue</span>
                         </div>
                         <div className="flex items-end justify-between">
-                            <p className="text-3xl font-black text-gray-900 tracking-tighter">₹{statsData?.totalRevenue?.toLocaleString() || '0'}</p>
-                            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#8b5cf6] transition-colors">
-                                <DollarSign className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-                            </div>
-
+                            <p className="text-3xl font-black text-gray-900 tracking-tighter">₹{statsData?.totalRevenue || 0}</p>
                         </div>
                     </motion.div>
                 </div>
@@ -303,7 +212,7 @@ const AdminOverview = () => {
                         <div className="pl-5 border-l border-gray-200/50 flex flex-col justify-between py-1">
                             <div>
                                 <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Status</p>
-                                <span className="inline-block bg-orange-100/80 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">{statsData?.financials?.status || 'Active'}</span>
+                                <span className="inline-block bg-orange-100/80 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">{statsData?.financials?.status || 'N/A'}</span>
                             </div>
                             <div className="mt-2">
                                 <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">Next Payout</p>

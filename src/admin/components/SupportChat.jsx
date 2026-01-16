@@ -29,27 +29,40 @@ const SupportChat = () => {
         }
     };
 
-    const fetchMessages = async (reportId) => {
-        setLoadingMessages(true);
+    const fetchMessages = async (reportId, silent = false) => {
+        if (!silent) setLoadingMessages(true);
         try {
             const data = await apiService.getReportMessages(reportId);
             setMessages(data || []);
         } catch (err) {
             console.error(err);
         } finally {
-            setLoadingMessages(false);
-            setTimeout(scrollToBottom, 100);
+            if (!silent) setLoadingMessages(false);
+            setTimeout(scrollToBottom, 50); // Reduced delay for snappiness
         }
     };
 
     useEffect(() => {
         fetchReports();
+        const interval = setInterval(fetchReports, 5000); // Check for new reports every 5s
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
         if (selectedReport) {
             fetchMessages(selectedReport._id);
         }
+    }, [selectedReport]);
+
+    // Auto-refresh messages for selected report every 2 seconds
+    useEffect(() => {
+        if (!selectedReport) return;
+
+        const interval = setInterval(() => {
+            fetchMessages(selectedReport._id, true); // Silent mode
+        }, 2000);
+
+        return () => clearInterval(interval);
     }, [selectedReport]);
 
     useEffect(() => {
@@ -60,13 +73,30 @@ const SupportChat = () => {
         if (e) e.preventDefault();
         if (!newMessage.trim() || !selectedReport) return;
 
+        const tempId = Date.now().toString();
+        const tempMsg = {
+            _id: tempId,
+            message: newMessage,
+            senderRole: 'admin',
+            createdAt: new Date().toISOString()
+        };
+
+        // Optimistic update
+        setMessages(prev => [...prev, tempMsg]);
+        const msgToSend = newMessage;
+        setNewMessage('');
+
         try {
-            const sentMsg = await apiService.sendReportMessage(selectedReport._id, newMessage);
-            setMessages(prev => [...prev, sentMsg]);
-            setNewMessage('');
+            const sentMsg = await apiService.sendReportMessage(selectedReport._id, msgToSend);
+            // Replace temp message with real one
+            setMessages(prev => prev.map(msg => msg._id === tempId ? sentMsg : msg));
             fetchReports(); // Refresh sidebar to show latest message preview
         } catch (err) {
+            console.error(err);
+            // Revert on failure
+            setMessages(prev => prev.filter(msg => msg._id !== tempId));
             alert("Failed to send message");
+            setNewMessage(msgToSend);
         }
     };
 
@@ -179,7 +209,7 @@ const SupportChat = () => {
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     key={msg._id}
-                                    className={`flex flex-col ${msg.senderRole === 'admin' ? 'items-end' : 'items-start'} w-full`}
+                                    className={`flex flex-col ${msg.senderRole?.toLowerCase() === 'admin' ? 'items-end' : 'items-start'} w-full`}
                                 >
                                     <div className={`max-w-[75%] px-8 py-5 rounded-[32px] font-bold text-[15px] shadow-lg leading-relaxed ${msg.senderRole === 'admin'
                                         ? 'bg-[#8b5cf6] text-white rounded-tr-none shadow-purple-500/10'

@@ -72,6 +72,7 @@ export const API = "http://localhost:8080/api";
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
+  googleAuth: `${API}/auth/google`,
   signUp: `${API}/auth/signup`,
   logIn: `${API}/auth/login`,
   forgotPassword: `${API}/auth/forgot-password`,

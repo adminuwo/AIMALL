@@ -114,16 +114,8 @@ const Footer = () => {
                                     <a href="mailto:support@ai-mall.ai" className="group-hover:text-gray-700 transition-colors">admin@uwo24.com</a>
                                 </li>
                                 <li className="flex items-center gap-3 text-gray-500 group">
-                                    <a 
-                                        href="https://wa.me/918359890909?text=" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-3 hover:text-gray-700 transition-colors cursor-pointer"
-                                        title="Chat with us on WhatsApp"
-                                    >
-                                        <Phone size={20} className="text-green-500 group-hover:scale-110 transition-transform" />
-                                        <span>+91 83589 90909</span>
-                                    </a>
+                                    <Phone size={20} className="text-blue-500 group-hover:scale-110 transition-transform" />
+                                    <span className="group-hover:text-gray-700 transition-colors">+91 83589 90909</span>
                                 </li>
                             </ul>
                         </div>

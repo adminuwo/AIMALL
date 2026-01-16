@@ -47,7 +47,7 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
 
         try {
             setIsDeleting(true);
-            await apiService.deleteAgent(app.id);
+            await apiService.deleteAgent(app._id || app.id);
             if (onDelete) onDelete();
         } catch (error) {
             console.error("Failed to delete app:", error);

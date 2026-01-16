@@ -72,15 +72,20 @@ const Topbar = ({ toggleSidebar, vendorName, vendorType, vendorAvatar }) => {
 
     return (
         <header className="h-24 bg-transparent flex items-center justify-between px-8 z-30">
-            {/* Left: Mobile Menu & Search */}
-            <div className="flex items-center flex-1 max-w-xl gap-6">
+            {/* Left: Mobile Menu Trigger only */}
+            <div className="flex items-center md:hidden">
                 <button
                     onClick={toggleSidebar}
-                    className="p-3 bg-white/40 backdrop-blur-md rounded-[16px] text-gray-900 border border-white hover:bg-white hover:text-[#8b5cf6] md:hidden transition-all shadow-sm"
+                    className="p-3 bg-white/40 backdrop-blur-md rounded-[16px] text-gray-900 border border-white hover:bg-white hover:text-[#8b5cf6] transition-all shadow-sm"
                 >
                     <Menu size={20} />
                 </button>
+            </div>
 
+            {/* Right Group: Search, Notifications, Profile (All in sequence) */}
+            <div className="flex items-center gap-4 sm:gap-6 flex-1 justify-end">
+
+                {/* Prominent Search Bar */}
                 <div className="flex-1 relative group max-w-lg hidden sm:block">
                     <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                         <Search className="text-gray-400 group-focus-within:text-[#8b5cf6] transition-colors" size={18} />
@@ -93,12 +98,8 @@ const Topbar = ({ toggleSidebar, vendorName, vendorType, vendorAvatar }) => {
                         className="w-full bg-white/40 backdrop-blur-md border border-white/60 rounded-[20px] py-4 pl-14 pr-6 text-sm font-bold text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 focus:bg-white/60 shadow-sm transition-all"
                     />
                 </div>
-            </div>
 
-            {/* Right: Health, Notifications, Profile */}
-            <div className="flex items-center gap-4 sm:gap-6">
-
-                {/* Notifications */}
+                {/* Notifications icon to the right of search */}
                 <div className="relative" ref={notificationRef}>
                     <button
                         onClick={() => setShowNotifications(!showNotifications)}
@@ -170,13 +171,13 @@ const Topbar = ({ toggleSidebar, vendorName, vendorType, vendorAvatar }) => {
                     )}
                 </div>
 
-                {/* Profile - Dropdown on Click */}
-                <div className="relative pl-6 ml-2 border-l border-gray-200/50" ref={profileRef}>
+                {/* Profile icon to the right of notifications */}
+                <div className="relative pl-6 border-l border-gray-200/50" ref={profileRef}>
                     <button
                         onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                        className={`flex items-center gap-4 p-1.5 pr-4 rounded-[20px] transition-all border group bg-white/20 backdrop-blur-sm ${showProfileDropdown ? 'bg-white border-white shadow-md' : 'hover:bg-white/40 border-transparent hover:border-white/60 hover:shadow-sm'}`}
+                        className={`flex items-center gap-3 p-1.5 pr-4 rounded-[20px] transition-all border group bg-white/20 backdrop-blur-sm max-w-[200px] ${showProfileDropdown ? 'bg-white border-white shadow-md' : 'hover:bg-white/40 border-transparent hover:border-white/60 hover:shadow-sm'}`}
                     >
-                        <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-[#8b5cf6] font-black border border-white/60 shadow-lg group-hover:scale-105 transition-transform overflow-hidden relative">
+                        <div className="w-10 h-10 rounded-2xl bg-white flex-shrink-0 flex items-center justify-center text-[#8b5cf6] font-black border border-white/60 shadow-lg group-hover:scale-105 transition-transform overflow-hidden relative">
                             <div className="absolute inset-0 bg-gradient-to-tr from-[#f3e8ff] to-[#e0e7ff] opacity-50" />
                             {vendorAvatar ? (
                                 <img src={vendorAvatar} alt="Profile" className="w-full h-full object-cover relative z-10" />
@@ -184,11 +185,11 @@ const Topbar = ({ toggleSidebar, vendorName, vendorType, vendorAvatar }) => {
                                 vendorName ? <span className="relative z-10 text-lg">{vendorName.charAt(0).toUpperCase()}</span> : <User size={20} className="relative z-10" />
                             )}
                         </div>
-                        <div className="hidden md:block text-left">
-                            <p className="text-sm font-black text-gray-900 leading-none group-hover:text-[#8b5cf6] transition-colors">{vendorName || 'Vendor Portal'}</p>
+                        <div className="hidden md:block text-left truncate">
+                            <p className="text-sm font-black text-gray-900 leading-none group-hover:text-[#8b5cf6] transition-colors truncate">{vendorName || 'Vendor Portal'}</p>
                             <div className="flex items-center gap-1.5 mt-1">
                                 <Cpu size={10} className="text-[#8b5cf6]" />
-                                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{vendorType || 'Partner'}</p>
+                                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest truncate">{vendorType || 'Partner'}</p>
                             </div>
                         </div>
                     </button>

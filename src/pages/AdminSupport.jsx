@@ -4,27 +4,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Send,
     User,
-    Clock,
     Search,
-    RefreshCw,
     MessageSquare,
     MoreVertical,
     Check,
-    Eye,
-    Shield,
-    Activity,
-    Users,
-    ShoppingBag,
-    DollarSign,
-    AlertTriangle,
     CheckCircle,
-    Settings,
-    UserCheck,
-    LogOut,
-    Command,
-    ChevronDown,
-    LayoutDashboard,
-    X
+    Shield,
+    Image,
+    Paperclip,
+    ArrowLeft,
+    Phone,
+    Video,
+    Trash2
 } from 'lucide-react';
 import { useRecoilState } from 'recoil';
 import { userData } from '../userStore/userData';
@@ -38,26 +29,23 @@ const AdminSupport = () => {
 
     // Toggle for Admins to view the interface as a User (for testing)
     const [simulateUser, setSimulateUser] = useState(false);
-
-    // Effective role for the UI
     const isAdminView = realIsAdmin && !simulateUser;
 
     // State
     const [activeChat, setActiveChat] = useState(null);
-    const [chatsList, setChatsList] = useState([]); // For Admin sidebar
+    const [chatsList, setChatsList] = useState([]);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const [chatLoading, setChatLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [permissionError, setPermissionError] = useState(false);
+    const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
 
     const messagesEndRef = useRef(null);
 
     // Initial Fetch & Polling
     useEffect(() => {
         let interval;
-
         const fetchData = async () => {
             if (isAdminView) {
                 await fetchAdminChats();
@@ -65,88 +53,89 @@ const AdminSupport = () => {
                 await fetchMyChat();
             }
         };
-
         fetchData();
         interval = setInterval(fetchData, 5000); // Poll every 5s
-
         return () => clearInterval(interval);
     }, [isAdminView]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, activeChat]);
+    }, [messages, activeChat, isMobileChatOpen]);
+
+    // Handle initial selection for single user chat
+    useEffect(() => {
+        if (!isAdminView && chatsList.length > 0 && !activeChat) {
+            // Auto-select the first chat for users if mostly they have one
+            // setActiveChat(chatsList[0]); 
+            // setMessages(chatsList[0].messages || []);
+        }
+    }, [chatsList, isAdminView]);
+
 
     // --- API CALLS ---
 
     const fetchMyChat = async () => {
-        // Don't show global loading for polling updates
-        if (messages.length === 0) setChatLoading(true);
         try {
             const chat = await apiService.getMySupportChat();
             if (chat) {
-                setChatsList([chat]); // List view
-                setMessages(chat.messages || []);
+                setChatsList([chat]);
+                // If active, update messages
+                if (activeChat && activeChat._id === chat._id) {
+                    setMessages(chat.messages || []);
+                }
 
-                // Keep activeChat in sync if open
-                if (activeChat) {
+                // Auto-select for user view if not selected yet
+                if (!isAdminView && !activeChat) {
                     setActiveChat(chat);
+                    setMessages(chat.messages || []);
                 }
             }
         } catch (err) {
             console.error("Fetch User Chat Error:", err);
-        } finally {
-            setChatLoading(false);
         }
     };
 
     const fetchAdminChats = async () => {
         try {
             const data = await apiService.getAdminActiveChats();
-            setChatsList(Array.isArray(data) ? data : []);
+            const list = Array.isArray(data) ? data : [];
+            setChatsList(list);
             setPermissionError(false);
 
-            // If we have an active chat selected, update its specific messages from the list
             if (activeChat) {
-                const updatedChat = data.find(c => c._id === activeChat._id);
+                const updatedChat = list.find(c => c._id === activeChat._id);
                 if (updatedChat) {
                     setMessages(updatedChat.messages || []);
                 }
             }
         } catch (err) {
             console.error("Fetch Admin Chats Error:", err);
-            if (err.response?.status === 403) {
-                setPermissionError(true);
-            }
+            if (err.response?.status === 403) setPermissionError(true);
         }
     };
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!newMessage.trim()) return;
-
         const text = newMessage;
-        setNewMessage(""); // Optimistic clear
+        setNewMessage("");
 
         try {
             if (isAdminView) {
                 if (!activeChat) return;
                 await apiService.sendSupportChatMessage(activeChat._id, text);
-                await fetchAdminChats(); // Refresh immediately
-                setActiveChat(null); // Close the reply modal
-                // Optional: You could show a specialized toast here instead of alert
+                await fetchAdminChats();
             } else {
-                // User sending message
-                // Check if activeChat exists (it should if fetchMyChat worked, or needs creation)
-                // The /my-chat endpoint creates it if missing, but we need the ID.
                 let chatId = activeChat?._id;
                 if (!chatId) {
                     const chat = await apiService.getMySupportChat();
                     chatId = chat._id;
+                    setChatsList([chat]); // Optimistic update
                     setActiveChat(chat);
                 }
                 await apiService.sendSupportChatMessage(chatId, text);
-                await fetchMyChat(); // Refresh immediately
+                await fetchMyChat();
             }
         } catch (err) {
             console.error("Failed to send", err);
@@ -154,515 +143,344 @@ const AdminSupport = () => {
         }
     };
 
-    // Filter chats for admin
-    const [supportTypeTab, setSupportTypeTab] = useState('user'); // 'user' or 'vendor'
+    const handleChatSelect = (chat) => {
+        setActiveChat(chat);
+        setMessages(chat.messages || []);
+        setIsMobileChatOpen(true);
+    };
 
-    const filteredChats = chatsList.filter(c => {
-        const matchesTab = supportTypeTab === 'user' ? (c.chatType === 'user_support' || !c.chatType) : (c.chatType === 'vendor_support');
-        const matchesSearch = c.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            c.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesTab && matchesSearch;
-    });
+    const handleBackToContacts = () => {
+        setIsMobileChatOpen(false);
+        // Optional: setActiveChat(null) if we want to clear selection on mobile back
+    };
+
+    const handleClearChat = async (e) => {
+        e?.stopPropagation();
+
+        if (!activeChat) {
+            console.log('❌ No chat selected');
+            return;
+        }
+
+        console.log('🔍 Active Chat Object:', activeChat);
+        console.log('🔍 Chat ID:', activeChat._id);
+        console.log('🔍 Full API URL will be:', `/support-chat/${activeChat._id}/messages`);
+
+        if (window.confirm('Are you sure you want to clear this chat? This action cannot be undone and will delete the chat history for both parties.')) {
+            console.log('✅ User confirmed, deleting messages from backend...');
+            try {
+                // Call backend API to delete messages
+                await apiService.deleteSupportChatMessages(activeChat._id);
+                console.log('✅ Messages deleted from backend!');
+
+                // Clear local state
+                setMessages([]);
+
+                // Refresh the chats list to update the UI
+                if (isAdminView) {
+                    await fetchAdminChats();
+                } else {
+                    await fetchMyChat();
+                }
+
+                alert('Chat history deleted successfully!');
+            } catch (err) {
+                console.error('❌ Failed to delete messages:', err);
+                alert('Failed to delete chat history. Please try again.');
+            }
+        } else {
+            console.log('❌ User cancelled');
+        }
+    };
+
+    // Filter chats
+    const filteredChats = chatsList.filter(c =>
+        c.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        c.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     // --- RENDER ---
 
-    // 1. ACCESS DENIED STATE (Admin View Only)
     if (isAdminView && permissionError) {
         return (
-            <div className="h-[80vh] flex flex-col items-center justify-center p-8 bg-white/60 backdrop-blur-3xl rounded-[40px] border border-white/60 shadow-2xl text-center">
-                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6 text-red-500 animate-pulse">
-                    <Shield size={40} />
+            <div className="h-full flex items-center justify-center p-8 text-center">
+                <div className="max-w-md">
+                    <Shield size={48} className="text-red-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold mb-2">Access Restored Required</h2>
+                    <p className="text-gray-500 mb-6">Please refresh your session to access admin support.</p>
+                    <button onClick={() => { localStorage.clear(); window.location.href = '/login'; }} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wider">
+                        Refresh Session
+                    </button>
                 </div>
-                <h2 className="text-2xl font-black text-slate-900 mb-2">Access Permissions Update Required</h2>
-                <p className="text-slate-500 max-w-md mb-8 font-medium">
-                    Your account capabilities have changed. Please refresh your secure session to access the Admin Console.
-                </p>
-                <button
-                    onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
-                    className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest transition-all hover:scale-105 shadow-xl"
-                >
-                    Update Session (Log Out)
-                </button>
             </div>
         );
     }
 
-    // 2. USER VIEW (Simulated or Real)
-    if (!isAdminView) {
-        // Using chatsList from state
+    // Determine other party name/avatar
+    const getChatMeta = (chat) => {
+        if (!chat) return { name: 'Support', subtitle: 'Online' };
+        if (isAdminView) {
+            return {
+                name: chat.userId?.name || 'Unknown User',
+                subtitle: chat.userId?.email || 'User',
+                avatar: chat.userId?.name?.charAt(0) || 'U'
+            };
+        } else {
+            return {
+                name: 'AI-MALL Support',
+                subtitle: 'Official Support Channel',
+                avatar: 'S'
+            };
+        }
+    };
 
-        return (
-            <div className="flex-1 h-full w-full relative overflow-hidden bg-[#f8fafc]/50 p-8 flex flex-col">
-                {/* Simulation Banner */}
-                {realIsAdmin && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-indigo-900 text-white px-6 py-2 rounded-b-xl text-xs font-black uppercase tracking-widest shadow-lg z-50 flex items-center gap-3">
-                        <span>🧪 User View Simulation</span>
-                        <button
-                            onClick={() => setSimulateUser(false)}
-                            className="bg-white/20 hover:bg-white/40 px-3 py-1 rounded-lg transition-colors"
-                        >
-                            Exit
+    return (
+        <div className="flex h-full w-full overflow-hidden relative bg-slate-50 font-sans text-slate-800">
+            {/* Sidebar (Standard Light) */}
+            <div className={`
+                ${isMobileChatOpen ? 'hidden md:flex' : 'flex'}
+                w-full md:w-[320px] bg-white border-r border-slate-200 flex-col h-full shrink-0 z-20 transition-all duration-300
+            `}>
+                {/* Header */}
+                <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <h2 className="font-bold text-lg text-slate-800">Messages</h2>
+                    <div className="flex gap-2">
+                        {/* Test Toggle */}
+                        {realIsAdmin && (
+                            <button
+                                onClick={() => setSimulateUser(!simulateUser)}
+                                className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-100"
+                            >
+                                {simulateUser ? 'Exit Test' : 'Test User View'}
+                            </button>
+                        )}
+                        <button className="p-2 hover:bg-slate-100 rounded-full text-slate-500">
+                            <MoreVertical size={18} />
                         </button>
+                    </div>
+                </div>
+
+                {/* Search Bar (Admin Only) */}
+                {isAdminView && (
+                    <div className="px-4 py-3">
+                        <div className="relative">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search conversations..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-slate-100 text-slate-700 text-sm rounded-xl pl-10 pr-4 py-2.5 border-none outline-none focus:ring-2 focus:ring-indigo-500/20 placeholder:text-slate-400 transition-all"
+                            />
+                        </div>
                     </div>
                 )}
 
-                {/* Header */}
-                <div className="flex justify-between items-end mb-8">
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">My Support Tickets</h1>
-                        <p className="text-slate-500 font-medium">Track and manage your support requests</p>
-                    </div>
-
-                    {chatsList.length === 0 && (
-                        <button
-                            onClick={async () => {
-                                const chat = await apiService.getMySupportChat();
-                                if (chat) {
-                                    setChatsList([chat]);
-                                    setActiveChat(chat);
-                                    setMessages(chat.messages || []);
-                                }
-                            }}
-                            className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center gap-2"
-                        >
-                            <MessageSquare size={18} />
-                            New Ticket
-                        </button>
-                    )}
-                </div>
-
-                {/* Content - Responsive View */}
-                <div className="flex-1 bg-white md:rounded-[32px] md:shadow-sm md:border border-slate-100 overflow-hidden flex flex-col">
-                    {/* Desktop Table View */}
-                    <div className="hidden md:block flex-1 overflow-y-auto">
-                        <table className="w-full">
-                            <thead className="bg-slate-50 sticky top-0 z-10">
-                                <tr>
-                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Subject</th>
-                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Last Message</th>
-                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                                    <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {chatsList.map((chat) => {
-                                    const lastMsg = chat.messages?.[chat.messages.length - 1];
-                                    return (
-                                        <tr key={chat._id} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-8 py-5">
-                                                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                                                    <Shield size={20} />
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-5">
-                                                <span className="font-bold text-slate-900 text-sm">General Inquiry</span>
-                                                <p className="text-xs text-slate-400">ID: {chat._id.substring(0, 8)}...</p>
-                                            </td>
-                                            <td className="px-8 py-5">
-                                                <p className="text-sm font-medium text-slate-600 max-w-[300px] truncate">
-                                                    {lastMsg?.text || 'No messages'}
-                                                </p>
-                                            </td>
-                                            <td className="px-8 py-5">
-                                                <span className="text-xs font-bold text-slate-500">
-                                                    {lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString('en-US') : '-'}
-                                                </span>
-                                            </td>
-                                            <td className="px-8 py-5">
-                                                <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-wider w-fit border border-amber-100">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                                    Active
-                                                </span>
-                                            </td>
-                                            <td className="px-8 py-5 text-right">
-                                                <button
-                                                    onClick={() => { setActiveChat(chat); setMessages(chat.messages || []); }}
-                                                    className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
-                                                >
-                                                    <MessageSquare size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Mobile Card View */}
-                    <div className="md:hidden flex-1 overflow-y-auto divide-y divide-slate-100 p-4">
-                        {chatsList.map((chat) => {
-                            const lastMsg = chat.messages?.[chat.messages.length - 1];
-                            return (
-                                <div
-                                    key={chat._id}
-                                    className="p-4 bg-white rounded-2xl mb-4 border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
-                                    onClick={() => { setActiveChat(chat); setMessages(chat.messages || []); }}
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                                                <Shield size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-slate-900 text-sm">General Inquiry</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {chat._id.substring(0, 8)}</p>
-                                            </div>
-                                        </div>
-                                        <span className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[8px] font-black uppercase tracking-wider border border-amber-100">
-                                            Active
-                                        </span>
-                                    </div>
-                                    <p className="text-sm text-slate-600 line-clamp-2 mb-4">
-                                        {lastMsg?.text || 'No messages yet...'}
-                                    </p>
-                                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                        <span>{lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : '-'}</span>
-                                        <span className="text-indigo-600 flex items-center gap-1">Open Chat <MessageSquare size={12} /></span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {chatsList.length === 0 && (
-                        <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-40">
-                            <MessageSquare size={48} className="text-slate-300 mb-4" />
-                            <p className="font-black text-slate-400 uppercase tracking-widest">No Support Tickets</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* User Chat Modal - Using activeChat as trigger, but we need to manage it. */}
-                {/* I will add a 'viewChat' param to this component in next step. For now, let's render it if activeChat exists. */}
-                <AnimatePresence>
-                    {activeChat && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
-                            <motion.div
-                                initial={{ scale: 0.95, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.95, opacity: 0 }}
-                                className="bg-white md:rounded-[32px] shadow-2xl w-full max-w-4xl h-full md:h-[80vh] overflow-hidden border border-white/50 flex flex-col"
+                {/* Chat List */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    {/* User "New Chat" Action if empty */}
+                    {!isAdminView && chatsList.length === 0 && (
+                        <div className="p-6 text-center">
+                            <button
+                                onClick={async () => {
+                                    const chat = await apiService.getMySupportChat();
+                                    if (chat) {
+                                        setChatsList([chat]);
+                                        setActiveChat(chat);
+                                        setMessages(chat.messages || []);
+                                        setIsMobileChatOpen(true);
+                                    }
+                                }}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-medium shadow-sm transition-all"
                             >
-                                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                                            <MessageSquare size={20} />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-xl font-black text-slate-900 tracking-tight">Support Chat</h2>
-                                            <div className="flex items-center gap-2">
-                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                                <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Online</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setActiveChat(null)}
-                                        className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
-
-                                {/* Chat Interface Reuse */}
-                                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
-                                    {messages.map((msg, idx) => {
-                                        const isMe = msg.senderId === (user.id || user._id);
-                                        return (
-                                            <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[70%] p-4 rounded-3xl relative group ${isMe
-                                                    ? 'bg-blue-600 text-white rounded-tr-none shadow-lg shadow-blue-500/20'
-                                                    : 'bg-white text-slate-800 border border-white shadow-sm rounded-tl-none'
-                                                    }`}>
-                                                    <p className="font-medium text-sm leading-relaxed">{msg.text}</p>
-                                                    <div className={`text-[10px] uppercase tracking-widest mt-1 flex items-center justify-end gap-1 ${isMe ? 'opacity-70 text-blue-100' : 'opacity-40 text-slate-500'}`}>
-                                                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    <div ref={messagesEndRef} />
-                                </div>
-
-                                {/* Input */}
-                                <div className="p-4 bg-white border-t border-slate-100">
-                                    <form onSubmit={handleSendMessage} className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
-                                            placeholder="Type your message..."
-                                            className="flex-1 bg-slate-100 border-none rounded-2xl px-6 py-4 font-medium focus:ring-2 focus:ring-blue-500/20 transition-all"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={!newMessage.trim()}
-                                            className="p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl transition-all disabled:opacity-50 hover:scale-105 shadow-lg shadow-blue-500/20"
-                                        >
-                                            <Send size={20} />
-                                        </button>
-                                    </form>
-                                </div>
-                            </motion.div>
+                                Start Support Chat
+                            </button>
                         </div>
                     )}
-                </AnimatePresence>
-            </div>
-        );
-    }
 
-    const navigation = {
-        management: [
-            { id: "overview", label: "Control Center", icon: Activity },
-            { id: "agents", label: "App Registry", icon: ShoppingBag },
-            { id: "finance", label: "Economy Hub", icon: DollarSign },
-            { id: "complaints", label: "Neural Support", icon: AlertTriangle, active: true },
-            { id: "users", label: "User Identities", icon: Users },
-            { id: "vendors", label: "Vendor Nodes", icon: UserCheck },
-        ],
-        governance: [
-            { id: "approvals", label: "Nexus Approvals", icon: CheckCircle },
-            { id: "roles", label: "Access Security", icon: Shield },
-            { id: "settings", label: "Core Protocol", icon: Settings },
-        ]
-    };
-
-    // 3. ADMIN VIEW (Table + Modal)
-    return (
-        <div className="flex-1 h-full w-full relative overflow-hidden bg-[#f8fafc]/50 p-8 flex flex-col">
-            {/* Header */}
-            <div className="flex justify-between items-end mb-8">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">User Support</h1>
-                    <p className="text-slate-500 font-medium">Manage user inquiries and support tickets</p>
-                </div>
-
-                {/* Dev Toggle */}
-                <div className="flex bg-white/40 backdrop-blur-md p-1.5 rounded-[20px] border border-white/60 shadow-sm self-end">
-                    <button
-                        onClick={() => setSupportTypeTab('user')}
-                        className={`px-6 py-2 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all ${supportTypeTab === 'user' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                        User Support
-                    </button>
-                    <button
-                        onClick={() => setSupportTypeTab('vendor')}
-                        className={`px-6 py-2 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all ${supportTypeTab === 'vendor' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                        Vendor Support
-                    </button>
-                </div>
-
-                <button
-                    onClick={() => setSimulateUser(true)}
-                    className="bg-white hover:bg-slate-50 text-slate-500 hover:text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm border border-slate-200 transition-all flex items-center gap-2"
-                >
-                    <Eye size={12} />
-                    Test as User
-                </button>
-            </div>
-
-            {/* Content - Responsive View */}
-            <div className="flex-1 bg-white md:rounded-[32px] md:shadow-sm md:border border-slate-100 overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-50/50">
-                    <div className="relative w-full md:w-96">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                        <input
-                            type="text"
-                            placeholder="Search users or tickets..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all placeholder:font-medium"
-                        />
-                    </div>
-                </div>
-
-                {/* Desktop Table View */}
-                <div className="hidden md:block flex-1 overflow-y-auto">
-                    <table className="w-full">
-                        <thead className="bg-slate-50 sticky top-0 z-10">
-                            <tr>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">User</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Message Preview</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                                <th className="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                                <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filteredChats.map((chat) => {
-                                const lastMsg = chat.messages?.[chat.messages.length - 1];
-                                return (
-                                    <tr key={chat._id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm">
-                                                    {chat.userId?.name?.charAt(0) || 'U'}
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-900 text-sm">{chat.userId?.name || 'Unknown User'}</p>
-                                                    <p className="text-xs text-slate-400 font-medium">{chat.userId?.email || 'No Email'}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-purple-100">
-                                                UserSupport
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <p className="text-sm font-medium text-slate-600 max-w-[300px] truncate">
-                                                {lastMsg?.text || 'No messages'}
-                                            </p>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="text-xs font-bold text-slate-500">
-                                                {lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString('en-US') : '-'}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-wider w-fit border border-amber-100">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                                Open
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <button
-                                                onClick={() => { setActiveChat(chat); setMessages(chat.messages || []); }}
-                                                className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:shadow-md transition-all active:scale-95"
-                                            >
-                                                <MessageSquare size={16} />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Mobile Card View */}
-                <div className="md:hidden flex-1 overflow-y-auto divide-y divide-slate-100 p-4">
                     {filteredChats.map((chat) => {
+                        const meta = getChatMeta(chat);
+                        const isActive = activeChat?._id === chat._id;
                         const lastMsg = chat.messages?.[chat.messages.length - 1];
+
                         return (
-                            <div
+                            <button
                                 key={chat._id}
-                                className="p-4 bg-white rounded-2xl mb-4 border border-slate-100 shadow-sm active:scale-[0.98] transition-all"
-                                onClick={() => { setActiveChat(chat); setMessages(chat.messages || []); }}
+                                onClick={() => handleChatSelect(chat)}
+                                className={`
+                                    w-full flex items-center gap-4 px-4 py-4 border-b border-slate-50 transition-colors
+                                    ${isActive ? 'bg-indigo-50/50 border-indigo-100' : 'hover:bg-slate-50 bg-white'}
+                                `}
                             >
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm">
-                                            {chat.userId?.name?.charAt(0) || 'U'}
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-slate-900 text-sm">{chat.userId?.name || 'Unknown'}</p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{chat.userId?.email || 'No Email'}</p>
-                                        </div>
+                                <div className={`
+                                    w-12 h-12 rounded-full flex items-center justify-center shrink-0 font-bold text-lg
+                                    ${isActive ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}
+                                `}>
+                                    {meta.avatar}
+                                </div>
+                                <div className="flex-1 text-left min-w-0">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className={`block truncate font-semibold ${isActive ? 'text-indigo-900' : 'text-slate-700'}`}>
+                                            {meta.name}
+                                        </span>
+                                        {lastMsg && (
+                                            <span className="text-[10px] text-slate-400 shrink-0">
+                                                {new Date(lastMsg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        )}
                                     </div>
-                                    <span className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[8px] font-black uppercase tracking-wider border border-amber-100">
-                                        Open
-                                    </span>
+                                    <p className="text-sm text-slate-500 truncate">
+                                        {lastMsg?.text || 'Standard Support Chat'}
+                                    </p>
                                 </div>
-                                <p className="text-sm text-slate-600 line-clamp-2 mb-4">
-                                    {lastMsg?.text || 'No messages...'}
-                                </p>
-                                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                    <span>{lastMsg ? new Date(lastMsg.timestamp).toLocaleDateString() : '-'}</span>
-                                    <span className="text-indigo-600 flex items-center gap-1 font-black">REPLY <Send size={12} /></span>
-                                </div>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
+            </div>
 
-                {filteredChats.length === 0 && (
-                    <div className="flex-1 flex flex-col items-center justify-center py-20 opacity-40">
-                        <MessageSquare size={48} className="text-slate-300 mb-4" />
-                        <p className="font-black text-slate-400 uppercase tracking-widest">No Active Tickets</p>
+            {/* Main Chat Area */}
+            <div className={`
+                ${isMobileChatOpen ? 'flex' : 'hidden md:flex'}
+                flex-1 flex-col h-full bg-slate-50 relative
+            `}>
+                {activeChat ? (
+                    <>
+                        {/* Chat Header */}
+                        <div className="h-[70px] bg-white px-6 flex items-center justify-between shrink-0 border-b border-slate-200 shadow-sm z-10">
+                            <div className="flex items-center gap-4">
+                                <button onClick={handleBackToContacts} className="md:hidden text-slate-500 hover:bg-slate-100 p-2 rounded-full">
+                                    <ArrowLeft size={20} />
+                                </button>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                                        {getChatMeta(activeChat).avatar}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-slate-800 leading-tight">{getChatMeta(activeChat).name}</h3>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                            <span className="text-xs text-slate-500 font-medium">{getChatMeta(activeChat).subtitle}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleClearChat}
+                                className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-full transition-colors"
+                                title="Clear Chat"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+
+                        {/* Messages Area */}
+                        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 space-y-6">
+                            {/* Date Separator (Example) */}
+                            <div className="flex justify-center">
+                                <span className="bg-slate-200/60 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                    Today
+                                </span>
+                            </div>
+
+                            {messages.map((msg, index) => {
+                                const isMe = msg.senderId === (user.id || user._id);
+                                return (
+                                    <div key={index} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`flex max-w-[80%] md:max-w-[60%] ${isMe ? 'flex-row-reverse' : 'flex-row'} gap-3`}>
+                                            {/* Avatar only for them */}
+                                            {!isMe && (
+                                                <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mt-1 shrink-0">
+                                                    {isAdminView ? getChatMeta(activeChat).avatar : 'S'}
+                                                </div>
+                                            )}
+
+                                            <div className={`
+                                                group relative px-5 py-3.5 rounded-2xl text-sm leading-relaxed shadow-sm
+                                                ${isMe
+                                                    ? 'bg-indigo-600 text-white rounded-tr-sm'
+                                                    : 'bg-white text-slate-700 border border-slate-100 rounded-tl-sm'
+                                                }
+                                            `}>
+                                                <p className="whitespace-pre-wrap">{msg.text}</p>
+                                                <div className={`
+                                                    text-[10px] mt-1 text-right font-medium
+                                                    ${isMe ? 'text-indigo-200' : 'text-slate-400'}
+                                                `}>
+                                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="p-4 bg-white border-t border-slate-200">
+                            <div className="max-w-4xl mx-auto">
+                                <form onSubmit={handleSendMessage} className="flex items-end gap-3">
+                                    <div className="flex-1 bg-slate-100 rounded-2xl flex items-center border border-transparent focus-within:border-indigo-500/30 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
+                                        <textarea
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    handleSendMessage(e);
+                                                }
+                                            }}
+                                            placeholder="Type your message..."
+                                            className="w-full px-4 py-3 bg-transparent border-none outline-none text-slate-800 resize-none h-12 max-h-32 placeholder:text-slate-400 custom-scrollbar"
+                                            rows={1}
+                                        />
+                                        <div className="flex items-center gap-1 pr-2 text-slate-400">
+                                            <button type="button" className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                                                <Paperclip size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={!newMessage.trim()}
+                                        className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:shadow-none transition-all active:scale-95 mb-1"
+                                    >
+                                        <Send size={20} />
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    // Empty State
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                        <div className="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                            <MessageSquare size={40} />
+                        </div>
+                        <h2 className="text-2xl font-bold text-slate-800 mb-2">AI-MALL Messages</h2>
+                        <p className="max-w-xs text-slate-500 mb-8">
+                            Select a conversation to start messaging.
+                        </p>
+                        {!isAdminView && (
+                            <button
+                                onClick={async () => {
+                                    const chat = await apiService.getMySupportChat();
+                                    if (chat) {
+                                        setChatsList([chat]);
+                                        setActiveChat(chat);
+                                        setMessages(chat.messages || []);
+                                        setIsMobileChatOpen(true);
+                                    }
+                                }}
+                                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 hover:-translate-y-1 transition-all"
+                            >
+                                Start Chat
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
-
-            {/* Reply Modal */}
-            <AnimatePresence>
-                {activeChat && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl overflow-hidden border border-white/50"
-                        >
-                            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
-                                        <MessageSquare size={20} />
-                                    </div>
-                                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Reply to User</h2>
-                                </div>
-                                <button onClick={() => setActiveChat(null)} className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            <div className="p-8 space-y-8">
-                                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <div className="grid grid-cols-2 gap-8 mb-6">
-                                        <div className="overflow-hidden">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">User</p>
-                                            <p className="font-bold text-slate-900 truncate">{activeChat.userId?.name}</p>
-                                        </div>
-                                        <div className="overflow-hidden">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contact</p>
-                                            <p className="font-bold text-slate-900 break-all">{activeChat.userId?.email}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Latest Inquiry</p>
-                                        <p className="font-medium text-slate-700 leading-relaxed">
-                                            {activeChat.messages?.[activeChat.messages?.length - 1]?.text || "No message content"}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Response Message</p>
-                                    <textarea
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Type your official response here..."
-                                        rows={4}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 font-medium text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none"
-                                    />
-                                </div>
-
-                                <div className="flex justify-end gap-3 pt-4">
-                                    <button
-                                        onClick={() => setActiveChat(null)}
-                                        className="px-6 py-4 rounded-xl font-black text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleSendMessage}
-                                        className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all flex items-center gap-2"
-                                    >
-                                        <Send size={16} />
-                                        Send
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };

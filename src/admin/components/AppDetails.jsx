@@ -9,7 +9,6 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
     const [reviewStatus, setReviewStatus] = useState(app ? (app.reviewStatus || 'Draft') : 'Draft');
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [deleteError, setDeleteError] = useState('');
 
     const userData = getUserData();
     const isAdmin = propsIsAdmin !== undefined ? propsIsAdmin : (userData?.role === 'admin');
@@ -45,18 +44,16 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
     };
 
     const handleDelete = async () => {
-        if (!window.confirm(`Are you sure you want to delete "${app.name || app.agentName}"? This will permanently remove all associated data and cannot be undone.`)) return;
+        if (!window.confirm("Are you sure you want to delete this agent? This action cannot be undone.")) return;
 
         try {
             setIsDeleting(true);
-            setDeleteError('');
-            await apiService.deleteAgent(app._id || app.id);
+            const id = app._id || app.id;
+            await apiService.deleteAgent(id);
             if (onDelete) onDelete();
         } catch (error) {
             console.error("Failed to delete app:", error);
-            const msg = error.response?.data?.error || "Failed to delete agent. Access denied or server error.";
-            setDeleteError(msg);
-            alert(msg);
+            alert("Failed to delete agent. Access denied or server error.");
         } finally {
             setIsDeleting(false);
         }

@@ -13,7 +13,7 @@ export const getUserData = () => {
   }
 }
 export const clearUser = () => {
-  localStorage.clear()
+  localStorage.removeItem("user");
 }
 const getUser = () => {
   try {
@@ -39,4 +39,9 @@ export const userData = atom({
 export const notificationState = atom({
   key: 'notifications',
   default: []
+})
+
+export const themeState = atom({
+  key: 'themeState',
+  default: localStorage.getItem('theme') || 'Light'
 })

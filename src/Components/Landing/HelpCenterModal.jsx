@@ -172,7 +172,7 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
                                 </button>
 
                                 <div className="text-center pt-2 md:pt-4">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest"> Direct Channel: <a href="mailto:support@ai-mall.in" className="text-blue-500 hover:text-blue-600 block md:inline mt-1 md:mt-0">support@ai-mall.in</a></p>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest"> Direct Channel: <a href="mailto:aditilakhera0@gmail.com" className="text-blue-500 hover:text-blue-600 block md:inline mt-1 md:mt-0">aditilakhera0@gmail.com</a></p>
                                 </div>
                             </div>
                         </div>

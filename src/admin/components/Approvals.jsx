@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Clock, Loader2, AlertCircle, ShieldCheck, UserCheck, Mail, X, Send } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, AlertCircle, ShieldCheck, UserCheck, Mail, X, Send, Trash2 } from 'lucide-react';
 import apiService from '../../services/apiService';
+import { getUserData } from '../../userStore/userData';
 import { motion } from 'framer-motion';
+import ContactVendorModal from '../../Components/ContactVendorModal';
 
 const Approvals = () => {
     const [activeSubTab, setActiveSubTab] = useState('apps'); // 'apps', 'vendors', 'registered'
@@ -19,8 +21,6 @@ const Approvals = () => {
 
     // Contact Modal State
     const [showContactModal, setShowContactModal] = useState(false);
-    const [contactSubject, setContactSubject] = useState('');
-    const [contactMessage, setContactMessage] = useState('');
 
     const fetchData = async () => {
         // Fetching approvals data...
@@ -115,32 +115,8 @@ const Approvals = () => {
         }
     };
 
-    const handleContactVendor = async () => {
-        if (!selectedItem?.email) return;
-
-        try {
-            await apiService.contactVendor({
-                senderType: 'Admin',
-                userName: 'Admin',
-                userEmail: 'admin@aimall.com',
-                agentId: selectedItem.agentId || selectedItem._id || selectedItem.id, // Agent ID if applicable
-                agentName: selectedItem.agentName || selectedItem.name || 'Platform Support',
-                subject: contactSubject,
-                message: contactMessage,
-                userId: null // Admin doesn't need a specific user ID in the User collection for this
-            });
-
-            // Show Success Alert
-            alert("Message sent to vendor successfully!");
-
-        } catch (err) {
-            console.error(err);
-            alert("Failed to send message: " + (err.response?.data?.error || err.message));
-        }
-
+    const handleContactVendor = () => {
         setShowContactModal(false);
-        setContactSubject('');
-        setContactMessage('');
         setSelectedItem(null);
     };
 
@@ -267,6 +243,25 @@ const Approvals = () => {
                                             </button>
                                             <button className="px-6 py-2.5 bg-white border border-white/60 text-slate-400 rounded-full text-[10px] font-black uppercase tracking-widest cursor-default flex items-center gap-2 shadow-sm">
                                                 <UserCheck size={14} /> Active
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (window.confirm("Are you sure you want to permanently delete this vendor? This action cannot be undone.")) {
+                                                        try {
+                                                            setProcessingId(item.id || item._id);
+                                                            await apiService.deleteVendor(item.id || item._id);
+                                                            setApprovedVendors(prev => prev.filter(v => (v._id || v.id) !== (item._id || item.id)));
+                                                        } catch (err) {
+                                                            alert("Failed to delete vendor");
+                                                        } finally {
+                                                            setProcessingId(null);
+                                                        }
+                                                    }
+                                                }}
+                                                className="w-10 h-9 rounded-full bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
+                                                title="Permanently Delete Vendor"
+                                            >
+                                                <Trash2 size={16} />
                                             </button>
                                         </>
                                     ) : (
@@ -398,62 +393,32 @@ const Approvals = () => {
                     </div>
                 </div>
             )}
-            {/* Contact Modal */}
-            {showContactModal && selectedItem && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
-                        <div className="p-8">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Contact Vendor</h2>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Regarding:</span>
-                                        <span className="bg-[#8b5cf6]/10 text-[#8b5cf6] px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest">
-                                            {selectedItem.name || selectedItem.agentName}
-                                        </span>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => { setShowContactModal(false); setContactSubject(''); setContactMessage(''); }}
-                                    className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors"
-                                >
-                                    <X size={16} />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Subject</label>
-                                    <input
-                                        type="text"
-                                        value={contactSubject}
-                                        onChange={(e) => setContactSubject(e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 transition-all"
-                                        placeholder="Briefly describe your issue..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Message</label>
-                                    <textarea
-                                        value={contactMessage}
-                                        onChange={(e) => setContactMessage(e.target.value)}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 transition-all resize-none h-32"
-                                        placeholder="Type your message here..."
-                                    />
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleContactVendor}
-                                disabled={!contactSubject.trim() || !contactMessage.trim()}
-                                className="w-full mt-8 py-4 bg-[#0F172A] text-white rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                <Send size={14} /> Send Message
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Standardized Contact Vendor Modal */}
+            <ContactVendorModal
+                isOpen={showContactModal}
+                onClose={() => { setShowContactModal(false); setSelectedItem(null); }}
+                agent={{
+                    _id: (() => {
+                        if (activeSubTab === 'registered' || activeSubTab === 'vendors') {
+                            // For registered vendors or vendor requests, use userId._id or _id
+                            return selectedItem?.userId?._id || selectedItem?.userId || selectedItem?._id;
+                        } else {
+                            // For agents, use agentId or _id
+                            return selectedItem?.agentId || selectedItem?._id;
+                        }
+                    })(),
+                    agentName: selectedItem?.agentName || selectedItem?.name || selectedItem?.userId?.name || 'Vendor Protocol',
+                    avatar: selectedItem?.avatar || selectedItem?.userId?.avatar,
+                    type: (activeSubTab === 'registered' || activeSubTab === 'vendors') ? 'vendor' : 'agent',
+                    vendorId: selectedItem?.owner // Pass owner ID for agents (so modal knows which vendor to chat with)
+                }}
+                user={{
+                    name: 'Admin',
+                    email: 'admin@aimall.com',
+                    _id: getUserData("user")?.id || getUserData("user")?._id,
+                    role: getUserData("user")?.role || 'admin'
+                }}
+            />
         </motion.div>
     );
 };

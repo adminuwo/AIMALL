@@ -32,8 +32,9 @@ const VendorLogin = () => {
 
             if (response.success) {
                 // Store token and user data
+                const userData = { ...response.user, token: response.token };
                 localStorage.setItem('token', response.token);
-                localStorage.setItem('user', JSON.stringify(response.user));
+                localStorage.setItem('user', JSON.stringify(userData));
 
                 // Redirect to vendor dashboard
                 navigate('/vendor/overview');
@@ -88,8 +89,8 @@ const VendorLogin = () => {
                 {/* Status Messages */}
                 {statusMessage && (
                     <div className={`mb-6 rounded-2xl p-6 border ${statusMessage.type === 'pending'
-                            ? 'bg-amber-50 border-amber-200'
-                            : 'bg-red-50 border-red-200'
+                        ? 'bg-amber-50 border-amber-200'
+                        : 'bg-red-50 border-red-200'
                         }`}>
                         <div className="flex items-start gap-3">
                             {statusMessage.type === 'pending' ? (
@@ -155,6 +156,16 @@ const VendorLogin = () => {
                                 required
                             />
                         </div>
+                    </div>
+
+                    {/* Forgot Password Link */}
+                    <div className="text-right -mt-2">
+                        <Link
+                            to="/forgot-password"
+                            className="text-sm text-[#8b5cf6] font-bold hover:underline transition-all"
+                        >
+                            Forgot Password?
+                        </Link>
                     </div>
 
                     {/* Error Message */}

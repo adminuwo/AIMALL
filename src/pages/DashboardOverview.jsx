@@ -5,8 +5,12 @@ import {
   Search, Bell, Plus, LayoutGrid, Calendar, Activity, ChevronRight, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRecoilValue } from 'recoil';
+import { themeState } from '../userStore/userData';
 
 const DashboardOverview = () => {
+  const theme = useRecoilValue(themeState);
+  const isDark = theme === 'Dark';
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,16 +54,16 @@ const DashboardOverview = () => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="p-4 md:p-8 lg:p-12 h-screen overflow-y-auto no-scrollbar bg-transparent relative"
+      className={`p-4 md:p-8 lg:p-12 h-screen overflow-y-auto no-scrollbar bg-transparent relative transition-colors duration-700 ${isDark ? 'text-white' : 'text-slate-900'}`}
     >
       {/* Top Header Section */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16">
         <div className="animate-in fade-in slide-in-from-bottom duration-700">
           <p className="text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.3em] mb-3 opacity-80">Command Hub V2.1</p>
-          <h1 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tighter leading-none mb-4">
+          <h1 className={`text-4xl lg:text-6xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-none mb-4 transition-colors`}>
             Welcome, <span className="text-[#8b5cf6]">Explorer.</span>
           </h1>
-          <p className="text-gray-500 font-medium text-base tracking-tight max-w-xl">Your intelligent neural workspace is operational. All advanced systems are at peak performance.</p>
+          <p className={`${isDark ? 'text-slate-400' : 'text-gray-500'} font-medium text-base tracking-tight max-w-xl transition-colors`}>Your intelligent neural workspace is operational. All advanced systems are at peak performance.</p>
         </div>
 
         <div className="flex items-center gap-6">
@@ -67,14 +71,14 @@ const DashboardOverview = () => {
             <input
               type="text"
               placeholder="Search intelligence..."
-              className="bg-white/40 border border-white/60 backdrop-blur-md rounded-[20px] px-8 py-5 pl-16 w-96 text-sm font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all placeholder:text-gray-400 shadow-glass"
+              className={`${isDark ? 'bg-slate-800/40 border-white/10 text-white placeholder:text-slate-500' : 'bg-white/40 border-white/60 text-gray-900 placeholder:text-gray-400'} backdrop-blur-md border rounded-[20px] px-8 py-5 pl-16 w-96 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all shadow-glass`}
             />
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#8b5cf6] transition-colors" />
+            <Search className={`absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 ${isDark ? 'text-slate-500' : 'text-gray-400'} group-focus-within:text-[#8b5cf6] transition-colors`} />
           </div>
 
-          <button className="p-5 bg-white/40 backdrop-blur-md border border-white/60 rounded-[22px] text-gray-400 hover:text-[#8b5cf6] hover:bg-white transition-all shadow-glass relative group">
+          <button className={`p-5 ${isDark ? 'bg-slate-800/40 border-white/10 text-slate-500' : 'bg-white/40 border-white/60 text-gray-400'} backdrop-blur-md border rounded-[22px] hover:text-[#8b5cf6] hover:bg-white transition-all shadow-glass relative group`}>
             <Bell className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-            <span className="absolute top-4 right-4 w-3 h-3 bg-gradient-to-br from-[#d946ef] to-[#8b5cf6] rounded-full border-2 border-white animate-pulse-glow" />
+            <span className={`absolute top-4 right-4 w-3 h-3 bg-gradient-to-br from-[#d946ef] to-[#8b5cf6] rounded-full border-2 ${isDark ? 'border-slate-800' : 'border-white'} animate-pulse-glow`} />
           </button>
         </div>
       </header>
@@ -91,17 +95,17 @@ const DashboardOverview = () => {
             key={idx}
             variants={itemVariants}
             whileHover={{ y: -8 }}
-            className="bg-white/40 backdrop-blur-3xl rounded-[40px] p-8 group border border-white/60 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_25px_50px_-12px_rgba(139,92,246,0.15)] transition-all duration-500"
+            className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[40px] p-8 group border transition-all duration-500`}
           >
             <div className="flex items-center justify-between mb-8">
               <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:rotate-12 transition-transform duration-500`}>
                 <item.icon className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-black px-4 py-1.5 bg-white/60 border border-white/60 rounded-full text-[#8b5cf6] uppercase tracking-widest">{item.trend}</span>
+              <span className={`text-[10px] font-black px-4 py-1.5 ${isDark ? 'bg-slate-800/60 border-white/10' : 'bg-white/60 border-white/60'} rounded-full text-[#8b5cf6] uppercase tracking-widest border`}>{item.trend}</span>
             </div>
             <div>
               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-2">{item.label}</p>
-              <h3 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">{item.value}</h3>
+              <h3 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-none transition-colors`}>{item.value}</h3>
             </div>
           </motion.div>
         ))}
@@ -110,12 +114,12 @@ const DashboardOverview = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 pb-12">
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-12">
           {/* Activity Stream Visual */}
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[56px] p-12 h-[500px] relative overflow-hidden group border border-white/60 shadow-[0_30px_60px_-15px_rgba(139,92,246,0.05)]">
+          <div className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_30px_60px_-15px_rgba(139,92,246,0.05)]'} backdrop-blur-3xl rounded-[56px] p-12 h-[500px] relative overflow-hidden group border transition-all`}>
             {/* Decorative Background Glows */}
             <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-[#8b5cf6]/10 rounded-full blur-[80px]"></div>
 
             <div className="flex items-center justify-between mb-12 relative z-10">
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase flex items-center gap-3">
+              <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight uppercase flex items-center gap-3 transition-colors`}>
                 <Activity className="text-[#8b5cf6]" /> Activity Stream
               </h3>
               <div className="flex gap-8">
@@ -163,10 +167,10 @@ const DashboardOverview = () => {
           </div>
 
           {/* Recent Transmissions */}
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[56px] p-12 border border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
+          <div className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[56px] p-12 border transition-all`}>
             <div className="flex items-center justify-between mb-12">
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Recent Sessions</h3>
-              <button className="text-[10px] font-black text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white uppercase tracking-widest p-3 px-6 bg-white border border-white/60 rounded-full transition-all">Export Trace Logs</button>
+              <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight uppercase transition-colors`}>Recent Sessions</h3>
+              <button className={`text-[10px] font-black text-[#8b5cf6] hover:bg-[#8b5cf6] hover:text-white uppercase tracking-widest p-3 px-6 ${isDark ? 'bg-slate-800' : 'bg-white'} border ${isDark ? 'border-white/10' : 'border-white/60'} rounded-full transition-all`}>Export Trace Logs</button>
             </div>
 
             <div className="space-y-6">
@@ -175,13 +179,13 @@ const DashboardOverview = () => {
                 { name: 'Research Paper Processor', time: '45 mins ago', icon: LayoutGrid, type: 'Knowledge' },
                 { name: 'Code Architecture Debug', time: '2 hours ago', icon: Cpu, type: 'Development' }
               ].map((session, i) => (
-                <div key={i} className="flex items-center justify-between p-8 bg-white/40 border border-white/80 rounded-[40px] hover:bg-white hover:shadow-glass hover:translate-x-3 transition-all duration-500 cursor-pointer group">
+                <div key={i} className={`flex items-center justify-between p-8 ${isDark ? 'bg-slate-800/40 border-white/5 hover:bg-slate-800' : 'bg-white/40 border-white/80 hover:bg-white'} rounded-[40px] border hover:shadow-glass hover:translate-x-3 transition-all duration-500 cursor-pointer group`}>
                   <div className="flex items-center gap-8">
-                    <div className="w-16 h-16 rounded-[24px] bg-white flex items-center justify-center text-[#8b5cf6] shadow-sm border border-gray-100 group-hover:rotate-6 transition-transform ring-4 ring-[#8b5cf6]/5">
+                    <div className={`w-16 h-16 rounded-[24px] ${isDark ? 'bg-slate-900' : 'bg-white'} flex items-center justify-center text-[#8b5cf6] shadow-sm border ${isDark ? 'border-white/10' : 'border-gray-100'} group-hover:rotate-6 transition-transform ring-4 ring-[#8b5cf6]/5`}>
                       <session.icon className="w-7 h-7" />
                     </div>
                     <div>
-                      <p className="font-black text-gray-900 text-lg tracking-tight mb-1">{session.name}</p>
+                      <p className={`font-black ${isDark ? 'text-white' : 'text-gray-900'} text-lg tracking-tight mb-1 transition-colors`}>{session.name}</p>
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{session.time} • <span className="text-[#8b5cf6] opacity-80">{session.type}</span></p>
                     </div>
                   </div>
@@ -196,27 +200,27 @@ const DashboardOverview = () => {
 
         {/* Action Node (Right Sidebar) */}
         <motion.div variants={itemVariants} className="space-y-12">
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[56px] p-12 border border-white/60 flex flex-col items-center text-center shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)] relative group">
+          <div className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[56px] p-12 border flex flex-col items-center text-center transition-all relative group`}>
             {/* Pulsing Aura */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#8b5cf6]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rounded-[56px] pointer-events-none"></div>
 
             <div className="w-28 h-28 rounded-[40px] bg-gradient-to-br from-[#d946ef] to-[#8b5cf6] p-1.5 shadow-2xl mb-10 group relative animate-pulse-glow">
-              <div className="w-full h-full rounded-[35px] bg-white flex items-center justify-center text-[#8b5cf6] font-black text-4xl shadow-inner">
+              <div className={`w-full h-full rounded-[35px] ${isDark ? 'bg-slate-900' : 'bg-white'} flex items-center justify-center text-[#8b5cf6] font-black text-4xl shadow-inner transition-colors`}>
                 {stats?.activeAgents || '0'}
               </div>
             </div>
 
-            <h3 className="text-2xl font-black text-gray-900 tracking-tight leading-none mb-3 font-black">Neural Hub</h3>
-            <p className="text-[13px] font-medium text-gray-500 leading-relaxed max-w-[220px] mb-12">Orchestrate and calibrate your fleet of intelligent neural agents.</p>
+            <h3 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight leading-none mb-3 font-black transition-colors`}>Neural Hub</h3>
+            <p className={`text-[13px] font-medium ${isDark ? 'text-slate-400' : 'text-gray-500'} leading-relaxed max-w-[220px] mb-12 transition-colors`}>Orchestrate and calibrate your fleet of intelligent neural agents.</p>
 
             <div className="grid grid-cols-2 gap-5 w-full">
               {[
                 { label: 'Uptime', val: '99.9%' },
                 { label: 'Latency', val: '42ms' }
               ].map((s, i) => (
-                <div key={i} className="bg-white/60 backdrop-blur-md p-6 rounded-[28px] border border-white/80 shadow-sm">
+                <div key={i} className={`${isDark ? 'bg-slate-800/60 border-white/5' : 'bg-white/60 border-white/80'} backdrop-blur-md p-6 rounded-[28px] border shadow-sm transition-colors`}>
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 opacity-70">{s.label}</p>
-                  <p className="text-xl font-black text-gray-900 tracking-tighter">{s.val}</p>
+                  <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter transition-colors`}>{s.val}</p>
                 </div>
               ))}
             </div>
@@ -226,8 +230,8 @@ const DashboardOverview = () => {
             </button>
           </div>
 
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[56px] p-12 border border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
-            <h3 className="text-xl font-black text-gray-900 tracking-tight mb-10 uppercase flex items-center gap-3">
+          <div className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl rounded-[56px] p-12 border transition-all`}>
+            <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight mb-10 uppercase flex items-center gap-3 transition-colors`}>
               <Sparkles size={18} className="text-[#8b5cf6]" /> System Protocols
             </h3>
             <div className="space-y-5">
@@ -236,17 +240,17 @@ const DashboardOverview = () => {
                 { label: 'Neural Link Sync', status: 'Optimal', color: 'bg-[#8b5cf6]' },
                 { label: 'Cloud Gateway', status: 'Stable', color: 'bg-blue-400' }
               ].map((p, i) => (
-                <div key={i} className="flex items-center justify-between p-6 bg-white/40 border border-white/60 rounded-[30px] transition-all hover:bg-white/60">
+                <div key={i} className={`flex items-center justify-between p-6 ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-white/40 border-white/60'} rounded-[30px] border transition-all hover:bg-white/60 transition-colors`}>
                   <span className="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em]">{p.label}</span>
                   <div className="flex items-center gap-3">
                     <div className={`w-2.5 h-2.5 rounded-full ${p.color} animate-pulse shadow-lg`} />
-                    <span className="text-[10px] font-black text-gray-900 uppercase tracking-tighter">{p.status}</span>
+                    <span className={`text-[10px] font-black ${isDark ? 'text-white' : 'text-gray-900'} uppercase tracking-tighter transition-colors`}>{p.status}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <button className="w-full py-5 mt-10 bg-white/40 hover:bg-white text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-gray-900 rounded-[28px] border border-white/80 transition-all shadow-sm">
+            <button className={`w-full py-5 mt-10 ${isDark ? 'bg-slate-800/40 hover:bg-slate-800 text-slate-500 hover:text-white' : 'bg-white/40 hover:bg-white text-gray-400 hover:text-gray-900'} text-[10px] font-black uppercase tracking-[0.3em] rounded-[28px] border ${isDark ? 'border-white/5' : 'border-white/80'} transition-all shadow-sm`}>
               Launch Diagnostic Array
             </button>
           </div>

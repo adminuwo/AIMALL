@@ -116,6 +116,26 @@ export const apiService = {
     }
   },
 
+  async updateProfile(data) {
+    return this.updateUserProfile(data);
+  },
+
+  async uploadFile(file) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await apiClient.post('/user/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.url;
+    } catch (error) {
+      console.error("Failed to upload file:", error);
+      throw error;
+    }
+  },
+
   // --- Dashboard Stats ---
   async getDashboardStats() {
     try {
@@ -604,6 +624,18 @@ export const apiService = {
       throw error;
     }
   },
+
+  async deleteReportMessages(reportId) {
+    try {
+      const response = await apiClient.delete(`/reports/${reportId}/messages`);
+      console.log("[apiService] deleteReportMessages Success for report:", reportId);
+      return response.data;
+    } catch (error) {
+      console.error("[apiService] deleteReportMessages Error:", error.response?.status, error.message);
+      throw error;
+    }
+  },
+
   async resolveReport(id, status, resolutionNote) {
     try {
       const response = await apiClient.put(`/reports/${id}/resolve`, { status, resolutionNote });
@@ -680,6 +712,17 @@ export const apiService = {
     }
   },
 
+  async deleteSupportChatMessages(chatId) {
+    try {
+      const response = await apiClient.delete(`/support-chat/${chatId}/messages`);
+      console.log("[apiService] deleteSupportChatMessages Success for chat:", chatId);
+      return response.data;
+    } catch (error) {
+      console.error("[apiService] deleteSupportChatMessages Error:", error.response?.status, error.message);
+      throw error;
+    }
+  },
+
   async replyToVendorTicket(ticketId, message) {
     try {
       const response = await apiClient.post(`/reports/${ticketId}/reply`, { message });
@@ -712,7 +755,7 @@ export const apiService = {
     }
   },
 
-  async sendVendorMessage({ vendorId, agentId, text }) {
+  async sendVendorDirectMessage({ vendorId, agentId, text }) {
     try {
       const response = await apiClient.post('/vendor-chat/message', { vendorId, agentId, text });
       return response.data;
@@ -752,6 +795,16 @@ export const apiService = {
     }
   },
 
+  async getUserReports(userId, type = null) {
+    try {
+      const response = await apiClient.get(`/reports/user/${userId}${type ? `?type=${type}` : ''}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch user reports:", error);
+      return [];
+    }
+  },
+
   async contactVendor(data) {
     try {
       const response = await apiClient.post('/messages/contact-vendor', data);
@@ -782,6 +835,38 @@ export const apiService = {
     }
   },
 
+  async getUserMessages(userId) {
+    try {
+      const response = await apiClient.get(`/messages/user/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch user messages:", error);
+      return { success: false, data: [] };
+    }
+  },
+
+  async getConversationHistory(userId, vendorId, agentId = null) {
+    try {
+      const response = await apiClient.get(`/messages/history`, {
+        params: { userId, vendorId, agentId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch conversation history:", error);
+      return { success: false, data: [] };
+    }
+  },
+
+  async deleteMessage(messageId) {
+    try {
+      const response = await apiClient.delete(`/messages/${messageId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      throw error;
+    }
+  },
+
   async getMessageById(id) {
     try {
       const response = await apiClient.get(`/messages/${id}`);
@@ -802,12 +887,12 @@ export const apiService = {
     }
   },
 
-  async adminDirectMessage(data) {
+  async sendVendorMessage(data) {
     try {
-      const response = await apiClient.post('/messages/admin-direct', data);
+      const response = await apiClient.post('/messages/send-to-user', data);
       return response.data;
     } catch (error) {
-      console.error("Failed to send admin direct message:", error);
+      console.error("Failed to send vendor message:", error);
       throw error;
     }
   },
@@ -890,6 +975,27 @@ export const apiService = {
     } catch (error) {
       console.error("Failed to reject vendor:", error);
       throw error;
+    }
+  },
+
+  async deleteVendor(id) {
+    try {
+      // Reusing the generic user delete endpoint since vendors are users
+      await apiClient.delete(`/user/${id}`);
+      return true;
+    } catch (error) {
+      console.error("Failed to delete vendor:", error);
+      throw error;
+    }
+  },
+
+  async getAdmins() {
+    try {
+      const response = await apiClient.get('/user/admins');
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch admins:", error);
+      return [];
     }
   }
 };

@@ -20,7 +20,7 @@ const VendorLayout = () => {
         const updateVendorData = () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             setVendorData({
-                name: user.companyName || user.name || 'Vendor',
+                name: user.name || user.companyName || 'Vendor',
                 type: user.companyType || 'Premium Partner',
                 avatar: user.avatar || null
             });

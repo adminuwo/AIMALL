@@ -12,15 +12,16 @@ import {
     ChevronDown,
     ChevronUp,
     LogOut,
+    User as UserIcon,
     Command,
     LayoutDashboard,
     ChevronLeft,
     ChevronRight,
     X,
-    Menu,
-    Headset
+    Menu
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router";
 
 // Sub-Components
 import AdminOverview from "./components/AdminOverview";
@@ -33,13 +34,20 @@ import TransactionHistory from "./components/TransactionHistory";
 import Complaints from "./components/Complaints";
 import AccessControl from "./components/AccessControl";
 import PlatformSettings from "./components/PlatformSettings";
-import SupportChat from "./components/SupportChat";
+import AdminSupport from "../pages/AdminSupport";
 
 const Admin = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const [activeSubTab, setActiveSubTab] = useState("overview");
     const [isRevenueExpanded, setIsRevenueExpanded] = useState(true);
     const [userProfile, setUserProfile] = useState({ name: 'Admin', avatar: '' });
+    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/');
+    };
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -75,9 +83,9 @@ const Admin = () => {
                     { id: "transactions", label: "Transaction History" }
                 ]
             },
-            { id: "complaints", label: "Neural Support", icon: Headset },
+            { id: "complaints", label: "User Support", icon: AlertTriangle },
             { id: "users", label: "User Management", icon: Users },
-            { id: "vendors", label: "Vendor Support", icon: UserCheck },
+
         ],
         governance: [
             { id: "approvals", label: "Approvals", icon: CheckCircle },
@@ -94,7 +102,7 @@ const Admin = () => {
             case "agents": return <AgentManagement />;
             case "finance":
                 return activeSubTab === "transactions" ? <TransactionHistory /> : <Financials />;
-            case "complaints": return <SupportChat />;
+            case "complaints": return <AdminSupport />;
             case "roles": return <AccessControl />;
             case "settings": return <PlatformSettings />;
             default: return <AdminOverview />;
@@ -288,9 +296,9 @@ const Admin = () => {
                 </div>
 
                 <div className="p-4">
-                    <button className={`w-full ${!isCompact ? 'h-10 px-6' : 'h-10 px-0 justify-center'} flex items-center gap-4 bg-red-50 dark:bg-red-900/10 text-red-500 dark:text-red-400 rounded-[28px] hover:bg-red-500 hover:text-white transition-all shadow-sm group active:scale-95 overflow-hidden`}>
-                        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform shrink-0" />
-                        {!isCompact && <span className="text-[11px] font-black uppercase tracking-[0.2em] whitespace-nowrap">Deactivate Token</span>}
+                    <button className={`w-full ${!isCompact ? 'h-12 px-6' : 'h-12 px-0 justify-center'} flex items-center gap-3 bg-red-50 dark:bg-red-900/10 text-red-500 dark:text-red-400 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm group active:scale-95 border border-red-100 dark:border-red-900/20`}>
+                        <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform shrink-0" />
+                        {!isCompact && <span className="text-xs font-black lowercase tracking-widest whitespace-nowrap">Deactivate Token</span>}
                     </button>
                 </div>
             </aside>
@@ -310,17 +318,62 @@ const Admin = () => {
 
                     <div className="flex items-center gap-8">
                         <div
-                            onClick={() => setActiveTab('settings')}
-                            className="flex items-center gap-5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl px-1.5 py-1.5 rounded-[20px] border border-white/60 dark:border-white/10 shadow-glass transform hover:scale-105 transition-all cursor-pointer group"
+                            className="relative group profile-dropdown-container"
+                            onMouseEnter={() => setIsProfileDropdownOpen(true)}
+                            onMouseLeave={() => setIsProfileDropdownOpen(false)}
                         >
-                            <div className="w-10 h-10 rounded-[14px] bg-gray-900 dark:bg-slate-800 flex items-center justify-center text-white font-black shadow-2xl relative overflow-hidden">
-                                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#8b5cf6] rounded-full border-2 border-white animate-pulse" />
-                                {userProfile.avatar ? (
-                                    <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
-                                ) : (
-                                    userProfile.name.charAt(0).toUpperCase()
-                                )}
+                            <div
+                                onClick={() => setActiveTab('settings')}
+                                className="flex items-center gap-5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl px-1.5 py-1.5 rounded-[20px] border border-white/60 dark:border-white/10 shadow-glass transform hover:scale-105 transition-all cursor-pointer"
+                            >
+                                <div className="w-10 h-10 rounded-[14px] bg-gray-900 dark:bg-slate-800 flex items-center justify-center text-white font-black shadow-2xl relative overflow-hidden">
+                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#8b5cf6] rounded-full border-2 border-white animate-pulse" />
+                                    {userProfile.avatar ? (
+                                        <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        userProfile.name.charAt(0).toUpperCase()
+                                    )}
+                                </div>
                             </div>
+
+                            <AnimatePresence>
+                                {isProfileDropdownOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        className="absolute right-0 mt-3 w-56 bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-[24px] border border-white/60 dark:border-white/10 shadow-2xl p-2 z-50"
+                                    >
+                                        <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-800 mb-2">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Logged in as</p>
+                                            <p className="text-sm font-black text-gray-900 dark:text-white tracking-tight truncate">{userProfile.name}</p>
+                                        </div>
+
+                                        <button
+                                            onClick={() => {
+                                                setActiveTab('settings');
+                                                setIsProfileDropdownOpen(false);
+                                            }}
+                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-slate-400 hover:bg-[#8b5cf6] hover:text-white transition-all group"
+                                        >
+                                            <div className="p-2 bg-gray-100 dark:bg-slate-800 rounded-lg group-hover:bg-white/20 transition-colors">
+                                                <UserIcon size={14} />
+                                            </div>
+                                            <span className="text-xs font-black uppercase tracking-widest">My Profile</span>
+                                        </button>
+
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all group mt-1"
+                                        >
+                                            <div className="p-2 bg-red-50 dark:bg-red-900/10 rounded-lg group-hover:bg-white/20 transition-colors">
+                                                <LogOut size={14} />
+                                            </div>
+                                            <span className="text-xs font-black uppercase tracking-widest">Sign Out</span>
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </header>

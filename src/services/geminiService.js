@@ -2,12 +2,14 @@ import axios from "axios";
 import { apis } from "../types";
 import { getUserData } from "../userStore/userData";
 
-export const generateChatResponse = async (history, currentMessage, systemInstruction) => {
+export const generateChatResponse = async (history, currentMessage, sessionId, title, systemInstruction) => {
     try {
         const token = getUserData()?.token;
         const payload = {
             content: currentMessage,
             history: history,
+            sessionId: sessionId,
+            title: title,
             systemInstruction: systemInstruction
         };
 

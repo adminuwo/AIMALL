@@ -1,26 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, Server, ShieldAlert, Settings, Activity, Lock, User, Camera, Mail, Save, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AlertCircle, Server, ShieldAlert, Settings, Activity, Lock, User, Camera, Mail, Save, Loader2, Users, Calendar, Info, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import apiService from '../../services/apiService';
 import { useToast } from '../../Components/Toast/ToastContext';
 
 const PlatformSettings = () => {
     const toast = useToast();
-    const [platformSettings, setPlatformSettings] = useState({
-        allowPublicSignup: true,
-        maintenanceMode: false,
-        globalKillSwitch: false,
-        globalRateLimit: 50
-    });
     const [maintenance, setMaintenance] = useState(false);
     const [killSwitch, setKillSwitch] = useState(false);
-    const [reqLimit, setReqLimit] = useState(50);
+    const [reqLimit, setReqLimit] = useState(1);
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState({
         name: '',
         email: '',
         avatar: ''
     });
+    const [admins, setAdmins] = useState([]);
+    const [selectedAdmin, setSelectedAdmin] = useState(null);
+    const [fetchingAdmins, setFetchingAdmins] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(false);
+
+    const handleDeleteAdmin = async (id) => {
+        try {
+            setLoading(true);
+            await apiService.deleteUser(id);
+            toast.success("Administrator removed successfully");
+            setSelectedAdmin(null);
+            setConfirmDelete(false);
+            fetchAdmins();
+        } catch (error) {
+            toast.error(error.response?.data?.error || "Failed to remove administrator");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchAdmins = async () => {
+        try {
+            setFetchingAdmins(true);
+            const data = await apiService.getAdmins();
+            setAdmins(data);
+        } catch (error) {
+            console.error("Failed to fetch admins", error);
+        } finally {
+            setFetchingAdmins(false);
+        }
+    };
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -29,67 +54,8 @@ const PlatformSettings = () => {
             email: user.email || 'admin@aimall.com',
             avatar: user.avatar || ''
         });
-        fetchPlatformSettings();
+        fetchAdmins();
     }, []);
-
-    const fetchPlatformSettings = async () => {
-        try {
-            const settings = await apiService.getAdminSettings();
-            setPlatformSettings(settings);
-            setMaintenance(settings.maintenanceMode);
-            setKillSwitch(settings.globalKillSwitch);
-            setReqLimit(settings.globalRateLimit || 50);
-        } catch (err) {
-            console.error("Failed to fetch platform settings", err);
-        }
-    };
-
-    const handleToggleMaintenance = async () => {
-        try {
-            const newVal = !maintenance;
-            await apiService.updateMaintenanceMode(newVal);
-            setMaintenance(newVal);
-            toast.success(`Maintenance mode ${newVal ? 'ENABLED' : 'DISABLED'}`);
-        } catch (err) {
-            toast.error("Failed to toggle maintenance mode");
-        }
-    };
-
-    const handleToggleKillSwitch = async () => {
-        try {
-            const newVal = !killSwitch;
-            await apiService.updateKillSwitch(newVal);
-            setKillSwitch(newVal);
-            toast.success(`Global kill-switch ${newVal ? 'ACTIVATED' : 'DEACTIVATED'}`);
-        } catch (err) {
-            toast.error("Failed to toggle kill-switch");
-        }
-    };
-
-    const handleRateLimitChange = async (e) => {
-        const val = parseInt(e.target.value);
-        setReqLimit(val);
-    };
-
-    const saveRateLimit = async () => {
-        try {
-            await apiService.updateRateLimit(reqLimit);
-            toast.success("Rate limit updated successfully");
-        } catch (err) {
-            toast.error("Failed to update rate limit");
-        }
-    };
-
-    const handleToggleSignup = async () => {
-        try {
-            const nextSettings = { ...platformSettings, allowPublicSignup: !platformSettings.allowPublicSignup };
-            await apiService.updateAdminSettings(nextSettings);
-            setPlatformSettings(nextSettings);
-            toast.success(`Public signups ${nextSettings.allowPublicSignup ? 'ENABLED' : 'DISABLED'}`);
-        } catch (err) {
-            toast.error("Failed to update signup logic");
-        }
-    };
 
     const handleProfileChange = (e) => {
         const { name, value } = e.target;
@@ -112,7 +78,13 @@ const PlatformSettings = () => {
     const handleSaveProfile = async () => {
         try {
             setLoading(true);
-            await apiService.updateProfile(profile);
+            const updatedUser = await apiService.updateProfile(profile);
+
+            // Update local storage to persist changes across refresh
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const newUser = { ...currentUser, ...updatedUser };
+            localStorage.setItem('user', JSON.stringify(newUser));
+
             toast.success("Profile updated successfully!");
             // Notify other components that profile was updated
             window.dispatchEvent(new Event('profileUpdated'));
@@ -237,63 +209,164 @@ const PlatformSettings = () => {
                 </div>
             </div>
 
-            {/* Safety & Emergency */}
-            <div className="bg-red-50/50 backdrop-blur-3xl border border-red-100/60 rounded-[32px] p-8 shadow-[0_20px_40px_-20px_rgba(239,68,68,0.05)]">
+            {/* Platform Administrators */}
+            <div className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[32px] p-8 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#8b5cf6]/5 blur-3xl rounded-full -mr-16 -mt-16"></div>
+
                 <h3 className="text-lg font-black text-gray-900 tracking-tight mb-6 flex items-center gap-2 uppercase">
-                    <ShieldAlert className="w-5 h-5 text-red-500" />
-                    Safety & Emergency Controls
+                    <Users className="w-5 h-5 text-[#8b5cf6]" />
+                    Platform Administrators
                 </h3>
 
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between p-6 bg-white/60 rounded-[24px] border border-white/80 transition-all hover:bg-white/80 hover:shadow-sm group">
-                        <div className="space-y-1">
-                            <p className="font-bold text-sm text-gray-900 uppercase tracking-tight">Public Registration</p>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Allow new users to create accounts independently.</p>
-                        </div>
-                        <button
-                            onClick={handleToggleSignup}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${platformSettings.allowPublicSignup ? 'bg-indigo-500' : 'bg-gray-200'}`}
-                        >
-                            <motion.div
-                                animate={{ x: platformSettings.allowPublicSignup ? 24 : 0 }}
-                                className="w-4 h-4 bg-white rounded-full shadow-sm"
-                            />
-                        </button>
+                {fetchingAdmins ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-4 text-gray-400">
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                        <p className="text-[10px] font-black uppercase tracking-widest italic">Syncing admin database...</p>
                     </div>
-
-                    <div className="flex items-center justify-between p-6 bg-white/60 rounded-[24px] border border-white/80 transition-all hover:bg-white/80 hover:shadow-sm group">
-                        <div className="space-y-1">
-                            <p className="font-bold text-sm text-gray-900 uppercase tracking-tight">Maintenance Mode</p>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Disable user access for system upgrades.</p>
-                        </div>
-                        <button
-                            onClick={handleToggleMaintenance}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${maintenance ? 'bg-emerald-500' : 'bg-gray-200'}`}
-                        >
+                ) : (
+                    <div className="flex flex-col gap-3">
+                        {admins.map((admin) => (
                             <motion.div
-                                animate={{ x: maintenance ? 24 : 0 }}
-                                className="w-4 h-4 bg-white rounded-full shadow-sm"
-                            />
-                        </button>
+                                key={admin.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setSelectedAdmin(admin)}
+                                className="group p-4 bg-white/60 border border-white/80 rounded-[24px] cursor-pointer hover:bg-white/80 hover:border-[#8b5cf6]/30 transition-all flex items-center gap-4"
+                            >
+                                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+                                    {admin.avatar ? (
+                                        <img src={admin.avatar} alt={admin.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-[#8b5cf6]/10 text-[#8b5cf6] flex items-center justify-center font-black">
+                                            {admin.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-black text-sm text-gray-900 truncate group-hover:text-[#8b5cf6] transition-colors">{admin.name}</h4>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{admin.email}</p>
+                                </div>
+                                <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-[#8b5cf6]/10 transition-colors">
+                                    <Info className="w-4 h-4 text-gray-400 group-hover:text-[#8b5cf6]" />
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
-
-                    <div className="flex items-center justify-between p-6 bg-white/60 rounded-[24px] border border-red-100 transition-all hover:bg-red-50/50 hover:shadow-sm hover:border-red-200 group">
-                        <div className="space-y-1">
-                            <p className="font-bold text-sm text-red-500 uppercase tracking-tight">Global Kill-Switch</p>
-                            <p className="text-[10px] font-bold text-red-400/70 uppercase tracking-widest">Immediately disable ALL AI Agent inference APIs.</p>
-                        </div>
-                        <button
-                            onClick={handleToggleKillSwitch}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${killSwitch ? 'bg-red-500' : 'bg-gray-200'}`}
-                        >
-                            <motion.div
-                                animate={{ x: killSwitch ? 24 : 0 }}
-                                className="w-4 h-4 bg-white rounded-full shadow-sm"
-                            />
-                        </button>
-                    </div>
-                </div>
+                )}
             </div>
+
+            {/* Admin Details Modal */}
+            <AnimatePresence>
+                {selectedAdmin && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+                        onClick={() => {
+                            setSelectedAdmin(null);
+                            setConfirmDelete(false);
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="w-full max-w-md bg-white rounded-[40px] p-8 shadow-2xl relative overflow-hidden"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <button
+                                onClick={() => {
+                                    setSelectedAdmin(null);
+                                    setConfirmDelete(false);
+                                }}
+                                className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+                            >
+                                <X className="w-5 h-5 text-gray-400" />
+                            </button>
+
+                            <div className="flex flex-col items-center text-center mb-8">
+                                <div className="w-24 h-24 rounded-full border-4 border-[#8b5cf6]/20 p-1 mb-4">
+                                    <div className="w-full h-full rounded-full overflow-hidden">
+                                        {selectedAdmin.avatar ? (
+                                            <img src={selectedAdmin.avatar} alt={selectedAdmin.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-[#8b5cf6] text-white flex items-center justify-center text-2xl font-black">
+                                                {selectedAdmin.name.charAt(0)}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <h4 className="text-2xl font-black text-gray-900 tracking-tighter uppercase">{selectedAdmin.name}</h4>
+                                <p className="text-xs font-bold text-[#8b5cf6] uppercase tracking-[0.2em]">{selectedAdmin.email}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-gray-50 rounded-[24px] p-6 border border-gray-100">
+                                    <Calendar className="w-5 h-5 text-[#d946ef] mb-3" />
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Last Login Date</p>
+                                    <p className="font-black text-gray-900 text-sm">
+                                        {selectedAdmin.lastLogin ? new Date(selectedAdmin.lastLogin).toLocaleDateString('en-IN', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        }) : 'Never'}
+                                    </p>
+                                </div>
+                                <div className="bg-gray-50 rounded-[24px] p-6 border border-gray-100">
+                                    <Server className="w-5 h-5 text-[#8b5cf6] mb-3" />
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Agents Created</p>
+                                    <p className="font-black text-3xl text-gray-900">{selectedAdmin.agentCount}</p>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center gap-3">
+                                <Activity className="w-4 h-4 text-emerald-500" />
+                                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Administrator Account Verified & Active</p>
+                            </div>
+
+                            <div className="mt-8 pt-8 border-t border-gray-100">
+                                {confirmDelete ? (
+                                    <div className="bg-red-50 p-4 rounded-2xl border border-red-100">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="p-2 bg-red-100 rounded-xl text-red-600">
+                                                <ShieldAlert className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-red-600 uppercase tracking-widest leading-none">Confirm Deletion</p>
+                                                <p className="text-[9px] font-bold text-red-400 uppercase tracking-widest mt-0.5">This action is irreversible</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleDeleteAdmin(selectedAdmin.id)}
+                                                disabled={loading}
+                                                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 disabled:opacity-50"
+                                            >
+                                                {loading ? "Deleting..." : "Confirm Delete"}
+                                            </button>
+                                            <button
+                                                onClick={() => setConfirmDelete(false)}
+                                                className="flex-1 py-3 bg-white border border-gray-100 text-gray-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setConfirmDelete(true)}
+                                        className="w-full py-4 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-600 border border-gray-100 hover:border-red-100 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group"
+                                    >
+                                        <ShieldAlert className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                        Delete Administrator Account
+                                    </button>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* API Controls */}
             <div className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[32px] p-8 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)]">
@@ -304,22 +377,14 @@ const PlatformSettings = () => {
                 <div className="p-6 bg-white/40 rounded-[24px] border border-white/60">
                     <div className="flex justify-between items-center mb-4">
                         <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Global Requests Per Minute</label>
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm font-black text-[#8b5cf6]">{reqLimit}k</span>
-                            <button
-                                onClick={saveRateLimit}
-                                className="px-3 py-1 bg-[#8b5cf6] text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-[#7c3aed] transition-all"
-                            >
-                                Apply
-                            </button>
-                        </div>
+                        <span className="text-sm font-black text-[#8b5cf6]">{reqLimit}k</span>
                     </div>
                     <input
                         type="range"
                         min="1"
                         max="100"
                         value={reqLimit}
-                        onChange={handleRateLimitChange}
+                        onChange={(e) => setReqLimit(e.target.value)}
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#8b5cf6] hover:accent-[#7c3aed] transition-all"
                     />
                     <div className="flex justify-between text-[9px] font-black text-gray-400 mt-3 uppercase tracking-widest">

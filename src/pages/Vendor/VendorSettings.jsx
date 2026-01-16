@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Building2, Save, Camera, ShieldCheck, Grip, FileCode2 } from 'lucide-react';
+import { User, Mail, Building2, Save, Camera, ShieldCheck, Grip } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
+import axios from 'axios';
+import { apis } from '../../types';
 
 const VendorSettings = () => {
     const navigate = useNavigate();
@@ -45,18 +47,28 @@ const VendorSettings = () => {
         fileInputRef.current.click();
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsLoading(true);
-        setTimeout(() => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const updatedUser = { ...user, ...formData };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(`${apis.user}/profile`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-            // Dispatch event to update layout
-            window.dispatchEvent(new Event('vendorProfileUpdate'));
+            if (response.data) {
+                // Update local storage with full user object from server
+                localStorage.setItem('user', JSON.stringify(response.data));
 
+                // Dispatch event to update layout
+                window.dispatchEvent(new Event('vendorProfileUpdate'));
+                alert('Profile updated successfully!');
+            }
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            alert('Failed to update profile. Please try again.');
+        } finally {
             setIsLoading(false);
-        }, 800);
+        }
     };
 
     return (
