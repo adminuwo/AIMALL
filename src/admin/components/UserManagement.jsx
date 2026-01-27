@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Ban, Search, User, Loader2, Bot, ShieldCheck, ChevronDown, ChevronUp, UserCheck, Activity, Trash2 } from 'lucide-react';
+import { Ban, Search, User, Loader2, Bot, ShieldCheck, ShoppingBag, ChevronDown, ChevronUp, UserCheck, Activity, Trash2, Layers } from 'lucide-react';
 import apiService from '../../services/apiService';
 import { useToast } from '../../Components/Toast/ToastContext';
 import { motion } from 'framer-motion';
@@ -10,6 +10,8 @@ const UserManagement = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [expandedUser, setExpandedUser] = useState(null);
+
+    const [viewMode, setViewMode] = useState('AIMALL'); // 'AIMALL', 'ASERIES', or 'AISA'
 
     useEffect(() => {
         fetchUsers();
@@ -41,10 +43,24 @@ const UserManagement = () => {
         }
     };
 
-    const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = users.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const isAdmin = user.role?.toLowerCase() === 'admin' || user.email === 'admin@uwo24.com';
+        const isAISA = user.platform === 'AISA' || user.email?.includes('aisa'); // Fallback check
+
+        if (viewMode === 'ASERIES') {
+            return matchesSearch && isAdmin;
+        }
+
+        if (viewMode === 'AISA') {
+            return matchesSearch && !isAdmin && isAISA;
+        }
+
+        // AI-MALL view: Everyone who isn't an AISA user (Admins are now included here too)
+        return matchesSearch && !isAISA;
+    });
 
     const handleDeleteUser = async (userId) => {
         if (!window.confirm("Are you sure you want to permanently delete this user? This action cannot be undone.")) {
@@ -73,12 +89,56 @@ const UserManagement = () => {
         <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
+            style={{
+                WebkitFontSmoothing: 'antialiased',
+                textRendering: 'optimizeLegibility',
+                backfaceVisibility: 'hidden'
+            }}
             className="space-y-4 pb-24"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">User Management</h2>
-                    <p className="text-gray-500 font-medium text-xs">Manage platform users, roles, and subscriptions</p>
+                <div className="flex flex-col md:flex-row md:items-center gap-6">
+                    <div>
+                        <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">
+                            {viewMode === 'ASERIES' ? 'A-SERIES' : viewMode === 'AISA' ? 'AISA' : 'AI-MALL'} User Management
+                        </h2>
+                        <p className="text-gray-500 font-medium text-xs">
+                            {viewMode === 'ASERIES' ? 'Manage platform system users and admins' : viewMode === 'AISA' ? 'Manage AISA platform specific users' : 'Manage platform users, vendors, and roles'}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-1.5 bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[24px] shadow-sm">
+                        <button
+                            onClick={() => setViewMode('ASERIES')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'ASERIES'
+                                ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20 scale-105'
+                                : 'text-gray-400 hover:text-gray-900 hover:bg-white/40'
+                                }`}
+                        >
+                            <Layers className="w-4 h-4" />
+                            A SERIES
+                        </button>
+                        <button
+                            onClick={() => setViewMode('AISA')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'AISA'
+                                ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20 scale-105'
+                                : 'text-gray-400 hover:text-gray-900 hover:bg-white/40'
+                                }`}
+                        >
+                            <Bot className="w-4 h-4" />
+                            AISA
+                        </button>
+                        <button
+                            onClick={() => setViewMode('AIMALL')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'AIMALL'
+                                ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20 scale-105'
+                                : 'text-gray-400 hover:text-gray-900 hover:bg-white/40'
+                                }`}
+                        >
+                            <ShoppingBag className="w-4 h-4" />
+                            AI MALL
+                        </button>
+                    </div>
                 </div>
 
                 <div className="relative group w-full md:w-80">
@@ -95,7 +155,7 @@ const UserManagement = () => {
             </div>
 
             <div className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[32px] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-white/60 bg-white/20">
@@ -125,7 +185,7 @@ const UserManagement = () => {
                                             </td>
                                             <td className="px-6 py-3">
                                                 {(() => {
-                                                    const isAdmin = user.role?.toLowerCase() === 'admin' || user.email === 'aditilakhera0@gmail.com';
+                                                    const isAdmin = user.role?.toLowerCase() === 'admin' || user.email === 'admin@uwo24.com';
                                                     return (
                                                         <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${isAdmin ? 'bg-[#8b5cf6]/10 text-[#8b5cf6] border-[#8b5cf6]/20' : 'bg-gray-100 text-gray-500 border-gray-200'} `}>
                                                             {isAdmin && <ShieldCheck className="w-3 h-3" />}

@@ -70,6 +70,7 @@ const DashboardLayout = () => {
   const user = JSON.parse(
     localStorage.getItem('user') || '{"name":"User"}'
   );
+  const isAdmin = user.role === 'admin' || user.role === 'Admin' || user.email === 'admin@uwo24.com';
 
   return (
     <div className={`fixed inset-0 flex bg-transparent ${isDark ? 'text-white' : 'text-slate-900'} overflow-hidden font-sans h-[100dvh] transition-colors duration-700`}>
@@ -97,7 +98,7 @@ const DashboardLayout = () => {
           </div>
 
           <Link
-            to={AppRoute.PROFILE}
+            to={isAdmin ? AppRoute.SETTINGS : AppRoute.PROFILE}
             className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm uppercase hover:bg-primary/30 transition-colors"
           >
             {user.name?.charAt(0) || 'U'}

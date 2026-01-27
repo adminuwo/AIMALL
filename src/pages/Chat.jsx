@@ -7,10 +7,12 @@ import Loader from '../Components/Loader/Loader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../userStore/userData';
+import { useLanguage } from '../context/LanguageContext';
 
 const Chat = () => {
   const theme = useRecoilValue(themeState);
   const isDark = theme === 'Dark';
+  const { t } = useLanguage();
   const { sessionId } = useParams();
   const navigate = useNavigate();
 
@@ -143,7 +145,7 @@ const Chat = () => {
       {/* Sidebar History - Dreamy Glass Style */}
       <motion.div
         className={`
-          w-80 ${isDark ? 'bg-slate-950/40 border-white/5' : 'bg-white/40 border-white/60'} backdrop-blur-3xl border-r flex flex-col flex-shrink-0
+          w-80 ${isDark ? 'bg-[#0B0F1A] border-white/5' : 'bg-white/40 border-white/60'} backdrop-blur-3xl border-r flex flex-col flex-shrink-0
           absolute inset-y-0 left-0 z-[70] transition-all duration-500 ease-in-out
           md:relative md:translate-x-0 overflow-hidden
           ${showHistory ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
@@ -154,12 +156,12 @@ const Chat = () => {
         </div>
 
         <div className="p-8">
-          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight mb-6 transition-colors`}>History<span className="text-[#8b5cf6]">.</span></h2>
+          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight mb-6 transition-colors`}>{t('history')}<span className="text-[#8B5CF6]">.</span></h2>
           <button
             onClick={handleNewChat}
-            className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-black py-4 px-4 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-[0_10px_20px_rgba(139,92,246,0.3)] hover:scale-[1.02] active:scale-95 uppercase text-xs tracking-widest"
+            className="w-full bg-[#8B5CF6] hover:bg-[#7c3aed] text-white font-black py-4 px-4 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-[0_10px_20px_rgba(139,92,246,0.3)] hover:shadow-[#8B5CF6]/20 hover:scale-[1.02] active:scale-95 uppercase text-xs tracking-widest"
           >
-            <Plus className="w-4 h-4" strokeWidth={3} /> New Instance
+            <Plus className="w-4 h-4" strokeWidth={3} /> {t('newInstance')}
           </button>
         </div>
 
@@ -173,14 +175,14 @@ const Chat = () => {
                 }}
                 className={`w-full text-left px-5 py-4 rounded-[20px] transition-all duration-300 truncate border
                   ${currentSessionId === session.sessionId
-                    ? `${isDark ? 'bg-slate-900 border-white/10 text-[#8b5cf6]' : 'bg-white/80 border-[#8b5cf6]/20 text-[#8b5cf6]'} shadow-sm font-black`
-                    : `${isDark ? 'text-slate-400 border-transparent hover:bg-slate-900/40 hover:text-white' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'}`
+                    ? `${isDark ? 'bg-[#161D35] border-[#8B5CF6]/20 text-[#8B5CF6] shadow-[0_0_15px_rgba(139,92,246,0.1)]' : 'bg-white/80 border-[#8b5cf6]/20 text-[#8b5cf6]'} shadow-sm font-black`
+                    : `${isDark ? 'text-white border-transparent hover:bg-white/5 hover:text-[#8B5CF6]' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'}`
                   }
                 `}
               >
                 <div className="flex items-center gap-3">
-                  <Clock size={14} className={currentSessionId === session.sessionId ? 'text-[#8b5cf6]' : 'text-gray-400'} />
-                  <div className="flex-1 truncate text-xs font-bold uppercase tracking-tight">{session.title || 'Untitled Session'}</div>
+                  <Clock size={14} className={currentSessionId === session.sessionId ? 'text-[#8B5CF6]' : `${isDark ? 'text-[#AAB0D6]' : 'text-gray-400'}`} />
+                  <div className="flex-1 truncate text-xs font-bold uppercase tracking-tight">{session.title || t('untitledSession')}</div>
                 </div>
               </button>
               <button
@@ -194,10 +196,10 @@ const Chat = () => {
 
           {sessions.length === 0 && (
             <div className="px-6 py-10 text-center">
-              <div className="w-12 h-12 bg-white/40 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/60">
-                <History className="w-6 h-6 text-gray-400" />
+              <div className={`w-12 h-12 ${isDark ? 'bg-[#161D35] border-white/5' : 'bg-white/40 border-white/60'} rounded-2xl flex items-center justify-center mx-auto mb-4 border`}>
+                <History className={`w-6 h-6 ${isDark ? 'text-[#AAB0D6]' : 'text-gray-400'}`} />
               </div>
-              <p className="text-[10px] uppercase font-black tracking-widest text-gray-400">Memory Empty</p>
+              <p className={`text-[10px] uppercase font-black tracking-widest ${isDark ? 'text-[#AAB0D6]' : 'text-gray-400'}`}>{t('memoryEmpty')}</p>
             </div>
           )}
         </div>
@@ -207,13 +209,13 @@ const Chat = () => {
       <div className="flex-1 flex flex-col relative bg-transparent w-full min-w-0">
 
         {/* Header - Transparent & Refined */}
-        <div className={`h-20 flex items-center justify-between px-6 sm:px-10 ${isDark ? 'bg-slate-950/20 border-white/5' : 'bg-white/20 border-white/40'} backdrop-blur-md border-b z-[50] shrink-0 transition-colors`}>
+        <div className={`h-20 flex items-center justify-between px-6 sm:px-10 ${isDark ? 'bg-[#0B0F1A] border-white/5' : 'bg-white/20 border-white/40'} backdrop-blur-md border-b z-[50] shrink-0 transition-colors`}>
           <div className="flex items-center gap-4 min-w-0">
             <button
-              className={`md:hidden p-3 ${isDark ? 'bg-slate-800' : 'bg-white/40'} rounded-xl text-gray-500 hover:text-gray-900 border ${isDark ? 'border-white/5' : 'border-white/60'} transition-all shrink-0`}
+              className={`md:hidden p-3 ${isDark ? 'bg-[#161D35]' : 'bg-white/40'} rounded-xl text-gray-500 hover:text-gray-900 border ${isDark ? 'border-[#8B5CF6]/10' : 'border-white/60'} transition-all shrink-0`}
               onClick={() => setShowHistory(!showHistory)}
             >
-              <History className="w-5 h-5" />
+              <History className={`w-5 h-5 ${isDark ? 'text-white' : 'text-gray-500'}`} />
             </button>
 
             <div className="flex items-center gap-3 min-w-0">
@@ -224,7 +226,7 @@ const Chat = () => {
                 <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-900'} uppercase tracking-tighter leading-none flex items-center gap-1.5 transition-colors`}>
                   AISA
                 </h3>
-                <span className="text-[10px] font-bold text-[#8b5cf6] uppercase tracking-widest opacity-80">Online & Ready</span>
+                <span className={`text-[10px] font-bold ${isDark ? 'text-[#8B5CF6]' : 'text-[#8b5cf6]'} uppercase tracking-widest opacity-80`}>{t('onlineReady')}</span>
               </div>
             </div>
           </div>
@@ -237,13 +239,13 @@ const Chat = () => {
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center px-6">
               <div className="relative mb-10">
-                <div className="absolute inset-0 bg-[#8b5cf6]/20 blur-[60px] rounded-full animate-blob"></div>
-                <div className={`relative w-32 h-32 ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-white/40 border-white/60'} backdrop-blur-3xl border rounded-full flex items-center justify-center shadow-glass ring-8 ${isDark ? 'ring-white/5' : 'ring-white/20'}`}>
-                  <Sparkles className="w-12 h-12 text-[#8b5cf6] animate-pulse-glow" />
+                <div className="absolute inset-0 bg-[#8B5CF6]/20 blur-[60px] rounded-full animate-blob"></div>
+                <div className={`relative w-32 h-32 ${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10' : 'bg-white/40 border-white/60'} backdrop-blur-3xl border rounded-full flex items-center justify-center shadow-glass ring-8 ${isDark ? 'ring-white/5' : 'ring-white/20'}`}>
+                  <Sparkles className="w-12 h-12 text-[#8B5CF6] animate-pulse-glow" />
                 </div>
               </div>
-              <h2 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-gray-900'} mb-4 tracking-tighter uppercase transition-colors`}>Initialize Logic<span className="text-[#8b5cf6]">.</span></h2>
-              <p className={`${isDark ? 'text-slate-400' : 'text-gray-500'} font-medium max-w-sm leading-relaxed transition-colors`}>Your advanced AI agent is calibrated and ready for interaction. How can we optimize your workflow today?</p>
+              <h2 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-gray-900'} mb-4 tracking-tighter uppercase transition-colors`}>{t('initializeLogic')}<span className="text-[#8B5CF6]">.</span></h2>
+              <p className={`${isDark ? 'text-white' : 'text-gray-500'} font-medium max-w-sm leading-relaxed transition-colors`}>{t('chatGreeting')}</p>
             </div>
           ) : (
             <div className="max-w-4xl mx-auto space-y-8">
@@ -263,13 +265,13 @@ const Chat = () => {
 
                   <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[85%]`}>
                     <div className={`px-6 py-4 rounded-[28px] text-[15px] font-medium leading-relaxed shadow-glass backdrop-blur-3xl border transition-all hover:shadow-xl ${msg.role === 'user'
-                      ? `${isDark ? 'bg-slate-900 border-white/10 text-white' : 'bg-white/80 text-gray-900 border-white/40'} rounded-tr-none`
-                      : `${isDark ? 'bg-slate-800/40 border-white/5 text-slate-100' : 'bg-white/40 text-gray-800 border-white/80'} rounded-tl-none`
+                      ? `${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10 text-white' : 'bg-white/80 text-gray-900 border-white/40'} rounded-tr-none`
+                      : `${isDark ? 'bg-[#0B0F1A] border-white/5 text-white' : 'bg-white/40 text-gray-800 border-white/80'} rounded-tl-none`
                       }`}>
                       {msg.content}
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-2 px-2">
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • SYNCED
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-gray-400' : 'text-gray-400'} mt-2 px-2`}>
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {t('synced')}
                     </span>
                   </div>
                 </motion.div>
@@ -282,7 +284,7 @@ const Chat = () => {
                   </div>
                   <div className={`px-6 py-4 rounded-[28px] rounded-tl-none ${isDark ? 'bg-slate-900/40 border-white/5' : 'bg-white/20 border-white/40'} backdrop-blur-md border flex items-center gap-2 transition-colors`}>
                     <Loader />
-                    <span className="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.2em] ml-2 animate-pulse">Processing Reality</span>
+                    <span className="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.2em] ml-2 animate-pulse">{t('processingReality')}</span>
                   </div>
                 </div>
               )}
@@ -307,8 +309,8 @@ const Chat = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask Aisa..."
-                className={`w-full h-[60px] ${isDark ? 'bg-slate-900/60 border-white/5 text-white placeholder-slate-600' : 'bg-white/60 border-white text-gray-900 placeholder-gray-400'} backdrop-blur-3xl border rounded-[32px] pl-6 pr-48 py-4 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-[#3b82f6]/10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all resize-none overflow-y-auto no-scrollbar`}
+                placeholder={t('askPlaceholder')}
+                className={`w-full h-[60px] ${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10 text-white placeholder-[#6F76A8]' : 'bg-white/60 border-white text-gray-900 placeholder-gray-400'} backdrop-blur-3xl border rounded-[32px] pl-6 pr-48 py-4 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-[#8B5CF6]/10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all resize-none overflow-y-auto no-scrollbar`}
               />
 
               <div className="absolute right-6 top-0 h-full flex items-center gap-2">
@@ -321,7 +323,7 @@ const Chat = () => {
                 <button
                   type="submit"
                   disabled={!inputValue.trim() || isLoading}
-                  className="w-10 h-10 rounded-full bg-[#3b82f6] text-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md flex items-center justify-center shadow-blue-500/20"
+                  className="w-10 h-10 rounded-full bg-[#8B5CF6] text-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md flex items-center justify-center shadow-[#8B5CF6]/20"
                 >
                   <Send className="w-5 h-5" />
                 </button>

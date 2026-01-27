@@ -19,6 +19,11 @@ const PlatformSettings = () => {
     const [selectedAdmin, setSelectedAdmin] = useState(null);
     const [fetchingAdmins, setFetchingAdmins] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [platformConfig, setPlatformConfig] = useState({
+        platformName: 'AI-MALL',
+        contactEmail: 'support@aimall.com'
+    });
+    const [savingConfig, setSavingConfig] = useState(false);
 
     const handleDeleteAdmin = async (id) => {
         try {
@@ -47,14 +52,30 @@ const PlatformSettings = () => {
         }
     };
 
+    const fetchSettings = async () => {
+        try {
+            const data = await apiService.getAdminSettings();
+            setPlatformConfig({
+                platformName: data.platformName || 'AI-MALL',
+                contactEmail: data.contactEmail || 'support@aimall.com'
+            });
+            setMaintenance(data.maintenanceMode || false);
+            setKillSwitch(data.globalKillSwitch || false);
+            setReqLimit(data.globalRateLimit ? (data.globalRateLimit / 1000) : 1);
+        } catch (error) {
+            console.error("Failed to fetch settings", error);
+        }
+    };
+
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         setProfile({
             name: user.name || 'Admin User',
-            email: user.email || 'admin@aimall.com',
+            email: user.email || 'admin@uwo24.com', // Updated to new admin email
             avatar: user.avatar || ''
         });
         fetchAdmins();
+        fetchSettings();
     }, []);
 
     const handleProfileChange = (e) => {
@@ -92,6 +113,21 @@ const PlatformSettings = () => {
             toast.error("Failed to update profile");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSaveConfig = async () => {
+        try {
+            setSavingConfig(true);
+            await apiService.updateAdminSettings({
+                platformName: platformConfig.platformName,
+                contactEmail: platformConfig.contactEmail
+            });
+            toast.success("Configuration saved successfully!");
+        } catch (error) {
+            toast.error("Failed to save configuration");
+        } finally {
+            setSavingConfig(false);
         }
     };
 
@@ -185,16 +221,19 @@ const PlatformSettings = () => {
 
             {/* General Config */}
             <div className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[32px] p-8 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.05)]">
-                <h3 className="text-lg font-black text-gray-900 tracking-tight mb-6 flex items-center gap-2 uppercase">
-                    <Settings className="w-5 h-5 text-[#8b5cf6]" />
-                    General Configuration
-                </h3>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2 uppercase">
+                        <Settings className="w-5 h-5 text-[#8b5cf6]" />
+                        General Configuration
+                    </h3>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Platform Name</label>
                         <input
                             type="text"
-                            defaultValue="AI-MALL"
+                            value={platformConfig.platformName}
+                            onChange={(e) => setPlatformConfig({ ...platformConfig, platformName: e.target.value })}
                             className="w-full bg-white/60 border border-white/80 rounded-[16px] px-6 py-3 text-sm font-bold text-gray-900 outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all uppercase tracking-wide placeholder-gray-400"
                         />
                     </div>
@@ -202,9 +241,20 @@ const PlatformSettings = () => {
                         <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-2">Contact Email</label>
                         <input
                             type="text"
-                            defaultValue="support@aimall.com"
+                            value={platformConfig.contactEmail}
+                            onChange={(e) => setPlatformConfig({ ...platformConfig, contactEmail: e.target.value })}
                             className="w-full bg-white/60 border border-white/80 rounded-[16px] px-6 py-3 text-sm font-bold text-gray-900 outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all tracking-wide placeholder-gray-400"
                         />
+                    </div>
+                    <div className="md:col-span-2 flex justify-end mt-4">
+                        <button
+                            onClick={handleSaveConfig}
+                            disabled={savingConfig}
+                            className="px-8 py-3 bg-[#d946ef] text-white rounded-[16px] font-black text-[10px] uppercase tracking-widest hover:bg-[#c026d3] shadow-lg shadow-[#d946ef]/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70"
+                        >
+                            {savingConfig ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                            Save Configuration
+                        </button>
                     </div>
                 </div>
             </div>

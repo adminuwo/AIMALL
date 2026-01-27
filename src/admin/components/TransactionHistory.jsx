@@ -76,7 +76,7 @@ const TransactionHistory = () => {
             </div>
 
             <div className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[32px] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left">
                         <thead className="bg-white/30 border-b border-white/60">
                             <tr>

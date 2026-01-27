@@ -146,39 +146,43 @@ const Approvals = () => {
         <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
+            style={{
+                WebkitFontSmoothing: 'antialiased',
+                textRendering: 'optimizeLegibility',
+                backfaceVisibility: 'hidden'
+            }}
             className="space-y-6 pb-24"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">Approvals & Consistency</h2>
-                    <p className="text-gray-500 font-medium text-xs">Review and manage app submissions, vendor requests, and verified partners</p>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tighter mb-1 text-sharp">Approvals & Consistency</h2>
+                    <p className="text-gray-500 font-medium text-xs text-sharp">Review and manage app submissions, vendor requests, and verified partners</p>
                 </div>
 
-                <div className="flex bg-white/40 backdrop-blur-md p-1.5 rounded-[24px] border border-white/60 shadow-sm self-start overflow-x-auto">
+                <div className="grid grid-cols-2 lg:flex bg-white/40 backdrop-blur-md p-1.5 rounded-[24px] lg:rounded-[24px] rounded-[24px] border border-white/60 shadow-sm self-stretch lg:self-start gap-1">
                     <button
                         onClick={() => setActiveSubTab('apps')}
-                        className={`px-6 py-2 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'apps' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
+                        className={`px-3 lg:px-6 py-2.5 rounded-[18px] text-[9px] lg:text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'apps' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                     >
                         App Reviews ({pendingAgents?.length || 0})
                     </button>
                     <button
                         onClick={() => setActiveSubTab('vendors')}
-                        className={`px-6 py-2 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'vendors' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
+                        className={`px-3 lg:px-6 py-2.5 rounded-[18px] text-[9px] lg:text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'vendors' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                     >
                         Vendor Requests ({pendingVendors?.length || 0})
                     </button>
                     <button
                         onClick={() => setActiveSubTab('deletions')}
-                        className={`px-6 py-2 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'deletions' ? 'bg-red-600 text-white shadow-lg shadow-red-500/20' : 'text-red-500 hover:bg-red-50'}`}
+                        className={`px-3 lg:px-6 py-2.5 rounded-[18px] text-[9px] lg:text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'deletions' ? 'bg-red-600 text-white shadow-lg shadow-red-500/20' : 'text-red-500 hover:bg-red-50'}`}
                     >
                         Deletions ({pendingDeletions.length})
                     </button>
                     <button
                         onClick={() => setActiveSubTab('registered')}
-                        className={`px-6 py-2 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeSubTab === 'registered' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
+                        className={`px-3 lg:px-6 py-2.5 rounded-[18px] text-[9px] lg:text-[10px] font-black uppercase tracking-widest transition-all ${activeSubTab === 'registered' ? 'bg-gray-900 text-white shadow-lg' : 'text-gray-400 hover:text-gray-900'}`}
                     >
-                        Registered Vendors ({approvedVendors.length})
-
+                        Registered ({approvedVendors.length})
                     </button>
                 </div>
             </div>
@@ -288,7 +292,7 @@ const Approvals = () => {
                             </div>
 
                             <div className="mt-4 pt-4 border-t border-white/40">
-                                <p className="text-xs text-slate-500 font-medium leading-relaxed italic opacity-80 line-clamp-2">
+                                <p className="text-xs text-slate-500 font-medium leading-relaxed italic opacity-80 line-clamp-2 text-sharp">
                                     "{item.description || item.bio || 'No description provided.'}"
                                 </p>
                             </div>

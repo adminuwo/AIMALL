@@ -106,6 +106,16 @@ body {
 
 .glass-card {
     animation: glass-card-float 6s ease-in-out infinite;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    transform: translateZ(0);
+}
+
+.text-sharp {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .orb-1 {

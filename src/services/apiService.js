@@ -857,6 +857,18 @@ export const apiService = {
     }
   },
 
+  async clearConversationHistory(userId, vendorId, agentId = null) {
+    try {
+      const response = await apiClient.delete(`/messages/clear-history`, {
+        params: { userId, vendorId, agentId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to clear conversation history:", error);
+      return { success: false, message: "Failed to clear history" };
+    }
+  },
+
   async deleteMessage(messageId) {
     try {
       const response = await apiClient.delete(`/messages/${messageId}`);

@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from 'lucide-react';
+import { apiService } from '../../services/apiService';
 
 const HelpCenterModal = ({ isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState('KNOWLEDGE');
     const [expandedFaq, setExpandedFaq] = useState(null);
     const [supportCategory, setSupportCategory] = useState('General Inquiry');
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
     // Prevent body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
+            setSubmitted(false);
+            setMessage('');
         } else {
             document.body.style.overflow = 'unset';
         }
@@ -17,6 +23,28 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
             document.body.style.overflow = 'unset';
         };
     }, [isOpen]);
+
+    const handleTicketSubmit = async () => {
+        if (!message.trim()) return;
+        setLoading(true);
+        try {
+            await apiService.submitReport({
+                type: supportCategory,
+                description: message,
+                priority: 'medium'
+            });
+            setSubmitted(true);
+            setMessage('');
+            setTimeout(() => {
+                onClose();
+            }, 2000);
+        } catch (err) {
+            console.error("Support submission error:", err);
+            alert("Failed to submit support ticket. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -139,42 +167,67 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
 
                     {activeTab === 'SUPPORT' && (
                         <div className="space-y-4 md:space-y-6 animate-in slide-in-from-right-4 duration-300">
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Issue Category</label>
-                                    <div className="relative">
-                                        <select
-                                            value={supportCategory}
-                                            onChange={(e) => setSupportCategory(e.target.value)}
-                                            className="w-full p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/40 border border-white/40 text-sm md:text-base text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
-                                        >
-                                            <option>General Inquiry</option>
-                                            <option>Payment Issue</option>
-                                            <option>Refund Request</option>
-                                            <option>Technical Support</option>
-                                            <option>Account Access</option>
-                                            <option>Other</option>
-                                        </select>
-                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+                            {submitted ? (
+                                <div className="h-64 flex flex-col items-center justify-center text-center space-y-4">
+                                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center animate-bounce">
+                                        <CheckCircle2 size={32} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900">Ticket Initialized!</h3>
+                                        <p className="text-sm text-gray-500">Our support team has been notified.</p>
                                     </div>
                                 </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Issue Category</label>
+                                        <div className="relative">
+                                            <select
+                                                value={supportCategory}
+                                                onChange={(e) => setSupportCategory(e.target.value)}
+                                                className="w-full p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/40 border border-white/40 text-sm md:text-base text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
+                                            >
+                                                <option>General Inquiry</option>
+                                                <option>Payment Issue</option>
+                                                <option>Refund Request</option>
+                                                <option>Technical Support</option>
+                                                <option>Account Access</option>
+                                                <option>Other</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+                                        </div>
+                                    </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Case Details</label>
-                                    <textarea
-                                        placeholder="Specify your request..."
-                                        className="w-full p-3 md:p-4 h-32 md:h-40 rounded-xl md:rounded-2xl bg-white/40 border border-white/40 text-sm md:text-base text-gray-800 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
-                                    ></textarea>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Case Details</label>
+                                        <textarea
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
+                                            placeholder="Specify your request..."
+                                            className="w-full p-3 md:p-4 h-32 md:h-40 rounded-xl md:rounded-2xl bg-white/40 border border-white/40 text-sm md:text-base text-gray-800 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                    <button
+                                        onClick={handleTicketSubmit}
+                                        disabled={loading || !message.trim()}
+                                        className="w-full py-3 md:py-4 bg-white/50 hover:bg-white/70 border border-white/50 rounded-xl md:rounded-2xl text-gray-800 font-bold shadow-sm hover:shadow transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="animate-spin" size={18} />
+                                                SUBMITTING...
+                                            </>
+                                        ) : (
+                                            'Initialize Ticket'
+                                        )}
+                                    </button>
+
+                                    <div className="text-center pt-2 md:pt-4">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest"> Direct Channel: <a href="mailto:admin@uwo24.com" className="text-blue-500 hover:text-blue-600 block md:inline mt-1 md:mt-0">admin@uwo24.com</a></p>
+                                    </div>
                                 </div>
-
-                                <button className="w-full py-3 md:py-4 bg-white/50 hover:bg-white/70 border border-white/50 rounded-xl md:rounded-2xl text-gray-800 font-bold shadow-sm hover:shadow transition-all active:scale-[0.98]">
-                                    Initialize Ticket
-                                </button>
-
-                                <div className="text-center pt-2 md:pt-4">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest"> Direct Channel: <a href="mailto:aditilakhera0@gmail.com" className="text-blue-500 hover:text-blue-600 block md:inline mt-1 md:mt-0">aditilakhera0@gmail.com</a></p>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     )}
 

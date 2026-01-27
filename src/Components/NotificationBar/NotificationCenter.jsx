@@ -77,16 +77,16 @@ const NotificationCenter = ({ isOpen, onClose }) => {
                                     layout
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className={`p-5 rounded-2xl border transition-all ${notif.isRead ? 'bg-white border-slate-100 opacity-70' : 'bg-blue-50/30 border-blue-100 shadow-sm'
+                                    className={`p-2 sm:p-5 rounded-2xl border transition-all ${notif.isRead ? 'bg-white border-slate-100 opacity-70' : 'bg-blue-50/30 border-blue-100 shadow-sm'
                                         }`}
                                     onClick={() => !notif.isRead && handleMarkAsRead(notif._id)}
                                 >
-                                    <div className="flex gap-4">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-green-100 text-green-600' :
-                                                notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                                    <div className="flex gap-2 sm:gap-4">
+                                        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${notif.type === 'success' ? 'bg-green-100 text-green-600' :
+                                            notif.type === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
                                             }`}>
-                                            {notif.type === 'success' ? <CheckCircle className="w-5 h-5" /> :
-                                                notif.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <Info className="w-5 h-5" />}
+                                            {notif.type === 'success' ? <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" /> :
+                                                notif.type === 'error' ? <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" /> : <Info className="w-4 h-4 sm:w-5 sm:h-5" />}
                                         </div>
                                         <div className="flex-1">
                                             <p className={`text-sm leading-relaxed ${notif.isRead ? 'text-[#64748B]' : 'text-[#1E293B] font-medium'}`}>

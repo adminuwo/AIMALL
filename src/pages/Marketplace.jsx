@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import ContactVendorModal from '../Components/ContactVendorModal';
 import { themeState } from '../userStore/userData';
+import ParallaxAgentCard from '../Components/ParallaxAgentCard';
+import { useLanguage } from '../context/LanguageContext';
 
 const Marketplace = () => {
     // --- MOCK DATA FOR PREVIEW (Ensures grid is never empty) ---
@@ -67,6 +69,7 @@ const Marketplace = () => {
     const navigate = useNavigate();
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
+    const { t } = useLanguage();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -226,10 +229,10 @@ const Marketplace = () => {
     };
 
     return (
-        <div className={`flex-1 overflow-y-auto w-full h-full ${isDark ? 'text-white' : 'text-slate-800'} relative no-scrollbar ${isDark ? 'bg-[#020617]' : 'bg-[#FAFAFA]'} transition-colors duration-700`}>
+        <div className={`flex-1 overflow-y-auto w-full h-full transition-colors duration-700 ${isDark ? 'bg-[#0B0F1A]' : 'bg-[#FAFAFA]'} relative no-scrollbar`}>
             {/* --- GLOBAL BACKGROUND: Soft Pastel Gradients --- */}
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-all duration-700">
-                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-br from-slate-950 via-[#020617] to-slate-900' : 'bg-gradient-to-br from-indigo-50/50 via-white to-fuchsia-50/30'} transition-all duration-700`}></div>
+                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-br from-[#0B0F1A] via-[#12182B] to-[#0B0F1A]' : 'bg-gradient-to-br from-indigo-50/50 via-white to-fuchsia-50/30'} transition-all duration-700`}></div>
                 {/* Floating Orbs */}
                 <div className={`absolute top-[-10%] left-[-10%] w-[80vmax] h-[80vmax] ${isDark ? 'bg-purple-900/10' : 'bg-purple-200/20'} rounded-full blur-[100px] animate-pulse transition-colors duration-700`} />
                 <div className={`absolute bottom-[-10%] right-[-10%] w-[60vmax] h-[60vmax] ${isDark ? 'bg-blue-900/10' : 'bg-blue-200/20'} rounded-full blur-[120px] transition-colors duration-700`} />
@@ -261,44 +264,68 @@ const Marketplace = () => {
                     {showAgentInfo && selectedAgent && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-md">
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                initial={{ opacity: 0, scale: 0.95, y: 30 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                className={`${isDark ? 'bg-slate-900/95 border-white/10 text-white' : 'bg-white/90 border-white text-gray-900'} backdrop-blur-3xl rounded-[32px] md:rounded-[48px] p-6 md:p-10 w-full max-w-3xl shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)] relative max-h-[90vh] overflow-y-auto no-scrollbar border mx-4`}
+                                exit={{ opacity: 0, scale: 0.95, y: 30 }}
+                                className={`${isDark ? 'bg-slate-900 border-white/10' : 'bg-gray-100'} rounded-[32px] overflow-hidden w-full max-w-xl shadow-2xl relative flex flex-col`}
                             >
-                                <button onClick={() => setShowAgentInfo(false)} className={`absolute top-6 right-6 p-3 rounded-full ${isDark ? 'bg-slate-800/80 hover:bg-slate-700 text-white border-white/10' : 'bg-white/50 hover:bg-white text-gray-800 border-white'} transition-all shadow-sm`}><X className="w-5 h-5" /></button>
-
-                                <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-10">
-                                    <div className={`w-32 h-32 rounded-[24px] ${isDark ? 'bg-slate-800 border-white/10' : 'bg-white border-white/60'} p-1.5 shadow-xl overflow-hidden flex-shrink-0 border`}>
-                                        <img src={selectedAgent.avatar} alt={selectedAgent.agentName} className="w-full h-full object-cover rounded-[18px]" />
-                                    </div>
-                                    <div className="text-center md:text-left space-y-3 pt-2">
-                                        <h2 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-none`}>{selectedAgent.agentName}</h2>
-                                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                            <span className={`${isDark ? 'bg-purple-900/30 text-purple-300 border-purple-800/30' : 'bg-purple-100/50 text-purple-700 border-purple-100'} px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border`}>Category: {selectedAgent.category}</span>
-                                            <div className={`flex items-center gap-1.5 ${isDark ? 'bg-amber-900/30 border-amber-800/30' : 'bg-yellow-50 border-yellow-100'} px-3 py-1.5 rounded-full border`}>
-                                                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                                                <span className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-gray-800'}`}>4.9/5.0</span>
+                                {/* Modal Header/Top Part */}
+                                <div className={`${isDark ? 'bg-slate-900' : 'bg-[#e2e8f0]'} p-6 md:p-8 pb-6`}>
+                                    <button
+                                        onClick={() => setShowAgentInfo(false)}
+                                        className={`absolute top-6 right-6 p-2 rounded-full ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'} transition-all`}
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                    <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                                        {/* Agent Logo Container */}
+                                        <div className={`w-24 h-24 rounded-[24px] bg-white p-3 shadow-xl flex items-center justify-center shrink-0`}>
+                                            <img
+                                                src={selectedAgent.avatar}
+                                                alt={selectedAgent.agentName}
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center md:items-start space-y-2 pt-1">
+                                            <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight`}>
+                                                {selectedAgent.agentName}
+                                            </h2>
+                                            <div className="bg-[#ba79ff]/20 text-[#9333ea] px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
+                                                {selectedAgent.category}
                                             </div>
+                                            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-600'} font-semibold leading-relaxed text-center md:text-left`}>
+                                                {selectedAgent.description}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div className="space-y-8">
-                                    <div className={`p-8 ${isDark ? 'bg-slate-800/60 border-white/5' : 'bg-white/60 border-white/80'} rounded-[32px] border shadow-sm relative overflow-hidden transition-colors`}>
-                                        <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-3 uppercase tracking-tight`}><Sparkles className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />Capabilities</h3>
-                                        <p className={`${isDark ? 'text-slate-300' : 'text-gray-600'} font-medium text-base leading-relaxed`}>{selectedAgent.description}</p>
+                                {/* More in Category Section */}
+                                <div className={`p-6 md:p-8 pt-8 flex-1 ${isDark ? 'bg-slate-950' : 'bg-white'}`}>
+                                    <h3 className={`text-[10px] font-black ${isDark ? 'text-white' : 'text-black'} uppercase tracking-[0.1em] mb-4`}>
+                                        MORE IN {selectedAgent.category}
+                                    </h3>
+                                    <div className={`flex items-center justify-center h-20 ${isDark ? 'text-slate-600' : 'text-gray-400'} italic font-bold text-[13px]`}>
+                                        No other apps in this category yet.
                                     </div>
-
-                                    <div className="p-8 bg-gray-900 rounded-[40px] text-white shadow-xl relative overflow-hidden border border-gray-800">
-                                        <h3 className="text-2xl font-black mb-2 flex items-center gap-3 tracking-tighter">Support Uplink</h3>
-                                        <p className="text-gray-400 text-sm mb-6">Direct channel to vendor engineering.</p>
-                                        <div className="space-y-4">
-                                            <input type="text" placeholder="Subject" value={helpForm.subject} onChange={(e) => setHelpForm({ ...helpForm, subject: e.target.value })} className="w-full bg-white/10 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-500 focus:outline-none focus:bg-white/20 transition-all text-sm font-bold" />
-                                            <textarea placeholder="Message..." value={helpForm.message} onChange={(e) => setHelpForm({ ...helpForm, message: e.target.value })} rows="3" className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:outline-none focus:bg-white/20 transition-all resize-none text-sm font-medium"></textarea>
-                                            <button onClick={sendHelpQuery} disabled={!helpForm.subject || !helpForm.message} className="w-full py-4 bg-white text-black rounded-[20px] text-xs font-black uppercase tracking-widest hover:bg-purple-400 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2">Send Inquiry <Send className="w-4 h-4 ml-1" /></button>
-                                        </div>
-                                    </div>
+                                </div>
+                                {/* Modal Footer */}
+                                <div className={`p-6 md:px-8 md:py-8 border-t ${isDark ? 'border-white/5 bg-slate-900' : 'border-gray-100 bg-white'} flex items-center justify-between gap-4`}>
+                                    <button
+                                        onClick={() => setShowAgentInfo(false)}
+                                        className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-black'} transition-all`}
+                                    >
+                                        CANCEL
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            toggleBuy(selectedAgent._id);
+                                            setShowAgentInfo(false);
+                                        }}
+                                        className="flex-1 max-w-[280px] bg-[#9333ea] text-white py-3 px-8 rounded-[20px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-purple-500/20 hover:bg-purple-700 transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        <Zap size={14} fill="white" />
+                                        SUBSCRIBE NOW
+                                    </button>
                                 </div>
                             </motion.div>
                         </div>
@@ -311,133 +338,126 @@ const Marketplace = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    whileHover={{ y: -5 }} // Subtle interactive float
-                    className={`relative w-full min-h-[250px] md:min-h-[380px] mb-16 rounded-[48px] overflow-hidden ${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/30 backdrop-blur-3xl border-white/60 shadow-[0_20px_60px_-15px_rgba(100,50,255,0.1)]'} border group transition-all duration-700`}
+                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                    className={`relative w-full min-h-[250px] md:min-h-[360px] mb-12 rounded-[60px] overflow-hidden ${isDark ? 'bg-[#0B0F1A] border-white/5 shadow-2xl' : 'bg-white shadow-[0_20px_50px_-10px_rgba(100,50,255,0.1)]'} border transition-all duration-700 flex items-center group`}
                 >
-                    {/* Background Gradients & Flow */}
-                    <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-br from-slate-900/80 via-purple-900/5 to-slate-900/80' : 'bg-gradient-to-br from-white/80 via-purple-50/20 to-blue-50/10'} pointer-events-none transition-all duration-700`} />
+                    {/* Subtle Gradient Glowing Mixture (Blue, Purple, Pink) */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        <motion.div
+                            animate={{
+                                opacity: [0.03, 0.08, 0.03],
+                                scale: [1, 1.2, 1],
+                                x: [-20, 20, -20]
+                            }}
+                            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[120px]"
+                        />
+                        <motion.div
+                            animate={{
+                                opacity: [0.04, 0.1, 0.04],
+                                scale: [1.2, 1, 1.2],
+                                x: [30, -30, 30]
+                            }}
+                            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute bottom-[-20%] left-[10%] w-[600px] h-[600px] bg-[#9333EA]/10 rounded-full blur-[140px]"
+                        />
+                        <motion.div
+                            animate={{
+                                opacity: [0.03, 0.07, 0.03],
+                                scale: [1, 1.3, 1],
+                                y: [-20, 20, -20]
+                            }}
+                            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-pink-400/20 rounded-full blur-[110px]"
+                        />
+                    </div>
+                    {/* Background Video Container - Extreme Right Alignment with Seamless Fade */}
+                    <div className="absolute top-0 right-0 h-full w-full md:w-[65%] pointer-events-none overflow-hidden select-none">
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
+                            style={{ objectPosition: '100% center' }}
+                        >
+                            <source src="/video/robotgirl.mp4" type="video/mp4" />
+                        </video>
+                        {/* Gradient Mask for seamless white integration */}
+                        {/* Gradient Mask for seamless integration */}
+                        <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-r from-[#0B0F1A] via-[#0B0F1A]/20 to-transparent' : 'bg-gradient-to-r from-white via-white/20 to-transparent'}`} />
+                    </div>
 
-                    {/* Animated Blobs */}
-                    <motion.div
-                        animate={{ opacity: [0.4, 0.7, 0.4], scale: [1, 1.15, 1], x: [0, 20, 0], y: [0, -20, 0] }}
-                        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -top-[20%] -left-[10%] w-[550px] h-[550px] bg-purple-300/25 rounded-full blur-[130px] mix-blend-multiply"
-                    />
-                    <motion.div
-                        animate={{ opacity: [0.3, 0.6, 0.3], scale: [1.1, 1, 1.1], x: [0, -30, 0] }}
-                        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -bottom-[20%] -right-[10%] w-[650px] h-[650px] bg-blue-300/20 rounded-full blur-[130px] mix-blend-multiply"
-                    />
+                    <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 md:px-20 py-8 w-full md:w-1/2">
+                        {/* High Fidelity Typography per Reference */}
+                        <div className="space-y-4 md:space-y-6">
+                            <h1 className={`text-4xl md:text-[80px] font-black tracking-[-0.05em] leading-[0.85] ${isDark ? 'text-white' : 'text-black'} transition-all`}>
+                                <motion.span
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="relative z-10 block"
+                                >
+                                    {t('marketplaceHeading').split(' ').slice(0, 2).join(' ')}
+                                </motion.span>
+                                <motion.span
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    className={`relative z-10 block text-transparent bg-clip-text ${isDark ? 'bg-gradient-to-b from-white via-white/80 to-white/60' : 'bg-gradient-to-b from-gray-900 via-purple-900 to-gray-800'} drop-shadow-[0_0_40px_rgba(139,92,246,0.3)]`}
+                                >
+                                    {t('marketplaceHeading').split(' ').slice(2).join(' ')}
+                                </motion.span>
 
-                    <div className="relative z-10 flex flex-col md:flex-row h-full items-center px-6 md:px-20 py-6 md:py-12 gap-8 md:gap-10">
-                        {/* Left Content */}
-                        <div className="flex-1 space-y-6">
-                            <h1 className={`text-3xl md:text-6xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-[0.95] md:leading-[0.9] drop-shadow-sm transition-colors`}>
-                                <span className="block">AI-MALL</span>
-                                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 saturate-[1.2]">MARKETPLACE</span>
+
                             </h1>
 
-                            <p className={`text-base md:text-lg ${isDark ? 'text-slate-400' : 'text-gray-600'} font-medium max-w-lg leading-relaxed transition-colors`}>
-                                Deploy enterprise-grade autonomous agents directly into your workflow. The future of decentralized intelligence is here.
-                            </p>
-
-                            {/* <div className="flex items-center gap-4 pt-4">
-                                <a
-                                    href="/dashboard/series"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-10 py-4 bg-gray-900 text-white rounded-full font-bold text-xs tracking-widest uppercase hover:bg-black transition-all shadow-[0_10px_30px_-10px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_-10px_rgba(124,58,237,0.4)] hover:scale-105 active:scale-95 flex items-center gap-2 group/btn border border-gray-800"
-                                >
-                                    Explore A-Series <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform text-purple-300" />
-                                </a>
-                            </div> */}
-                        </div>
-
-                        {/* Right Content - Trending Vitals Card (Micro-animations) */}
-                        <div className="hidden md:block w-[320px] relative h-[260px]">
                             <motion.div
-                                animate={{ y: [0, -12, 0] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                className={`absolute right-0 top-0 w-full ${isDark ? 'bg-slate-800/80 border-white/10' : 'bg-white/70 border-white/60'} backdrop-blur-xl border p-6 rounded-[36px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.3)] transition-all duration-700`}
+                                initial={{ opacity: 0, letterSpacing: "0.1em" }}
+                                animate={{ opacity: 1, letterSpacing: "0.5em" }}
+                                transition={{ delay: 0.8, duration: 1.5 }}
+                                className="flex justify-start pt-4"
                             >
-                                <div className="flex items-center justify-between mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <motion.div
-                                            animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
-                                            transition={{ duration: 4, repeat: Infinity }}
-                                            className={`p-2.5 ${isDark ? 'bg-purple-900/40 border-purple-800/40 text-purple-300' : 'bg-gradient-to-br from-purple-50 to-pink-50 text-purple-600 border-purple-100'} rounded-2xl border transition-colors`}
-                                        >
-                                            <Activity className="w-5 h-5" />
-                                        </motion.div>
-                                        <div>
-                                            <h3 className={`text-xs font-black ${isDark ? 'text-white' : 'text-gray-900'} uppercase tracking-wider transition-colors`}>Top Trending</h3>
-                                            <p className={`text-[10px] ${isDark ? 'text-slate-500' : 'text-gray-500'} font-bold transition-colors`}>Real-time usage</p>
-                                        </div>
-                                    </div>
-                                    {/* Pulse Dot */}
-                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-75 absolute right-8" />
-                                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 relative" />
-                                </div>
-
-                                <div className="space-y-3">
-                                    {topUsedAgents.map((agent, index) => (
-                                        <div key={agent._id} className={`flex items-center gap-3 p-2 rounded-2xl ${isDark ? 'hover:bg-slate-700/50' : 'hover:bg-white/60'} transition-colors cursor-default border border-transparent ${isDark ? 'hover:border-white/5' : 'hover:border-white/50'}`}>
-                                            <img src={agent.avatar} className={`w-8 h-8 rounded-lg object-cover shadow-sm ${isDark ? 'bg-slate-900' : 'bg-gray-50'}`} />
-                                            <div className="flex-1">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <h4 className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-gray-800'} leading-none transition-colors`}>{agent.agentName}</h4>
-                                                    <span className={`text-[8px] font-black ${isDark ? 'text-slate-500' : 'text-gray-400'} transition-colors`}>{92 - index * 3}%</span>
-                                                </div>
-                                                <div className={`w-full h-1 ${isDark ? 'bg-slate-900' : 'bg-gray-100'} rounded-full overflow-hidden transition-colors`}>
-                                                    <motion.div
-                                                        initial={{ width: 0 }}
-                                                        whileInView={{ width: `${92 - index * 5}%` }}
-                                                        viewport={{ once: true }}
-                                                        transition={{ duration: 1.2, delay: 0.1 * index, ease: "easeOut" }}
-                                                        className={`h-full rounded-full ${index === 0 ? 'bg-gradient-to-r from-purple-500 to-indigo-500' :
-                                                            index === 1 ? 'bg-gradient-to-r from-pink-500 to-rose-500' :
-                                                                'bg-gradient-to-r from-blue-400 to-cyan-400'}`}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                <p className={`text-xs md:text-xl font-black uppercase tracking-[0.5em] ${isDark ? 'text-white' : 'text-black'} transition-all`}>
+                                    {t('marketplaceSubheading')}
+                                </p>
                             </motion.div>
                         </div>
                     </div>
                 </motion.div>
 
                 {/* --- NAVIGATION SECTION --- */}
-                <div className={`flex flex-col xl:flex-row items-center justify-between gap-6 mb-12 sticky top-4 z-40 ${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.4)]' : 'bg-white/25 backdrop-blur-xl border-white/50 shadow-[0_10px_30px_-5px_rgba(0,0,0,0.03)]'} backdrop-blur-xl p-3 pr-4 pl-6 rounded-[30px] border transition-all duration-700 selection:bg-purple-200`}>
-                    <div className="flex flex-col lg:flex-row items-center gap-6 w-full xl:w-auto">
-                        <h2 className={`text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-gray-900'} whitespace-nowrap transition-colors`}>
-                            AI Agents
+                <div className={`flex flex-col gap-6 mb-12 p-6 md:p-10 rounded-[60px] border transition-all duration-700 ${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10 shadow-[0_40px_100px_rgba(0,0,0,0.3)]' : 'bg-white border-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.04)]'}`}>
+
+                    {/* Top Row: Title & Search */}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <h2 className={`text-2xl md:text-4xl font-black uppercase tracking-tight ${isDark ? 'text-white' : 'text-black'} whitespace-nowrap transition-colors`}>
+                            {t('aiAgents')}
                         </h2>
 
-                        <div className="relative group w-full lg:w-[420px]">
-                            <div className={`relative ${isDark ? 'bg-slate-800/60 border-white/10' : 'bg-white/40 border-white/50'} backdrop-blur-md border rounded-full overflow-hidden flex items-center transition-all focus-within:ring-2 focus-within:ring-purple-200 focus-within:bg-white/80 h-12 shadow-inner`}>
-                                <Search className={`ml-5 w-4 h-4 ${isDark ? 'text-slate-500' : 'text-gray-400'} group-focus-within:text-purple-600 transition-colors`} />
+                        <div className="relative group w-full md:w-[480px]">
+                            <div className={`relative ${isDark ? 'bg-[#0B0F1A] border-[#8B5CF6]/10' : 'bg-gray-50 border-gray-100'} border rounded-full overflow-hidden flex items-center transition-all focus-within:ring-4 focus-within:ring-[#8B5CF6]/20 shadow-sm h-14`}>
+                                <Search className={`ml-6 w-5 h-5 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-focus-within:text-[#8B5CF6] transition-colors`} />
                                 <input
                                     type="text"
-                                    placeholder="Search intelligence..."
+                                    placeholder={t('searchPlaceholder')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className={`w-full px-4 bg-transparent border-none outline-none font-semibold text-sm ${isDark ? 'text-white placeholder-slate-600' : 'text-gray-900 placeholder-gray-400'} h-full transition-colors`}
+                                    className={`w-full px-4 bg-transparent border-none outline-none font-bold text-xs md:text-sm uppercase tracking-wider ${isDark ? 'text-white placeholder-[#6F76A8]' : 'text-gray-900 placeholder-gray-400'} h-full transition-colors`}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex overflow-x-auto md:flex-wrap justify-start md:justify-center xl:justify-end gap-3 flex-1 w-full md:w-auto no-scrollbar pb-2 md:pb-0 px-2">
-                        {categories.map((cat, i) => (
+                    {/* Bottom Row: Filter Chips */}
+                    <div className="flex overflow-x-auto justify-center gap-3 no-scrollbar pb-2">
+                        {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setFilter(cat)}
-                                className={`px-5 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border whitespace-nowrap flex-shrink-0 ${filter === cat
-                                    ? 'bg-purple-600 text-white border-transparent shadow-lg shadow-purple-200/50 scale-105'
-                                    : `${isDark ? 'bg-slate-800 text-slate-400 border-white/10 hover:bg-slate-700 hover:text-white' : 'bg-white/40 text-gray-500 border-white/30 hover:bg-white hover:text-purple-600 hover:shadow-md'}`
+                                className={`px-4 py-1.5 rounded-xl text-[9px] md:text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap flex-shrink-0 ${filter === cat
+                                    ? 'bg-[#8B5CF6] text-white border-transparent shadow-lg shadow-[#8B5CF6]/20 scale-105'
+                                    : `${isDark ? 'bg-[#0B0F1A] text-white border-white/5 hover:bg-[#161D35] hover:text-[#8B5CF6]' : 'bg-gray-50/50 text-gray-500 border-gray-100 hover:bg-white hover:text-[#9333EA] hover:shadow-md hover:border-purple-100'}`
                                     }`}
                             >
                                 {cat}
@@ -451,60 +471,17 @@ const Marketplace = () => {
                     variants={containerVariants}
                     initial="visible"
                     animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-32"
+                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-32"
                 >
                     <AnimatePresence mode="popLayout">
-                        {filteredAgents.map((agent, index) => (
-                            <motion.div
+                        {filteredAgents.map((agent) => (
+                            <ParallaxAgentCard
                                 key={agent._id}
-                                layout
-                                variants={cardVariants}
-                                animate="visible"
-                                whileHover="floating"
-                                whileInView="floating"
-                                viewport={{ once: false, amount: 0.3 }}
-                                className={`group relative ${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_10px_30px_rgb(0,0,0,0.3)]' : 'bg-white/40 backdrop-blur-2xl border-white/50 shadow-[0_10px_30px_rgb(0,0,0,0.02)]'} rounded-[32px] md:rounded-[40px] p-4 md:p-6 border h-full overflow-hidden transition-all duration-300`}
-                            >
-                                {/* Gentle Lavender Tint on Hover */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-blue-50/0 opacity-0 group-hover:opacity-100 group-hover:from-purple-50/20 group-hover:to-blue-50/20 transition-all duration-500 pointer-events-none" />
-
-                                <div className="relative z-10 flex justify-between items-start mb-6">
-                                    <div className={`w-14 h-14 rounded-[18px] ${isDark ? 'bg-slate-800' : 'bg-white/90'} shadow-sm p-1 flex items-center justify-center border ${isDark ? 'border-white/10' : 'border-white/80'} group-hover:shadow-md transition-all`}>
-                                        <img src={agent.avatar} className="w-full h-full object-cover rounded-[18px]" />
-                                    </div>
-                                    <div className={`px-2.5 py-1 rounded-full ${isDark ? 'bg-slate-800/60 text-slate-400 border-white/5' : 'bg-white/60 text-gray-500 border-white/50'} border text-[8px] font-black uppercase tracking-widest backdrop-blur-sm transition-colors`}>
-                                        {agent.category}
-                                    </div>
-                                </div>
-
-                                <div className="flex-1 relative z-10 space-y-3 mb-8">
-                                    <h3 className={`text-lg md:text-xl font-black ${isDark ? 'text-white group-hover:text-purple-400' : 'text-gray-900 group-hover:text-purple-900'} tracking-tight leading-none transition-colors`}>
-                                        {agent.agentName}
-                                    </h3>
-                                    <p className={`text-[12px] ${isDark ? 'text-slate-400 group-hover:text-slate-300' : 'text-gray-500 group-hover:text-gray-600'} font-medium leading-relaxed line-clamp-3 transition-colors`}>
-                                        {agent.description}
-                                    </p>
-                                </div>
-
-                                <div className={`relative z-10 flex items-center gap-3 pt-6 border-t ${isDark ? 'border-white/5' : 'border-purple-50/50'} mt-auto transition-colors`}>
-                                    <button
-                                        onClick={() => toggleBuy(agent._id)}
-                                        disabled={userAgent.some((ag) => ag && agent._id == ag._id)}
-                                        className={`flex-1 py-3 px-4 rounded-full font-bold text-[9px] uppercase tracking-widest transition-all shadow-sm active:scale-95 flex items-center justify-center gap-2 ${userAgent.some((ag) => ag && agent._id == ag._id)
-                                            ? `${isDark ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/30' : 'bg-emerald-50 text-emerald-700 border-emerald-100'} cursor-default opacity-90`
-                                            : 'bg-purple-600 text-white hover:bg-purple-700 border border-transparent hover:shadow-[0_10px_20px_-5px_rgba(124,58,237,0.3)]'
-                                            }`}
-                                    >
-                                        {userAgent.some((ag) => ag && agent._id == ag._id) ? <><ShieldCheck className="w-3 h-3" /> Deployed</> : 'Install'}
-                                    </button>
-                                    <button
-                                        onClick={() => openAgentInfo(agent)}
-                                        className={`p-3 rounded-full ${isDark ? 'bg-slate-800 border-white/10 text-slate-400 hover:text-purple-400 hover:bg-slate-700' : 'bg-white border-gray-200 text-gray-400 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50'} transition-all shadow-sm hover:shadow-md`}
-                                    >
-                                        <Info className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-                            </motion.div>
+                                agent={agent}
+                                isDark={isDark}
+                                onOpenInfo={openAgentInfo}
+                                toggleBuy={toggleBuy}
+                            />
                         ))}
                     </AnimatePresence>
                 </motion.div>

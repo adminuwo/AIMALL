@@ -3,8 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Send, Check, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { apiService } from '../services/apiService';
+import { useRecoilValue } from 'recoil';
+import { themeState } from '../userStore/userData';
 
 const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
+    const theme = useRecoilValue(themeState);
+    const isDark = theme === 'Dark';
     const [formData, setFormData] = useState({
         userName: user?.name || '',
         userEmail: user?.email || '',
@@ -35,7 +39,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
         if (!silent) setLoadingMessages(true);
         try {
             // Check if user is admin by role OR email
-            const isAdmin = user?.role === 'admin' || user?.email === 'aditilakhera0@gmail.com' || user?.email === 'admin@aimall.com';
+            const isAdmin = user?.role === 'admin' || user?.email === 'admin@uwo24.com' || user?.email === 'admin@aimall.com';
 
             if (isAdmin) {
                 // Admin Mode: Fetch Reports
@@ -178,7 +182,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
 
         try {
             // Check if user is admin by role OR email
-            const isAdmin = user?.role === 'admin' || user?.email === 'aditilakhera0@gmail.com' || user?.email === 'admin@aimall.com';
+            const isAdmin = user?.role === 'admin' || user?.email === 'admin@uwo24.com' || user?.email === 'admin@aimall.com';
 
             if (activeReportId && isAdmin) {
                 // CASE 1: Sending to an existing Support Ticket (Vendor Support System)
@@ -269,7 +273,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-md"
+                    className={`absolute inset-0 ${isDark ? 'bg-[#0B0F1A]/80' : 'bg-black/40'} backdrop-blur-md`}
                 />
 
                 {/* Modal */}
@@ -278,27 +282,27 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     transition={{ type: 'spring', duration: 0.5 }}
-                    className="relative w-full max-w-2xl h-[600px] bg-white rounded-[32px] shadow-2xl border border-gray-100 overflow-hidden flex flex-col"
+                    className={`relative w-full max-w-2xl h-[600px] ${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10 shadow-[0_50px_100px_rgba(0,0,0,0.5)]' : 'bg-white border-gray-100'} rounded-[32px] shadow-2xl border overflow-hidden flex flex-col`}
                 >
                     {/* Chat Header */}
-                    <div className="px-8 py-5 border-b border-gray-50 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-10">
+                    <div className={`px-8 py-5 border-b ${isDark ? 'border-white/5 bg-[#161D35]/50' : 'border-gray-50 bg-white/50'} backdrop-blur-md sticky top-0 z-10`}>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-500 p-0.5 shadow-lg shadow-purple-500/20">
-                                <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center overflow-hidden">
+                            <div className={`w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#8B5CF6] to-indigo-500 p-0.5 shadow-lg shadow-[#8B5CF6]/20`}>
+                                <div className={`w-full h-full ${isDark ? 'bg-[#0B0F1A]' : 'bg-white'} rounded-[14px] flex items-center justify-center overflow-hidden`}>
                                     <img src={agent?.avatar} className="w-full h-full object-cover" alt={agent?.agentName} />
                                 </div>
                             </div>
                             <div>
-                                <h2 className="text-lg font-black text-gray-900 leading-none">{agent?.agentName || agent?.name}</h2>
+                                <h2 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'} leading-none`}>{agent?.agentName || agent?.name}</h2>
                                 {activeReportId ? (
                                     <div className="flex items-center gap-1.5 mt-1">
                                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                                        <p className="text-[10px] font-bold text-[#8b5cf6] uppercase tracking-widest">
+                                        <p className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-widest">
                                             Replying to Ticket: {formData.ticketType || 'Support'}
                                         </p>
                                     </div>
                                 ) : (
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Vendor Protocol Active</p>
+                                    <p className={`text-[10px] font-bold ${isDark ? 'text-[#AAB0D6]' : 'text-gray-400'} uppercase tracking-widest mt-1`}>Vendor Protocol Active</p>
                                 )}
                             </div>
                         </div>
@@ -320,7 +324,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                     </div>
 
                     {/* Chat Area */}
-                    <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-gray-50/30">
+                    <div className={`flex-1 overflow-y-auto p-8 space-y-6 ${isDark ? 'bg-[#0B0F1A]/50' : 'bg-gray-50/30'}`}>
                         {/* Ticket Description Context - For Admin only */}
                         {activeReportId && user?.role === 'admin' && formData.subject && (
                             <motion.div
@@ -339,16 +343,16 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                             animate={{ opacity: 1, y: 0 }}
                             className="flex flex-col items-start w-full"
                         >
-                            <div className="max-w-[85%] px-6 py-4 rounded-[26px] font-medium text-[14px] shadow-sm bg-white text-gray-600 rounded-bl-none border border-gray-100 relative overflow-hidden group">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-[#8b5cf6]" />
+                            <div className={`max-w-[85%] px-6 py-4 rounded-[26px] font-medium text-[14px] shadow-sm ${isDark ? 'bg-[#161D35] text-white border-white/5' : 'bg-white text-gray-600 border-gray-100'} rounded-bl-none border relative overflow-hidden group`}>
+                                <div className="absolute top-0 left-0 w-1 h-full bg-[#8B5CF6]" />
                                 <p className="leading-relaxed">
-                                    👋 Hello! Welcome to <span className="text-[#8b5cf6] font-bold">{agent?.agentName}</span> support channel.
+                                    👋 Hello! Welcome to <span className={`text-[#8B5CF6] font-bold`}>{agent?.agentName}</span> support channel.
                                 </p>
-                                <p className="mt-2 text-xs text-gray-500">
+                                <p className={`mt-2 text-xs ${isDark ? 'text-[#AAB0D6]' : 'text-gray-500'} opacity-70`}>
                                     Please feel free to ask your questions here. Our vendor team will review your message and respond shortly!
                                 </p>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-300 mt-1.5 ml-2 uppercase tracking-widest">Automated Greeting</span>
+                            <span className={`text-[10px] font-bold ${isDark ? 'text-[#AAB0D6]' : 'text-gray-300'} mt-1.5 ml-2 uppercase tracking-widest`}>Automated Greeting</span>
                         </motion.div>
 
                         {loadingMessages ? (
@@ -357,7 +361,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                             </div>
                         ) : (
                             messages.map((msg, index) => {
-                                const isMeEmail = user?.email === 'aditilakhera0@gmail.com' || user?.email === 'admin@aimall.com';
+                                const isMeEmail = user?.email === 'admin@uwo24.com' || user?.email === 'admin@aimall.com';
                                 const isAdminRole = user?.role === 'admin' || isMeEmail;
                                 const isVendorRole = user?.role === 'vendor';
 
@@ -388,12 +392,12 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                                         className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} w-full`}
                                     >
                                         <div className={`max-w-[80%] px-5 py-3 rounded-[22px] font-medium text-[14px] shadow-sm ${isMe
-                                            ? 'bg-[#8b5cf6] text-white rounded-br-mini shadow-purple-500/10'
-                                            : 'bg-white text-gray-700 rounded-bl-mini border border-gray-100'
+                                            ? 'bg-[#8B5CF6] text-white rounded-br-mini shadow-[#8B5CF6]/10'
+                                            : `${isDark ? 'bg-[#161D35] text-white border-white/5' : 'bg-white text-gray-700 border-gray-100'} rounded-bl-mini border shadow-sm`
                                             }`}>
                                             {msg.message}
                                         </div>
-                                        <div className={`flex items-center gap-1 mt-1 opacity-60 text-[10px] font-bold ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`flex items-center gap-1 mt-1 opacity-60 text-[10px] font-bold ${isMe ? 'justify-end' : 'justify-start'} ${isDark ? 'text-[#AAB0D6]' : 'text-gray-300'}`}>
                                             <span>{isMe ? 'You' : (msg.senderRole === 'vendor' ? 'Vendor' : 'Admin')}</span>
                                             •
                                             <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -412,7 +416,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                     </div>
 
                     {/* Chat Input Area */}
-                    <div className="p-6 bg-white border-t border-gray-50">
+                    <div className={`p-6 ${isDark ? 'bg-[#161D35] border-white/5' : 'bg-white border-gray-50'} border-t`}>
                         <form onSubmit={handleSubmit} className="relative group">
                             <textarea
                                 name="message"
@@ -420,7 +424,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                                 onChange={handleChange}
                                 required
                                 rows={1}
-                                className="w-full bg-gray-50 border border-gray-100 hover:border-gray-200 focus:border-purple-300 rounded-[28px] px-6 py-4 pr-16 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/5 transition-all resize-none shadow-inner"
+                                className={`w-full ${isDark ? 'bg-[#0B0F1A] border-white/10 text-white focus:border-[#8B5CF6]/40' : 'bg-gray-50 border-gray-100 text-gray-900 focus:border-purple-300'} rounded-[28px] px-6 py-4 pr-16 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8B5CF6]/5 transition-all resize-none shadow-inner`}
                                 placeholder="Type your message..."
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -432,7 +436,7 @@ const ContactVendorModal = ({ isOpen, onClose, agent, user }) => {
                             <button
                                 type="submit"
                                 disabled={loading || !formData.message.trim()}
-                                className="absolute right-2 top-2 w-10 h-10 bg-[#8b5cf6] text-white rounded-full flex items-center justify-center hover:bg-purple-700 transition-all disabled:opacity-30 disabled:grayscale shadow-lg shadow-purple-500/30 group-hover:scale-105 active:scale-95"
+                                className={`absolute right-2 top-2 w-10 h-10 ${isDark ? 'bg-[#8B5CF6] hover:bg-[#7c3aed]' : 'bg-[#8b5cf6] hover:bg-purple-700'} text-white rounded-full flex items-center justify-center transition-all disabled:opacity-30 disabled:grayscale shadow-lg shadow-[#8B5CF6]/30 group-hover:scale-105 active:scale-95`}
                             >
                                 {loading ? (
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

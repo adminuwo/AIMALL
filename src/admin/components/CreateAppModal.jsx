@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Sparkles, AlertCircle, Box, Layers, Zap } from 'lucide-react';
+import { X, Sparkles, AlertCircle, Box, Layers, Zap, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
@@ -9,7 +9,8 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
         description: '',
         agentUrl: '',
         category: 'Business OS',
-        pricing: 'Free'
+        pricing: 'Free',
+        avatar: ''
     };
 
     const [formData, setFormData] = useState(initialFormData);
@@ -38,6 +39,52 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleIconChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Target 4:7 aspect ratio (e.g., 400x700)
+                const targetWidth = 400;
+                const targetHeight = 700;
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+
+                const srcWidth = img.width;
+                const srcHeight = img.height;
+                const srcRatio = srcWidth / srcHeight;
+                const targetRatio = targetWidth / targetHeight;
+
+                let sx, sy, sw, sh;
+                if (srcRatio > targetRatio) {
+                    // Source is wider than target: crop left/right
+                    sh = srcHeight;
+                    sw = sh * targetRatio;
+                    sx = (srcWidth - sw) / 2;
+                    sy = 0;
+                } else {
+                    // Source is taller than target: crop top/bottom
+                    sw = srcWidth;
+                    sh = sw / targetRatio;
+                    sx = 0;
+                    sy = (srcHeight - sh) / 2;
+                }
+
+                ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetWidth, targetHeight);
+                const dataUrl = canvas.toDataURL('image/png');
+                setFormData(prev => ({ ...prev, avatar: dataUrl }));
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
     };
 
     return ReactDOM.createPortal(
@@ -118,20 +165,44 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
                                 />
                             </div>
 
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
-                                    Agent Endpoint URL
-                                </label>
-                                <div className="relative group">
-                                    <input
-                                        type="text"
-                                        name="agentUrl"
-                                        placeholder="https://api.your-agent.com/v1..."
-                                        value={formData.agentUrl}
-                                        onChange={handleChange}
-                                        className="w-full bg-white/20 border border-gray-200/50 rounded-[14px] px-4 py-2.5 text-sm font-bold focus:ring-4 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] outline-none transition-all placeholder:text-gray-400 group-hover:bg-white/40"
-                                    />
-                                    <Layers className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#8b5cf6] transition-colors" />
+                            <div className="flex gap-4 items-start">
+                                <div className="space-y-1.5 flex-1">
+                                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
+                                        Agent Endpoint URL
+                                    </label>
+                                    <div className="relative group">
+                                        <input
+                                            type="text"
+                                            name="agentUrl"
+                                            placeholder="https://api.your-agent.com/v1..."
+                                            value={formData.agentUrl}
+                                            onChange={handleChange}
+                                            className="w-full bg-white/20 border border-gray-200/50 rounded-[14px] px-4 py-2.5 text-sm font-bold focus:ring-4 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] outline-none transition-all placeholder:text-gray-400 group-hover:bg-white/40"
+                                        />
+                                        <Layers className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#8b5cf6] transition-colors" />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5 shrink-0">
+                                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
+                                        Agent Logo
+                                    </label>
+                                    <label className="relative group flex items-center justify-center w-16 aspect-[4/7] bg-white/30 border border-dashed border-gray-300 rounded-[12px] cursor-pointer hover:bg-white/50 hover:border-[#8b5cf6]/50 overflow-hidden transition-all shadow-sm">
+                                        {formData.avatar ? (
+                                            <img src={formData.avatar} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-1 text-[#8b5cf6] transition-all">
+                                                <ImageIcon className="w-4 h-4" />
+                                                <span className="text-[7px] font-black uppercase text-center leading-tight">Upload</span>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleIconChange}
+                                        />
+                                    </label>
                                 </div>
                             </div>
 

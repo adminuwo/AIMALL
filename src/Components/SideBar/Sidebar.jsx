@@ -15,7 +15,9 @@ import {
   HelpCircle,
   ChevronDown,
   User as UserIcon,
-  ShieldAlert
+  ShieldAlert,
+  Loader2,
+  CheckCircle
 } from 'lucide-react';
 import { apis, AppRoute } from '../../types';
 import { faqs } from '../../constants';
@@ -37,7 +39,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const user = currentUserData?.user || { name: "User", email: "user@example.com", role: "user" };
   const userRole = (user.role === 'admin' || user.role === 'Admin') ? 'admin' : user.role;
   // Check both role and email for admin access (matching backend logic)
-  const isAdminView = userRole === 'admin' || user.email === 'aditilakhera0@gmail.com';
+  const isAdminView = userRole === 'admin' || user.email === 'admin@uwo24.com';
   const token = localStorage.getItem('token');
   const isLoggedIn = !!token;
   const theme = useRecoilValue(themeState);
@@ -79,19 +81,21 @@ const Sidebar = ({ isOpen, onClose }) => {
     setSendStatus(null);
 
     try {
-      // 1. Get or Create Support Chat Session
-      const chat = await apiService.getMySupportChat();
-      if (!chat?._id) throw new Error("Could not initialize support session");
-
-      // 2. Format and Send the message
-      const fullMessage = `[Issue: ${issueType}] ${issueText}`;
-      await apiService.sendSupportChatMessage(chat._id, fullMessage);
+      // Use the Reports system instead of SupportChat
+      await apiService.submitReport({
+        type: issueType,
+        description: issueText,
+        priority: 'medium'
+      });
 
       setSendStatus('success');
       setIssueText("");
-      setTimeout(() => setSendStatus(null), 3000);
+      setTimeout(() => {
+        setSendStatus(null);
+        setIsFaqOpen(false);
+      }, 2000);
     } catch (error) {
-      console.error("Support chat integration failed", error);
+      console.error("Support submission failed", error);
       setSendStatus('error');
     } finally {
       setIsSending(false);
@@ -106,21 +110,21 @@ const Sidebar = ({ isOpen, onClose }) => {
   // token already declared at line 40
 
   useEffect(() => {
-    if (token) {
-      axios.get(apis.user, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }).then((res) => {
-        console.log(res);
-      }).catch((err) => {
-        console.error(err);
-        if (err.response?.status == 401) {
+    if (!token || location.pathname === AppRoute.LOGIN) return;
+
+    const fetchUserData = async () => {
+      try {
+        await axios.get(apis.user, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.error("User fetch failed", err);
+        if (err.response?.status === 401) {
           clearUser();
           navigate(AppRoute.LOGIN);
         }
-      });
-    }
+      }
+    };
 
     const fetchNotifications = async () => {
       try {
@@ -133,12 +137,11 @@ const Sidebar = ({ isOpen, onClose }) => {
       }
     };
 
-    if (token) {
-      fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30 * 1000);
-      return () => clearInterval(interval);
-    }
-  }, [token]);
+    fetchUserData();
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30 * 1000);
+    return () => clearInterval(interval);
+  }, [token, location.pathname, navigate, setNotifications]);
 
   if (notifiyTgl.notify) {
     setTimeout(() => {
@@ -219,7 +222,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar Container */}
       <div
         className={`
-          fixed inset-y-0 left-0 z-[200] bg-white/20 backdrop-blur-3xl border-r border-white/40
+          fixed inset-y-0 left-0 z-[200] ${isDark ? 'bg-[#0B0F1A] border-white/5' : 'bg-white/20 backdrop-blur-3xl border-white/40'}
           flex flex-col transition-all duration-500 ease-in-out 
           md:relative md:translate-x-0 shadow-[20px_0_40px_rgba(0,0,0,0.05)] w-46 overflow-hidden
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -240,7 +243,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           >
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className="text-xl font-black text-gray-900 tracking-tighter uppercase leading-none italic">AI MALL</span>
+                <span className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter uppercase leading-none transition-colors`}>AI MALL</span>
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse border border-white" />
               </div>
             </div>
@@ -267,17 +270,17 @@ const Sidebar = ({ isOpen, onClose }) => {
                 onClick={(e) => handleNavClick(e, item)}
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isActive
-                    ? 'bg-white text-[#7c3aed] shadow-[0_10px_20px_-5px_rgba(124,58,237,0.2)] scale-[1.02] border-purple-100'
-                    : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900 hover:shadow-lg hover:scale-[1.02]'
+                    ? `${isDark ? 'bg-[#8B5CF6]/10 border-[#8B5CF6]/20 text-white shadow-[0_0_20px_rgba(139,92,246,0.2)]' : 'bg-white text-[#7c3aed] border-purple-100 shadow-[0_10px_20px_-5px_rgba(124,58,237,0.2)]'} scale-[1.02]`
+                    : `${isDark ? 'text-white border-transparent hover:bg-white/5 hover:text-[#8B5CF6]' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-20' : 'group-hover:opacity-0'}`} />
-                    <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isActive ? 'text-[#d946ef]' : 'text-gray-400 group-hover:text-[#8b5cf6]'}`} />
+                    <div className={`absolute inset-0 ${isDark ? 'bg-[#8B5CF6]' : 'bg-gradient-to-r from-[#d946ef] to-[#8b5cf6]'} opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-20' : 'group-hover:opacity-0'}`} />
+                    <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isActive ? 'text-[#8B5CF6]' : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
                     <span className="relative z-10">{item.label}</span>
-                    {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-[#d946ef] animate-pulse" />}
+                    {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-[#8B5CF6] animate-pulse shadow-[0_0_10px_rgba(139,92,246,0.8)]" />}
                   </>
                 )}
               </NavLink>
@@ -302,24 +305,23 @@ const Sidebar = ({ isOpen, onClose }) => {
             }}
             className={({ isActive }) =>
               `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isActive
-                ? 'bg-white text-[#7c3aed] shadow-[0_10px_20px_-5px_rgba(124,58,237,0.2)] scale-[1.02] border-purple-100'
-                : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900 hover:shadow-lg hover:scale-[1.02]'
+                ? `${isDark ? 'bg-[#8B5CF6]/10 border-[#8B5CF6]/20 text-[#8B5CF6] shadow-[0_0_20px_rgba(139,92,246,0.2)]' : 'bg-white text-[#7c3aed] border-purple-100 shadow-[0_10px_20px_-5px_rgba(124,58,237,0.2)]'} scale-[1.02]`
+                : `${isDark ? 'text-[#AAB0D6] border-transparent hover:bg-white/5 hover:text-[#8B5CF6]' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-20' : 'group-hover:opacity-0'}`} />
                 <div className="relative mr-3 z-10">
-                  <Bell size={14} className={`transition-colors ${isActive ? 'text-[#d946ef]' : 'text-gray-400 group-hover:text-[#8b5cf6]'}`} />
+                  <Bell size={14} className={`transition-colors ${isActive ? 'text-[#8B5CF6]' : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
                   {notifications.filter(n => !n.isRead).length > 0 && (
                     <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-black text-white flex items-center justify-center border border-white">
                       {notifications.filter(n => !n.isRead).length}
                     </div>
                   )}
                 </div>
-                <span className="relative z-10">Notifications</span>
-                {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-[#d946ef] animate-pulse" />}
+                <span className="relative z-10">{t('notifications')}</span>
+                {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-[#8B5CF6] animate-pulse shadow-[0_0_10px_rgba(139,92,246,0.8)]" />}
               </>
             )}
           </NavLink>
@@ -334,25 +336,26 @@ const Sidebar = ({ isOpen, onClose }) => {
                 navigate('/login', { state: { from: location } });
                 onClose();
               } else {
-                navigate(AppRoute.PROFILE);
+                // If admin, navigate to Admin Settings page, otherwise to User Profile
+                navigate(isAdminView ? AppRoute.SETTINGS : AppRoute.PROFILE);
                 onClose();
               }
             }}
-            className="flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900 hover:shadow-lg hover:scale-[1.02]"
+            className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isDark ? 'text-[#AAB0D6] border-transparent hover:bg-white/5 hover:text-[#8B5CF6]' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-            <div className="w-6 h-6 rounded-lg mr-3 flex items-center justify-center bg-gray-100 text-[#7c3aed] font-black text-[10px] z-10 group-hover:bg-[#7c3aed] group-hover:text-white transition-all shadow-sm">
+            <div className={`absolute inset-0 ${isDark ? 'bg-[#8B5CF6]' : 'bg-gradient-to-r from-[#d946ef] to-[#8b5cf6]'} opacity-0 transition-opacity duration-300 group-hover:opacity-10`} />
+            <div className={`w-6 h-6 rounded-lg mr-3 flex items-center justify-center ${isDark ? 'bg-[#161D35] text-[#AAB0D6]' : 'bg-gray-100 text-[#7c3aed]'} font-black text-[10px] z-10 group-hover:bg-[#8B5CF6] group-hover:text-white transition-all shadow-sm`}>
               {user.name.charAt(0)}
             </div>
-            <span className="relative z-10">Personal Profile</span>
+            <span className="relative z-10">{t('personalProfile')}</span>
           </button>
 
           <button
             onClick={() => { setIsFaqOpen(true); onClose(); }}
-            className="flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900 hover:shadow-lg hover:scale-[1.02]"
+            className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isDark ? 'text-[#AAB0D6] border-transparent hover:bg-white/5 hover:text-[#8B5CF6]' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`}
           >
-            <HelpCircle size={15} className="mr-3 text-gray-400 group-hover:text-[#8b5cf6] transition-colors relative z-10" />
-            <span className="relative z-10">Help & FAQ</span>
+            <HelpCircle size={15} className={`mr-3 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6] transition-colors relative z-10`} />
+            <span className="relative z-10">{t('helpFaq')}</span>
           </button>
 
           <div className="pt-1">
@@ -361,7 +364,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               className="flex items-center w-full px-4 py-2.5 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all duration-300 group text-gray-400 hover:text-red-500 hover:bg-red-50/50"
             >
               <LogOut size={14} className="mr-3 group-hover:-translate-x-1 transition-transform" />
-              Sign Out
+              {t('signOut')}
             </button>
           </div>
         </div>
@@ -375,19 +378,19 @@ const Sidebar = ({ isOpen, onClose }) => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`glass-card md:rounded-[56px] w-full max-w-2xl h-full md:max-h-[85vh] overflow-hidden flex flex-col shadow-2xl ${isDark ? 'bg-slate-900/90 border-white/10' : 'border-white/80 bg-white/60'}`}
+            className={`glass-card md:rounded-[56px] w-full max-w-2xl h-full md:max-h-[85vh] overflow-hidden flex flex-col shadow-2xl ${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10 shadow-[0_40px_80px_rgba(0,0,0,0.5)]' : 'border-white/80 bg-white/60'}`}
           >
             <div className={`p-4 md:p-8 border-b ${isDark ? 'border-white/10 bg-white/5' : 'border-white/40 bg-white/20'} flex justify-between items-center shrink-0`}>
               <div className={`flex gap-2 md:gap-6 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/40 border-white/60'} p-1.5 rounded-full border`}>
                 <button
                   onClick={() => setActiveTab('faq')}
-                  className={`text-[10px] font-black uppercase tracking-widest px-4 md:px-6 py-2.5 rounded-full transition-all ${activeTab === 'faq' ? 'bg-white text-[#7c3aed] shadow-sm' : 'text-slate-500 hover:text-[#7c3aed]'}`}
+                  className={`text-[10px] font-black uppercase tracking-widest px-4 md:px-6 py-2.5 rounded-full transition-all ${activeTab === 'faq' ? (isDark ? 'bg-[#8B5CF6] text-white shadow-lg' : 'bg-white text-[#7c3aed] shadow-sm') : (isDark ? 'text-[#6F76A8] hover:text-[#8B5CF6]' : 'text-slate-500 hover:text-[#7c3aed]')}`}
                 >
                   Knowledge
                 </button>
                 <button
                   onClick={() => setActiveTab('help')}
-                  className={`text-[10px] font-black uppercase tracking-widest px-4 md:px-6 py-2.5 rounded-full transition-all ${activeTab === 'help' ? 'bg-white text-[#7c3aed] shadow-sm' : 'text-slate-500 hover:text-[#7c3aed]'}`}
+                  className={`text-[10px] font-black uppercase tracking-widest px-4 md:px-6 py-2.5 rounded-full transition-all ${activeTab === 'help' ? (isDark ? 'bg-[#8B5CF6] text-white shadow-lg' : 'bg-white text-[#7c3aed] shadow-sm') : (isDark ? 'text-white hover:text-[#8B5CF6]' : 'text-slate-500 hover:text-[#7c3aed]')}`}
                 >
                   Support
                 </button>
@@ -403,15 +406,15 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="flex-1 overflow-y-auto p-10 space-y-6 no-scrollbar">
               {activeTab === 'faq' ? (
                 <>
-                  <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'} font-bold uppercase tracking-widest opacity-60`}>General Guidelines</p>
+                  <p className={`text-sm ${isDark ? 'text-white/70' : 'text-slate-500'} font-bold uppercase tracking-widest opacity-60`}>General Guidelines</p>
                   {faqs.map((faq, index) => (
-                    <div key={index} className={`border ${isDark ? 'border-white/10 bg-white/5' : 'border-white/60 bg-white/20'} rounded-[32px] overflow-hidden hover:bg-white/10 transition-all`}>
+                    <div key={index} className={`border ${isDark ? 'border-[#8B5CF6]/10 bg-[#0B0F1A]' : 'border-white/60 bg-white/20'} rounded-[32px] overflow-hidden hover:bg-white/10 transition-all`}>
                       <button
                         onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
                         className="w-full flex justify-between items-center p-6 text-left focus:outline-none"
                       >
                         <span className={`font-black ${isDark ? 'text-white' : 'text-slate-900'} text-sm tracking-tight`}>{faq.question}</span>
-                        <ChevronDown className={`w-4 h-4 text-[#7c3aed] transition-transform duration-500 ${openFaqIndex === index ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`w-4 h-4 ${isDark ? 'text-[#8B5CF6]' : 'text-[#7c3aed]'} transition-transform duration-500 ${openFaqIndex === index ? 'rotate-180' : ''}`} />
                       </button>
                       <AnimatePresence>
                         {openFaqIndex === index && (
@@ -419,7 +422,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                             initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className={`px-8 pb-8 ${isDark ? 'text-slate-400' : 'text-slate-500'} text-sm font-medium leading-relaxed`}>
+                            <div className={`px-8 pb-8 ${isDark ? 'text-white' : 'text-slate-500'} text-sm font-medium leading-relaxed opacity-80`}>
                               {faq.answer}
                             </div>
                           </motion.div>
@@ -431,12 +434,12 @@ const Sidebar = ({ isOpen, onClose }) => {
               ) : (
                 <div className="flex flex-col gap-8">
                   <div className="space-y-4">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Category</label>
+                    <label className={`block text-[10px] font-black ${isDark ? 'text-[#6F76A8]' : 'text-slate-400'} uppercase tracking-widest ml-1`}>Issue Category</label>
                     <div className="relative group">
                       <select
                         value={issueType}
                         onChange={(e) => setIssueType(e.target.value)}
-                        className={`w-full p-5 pr-12 rounded-[24px] ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white/60 border-white/80 text-slate-900'} border focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none font-black text-sm transition-all`}
+                        className={`w-full p-5 pr-12 rounded-[24px] ${isDark ? 'bg-[#0B0F1A] border-white/10 text-white' : 'bg-white/60 border-white/80 text-slate-900'} border focus:ring-4 focus:ring-blue-500/10 outline-none appearance-none font-black text-sm transition-all`}
                       >
                         {issueOptions.map((opt) => (
                           <option key={opt} value={opt} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>{opt}</option>
@@ -447,9 +450,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                   </div>
 
                   <div className="space-y-4">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Case Details</label>
+                    <label className={`block text-[10px] font-black ${isDark ? 'text-[#6F76A8]' : 'text-slate-400'} uppercase tracking-widest ml-1`}>Case Details</label>
                     <textarea
-                      className={`w-full p-6 rounded-[32px] ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white/60 border-white/80 text-slate-900'} border focus:ring-4 focus:ring-blue-500/10 outline-none resize-none font-medium min-h-[180px] transition-all`}
+                      className={`w-full p-6 rounded-[32px] ${isDark ? 'bg-[#0B0F1A] border-white/10 text-white' : 'bg-white/60 border-white/80 text-slate-900'} border focus:ring-4 focus:ring-blue-500/10 outline-none resize-none font-medium min-h-[180px] transition-all`}
                       placeholder="Specify your request..."
                       value={issueText}
                       onChange={(e) => setIssueText(e.target.value)}
@@ -459,13 +462,23 @@ const Sidebar = ({ isOpen, onClose }) => {
                   <button
                     onClick={handleSupportSubmit}
                     disabled={isSending || !issueText.trim()}
-                    className="w-full py-6 mt-4 bg-[#7c3aed] hover:bg-[#6d28d9] text-white rounded-[28px] font-black text-[14px] uppercase tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                    className={`w-full py-6 mt-4 ${isDark ? 'bg-[#8B5CF6] hover:bg-[#7c3aed]' : 'bg-[#7c3aed] hover:bg-[#6d28d9]'} text-white rounded-[28px] font-black text-[14px] uppercase tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2`}
                   >
-                    {isSending ? 'Sending...' : 'Send Message'}
+                    {isSending ? (
+                      <>
+                        <Loader2 className="animate-spin w-5 h-5" />
+                        Sending...
+                      </>
+                    ) : sendStatus === 'success' ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        Ticket Created!
+                      </>
+                    ) : 'Send Message'}
                   </button>
 
-                  <p className="text-[10px] text-center font-black text-slate-400 uppercase tracking-widest mt-4">
-                    Direct Channel: <a href="mailto:aditilakhera0@gmail.com" className="text-blue-600 hover:underline">aditilakhera0@gmail.com</a>
+                  <p className={`text-[10px] text-center font-black ${isDark ? 'text-[#6F76A8]' : 'text-slate-400'} uppercase tracking-widest mt-4`}>
+                    Direct Channel: <a href="mailto:admin@uwo24.com" className={`${isDark ? 'text-[#8B5CF6]' : 'text-blue-600'} hover:underline`}>admin@uwo24.com</a>
                   </p>
                 </div>
               )}
@@ -474,7 +487,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className={`p-8 border-t ${isDark ? 'border-white/10 bg-white/5' : 'border-white/40 bg-white/20'} flex justify-center`}>
               <button
                 onClick={() => setIsFaqOpen(false)}
-                className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'} px-10 py-3 rounded-full hover:bg-white/5 transition-all outline-none border-none`}
+                className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-white hover:text-[#8B5CF6]' : 'text-slate-500 hover:text-slate-900'} px-10 py-3 rounded-full hover:bg-white/5 transition-all outline-none border-none`}
               >
                 Dismiss
               </button>

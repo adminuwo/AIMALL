@@ -8,16 +8,19 @@ import Testimonials from '../Components/Landing/Testimonials';
 
 import Footer from '../Components/Landing/Footer';
 import SecurityModal from '../Components/LiveDemo/SecurityModal';
-
 const Landing = () => {
   const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#eef2ff] to-[#fce7f3] font-sans text-gray-900 selection:bg-purple-100 selection:text-purple-900 overflow-hidden relative">
+    <div className="min-h-screen font-sans text-gray-900 selection:bg-purple-100 selection:text-purple-900 overflow-hidden relative">
       <div className="fixed inset-0 -z-10">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-200/30 blur-[120px]"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-[120px]"></div>
-        <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full bg-pink-200/20 blur-[100px]"></div>
+        <img
+          src="/video/landing_bg.jpg"
+          alt="Background"
+          className="w-full h-full object-cover opacity-60"
+        />
+        {/* Overlay to ensure text readability */}
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]"></div>
       </div>
 
       <Header />

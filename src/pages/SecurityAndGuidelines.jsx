@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Lock, FileText, Scale, Eye, AlertTriangle, ChevronRight, Sparkles, Phone, Mail } from 'lucide-react';
 import ReportModal from '../Components/ReportModal/ReportModal';

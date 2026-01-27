@@ -151,7 +151,7 @@ const Financials = () => {
                         View All Reports <ArrowUpRight className="w-3 h-3" />
                     </button>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-white/30 border-b border-white/60">

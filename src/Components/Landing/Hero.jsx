@@ -1,95 +1,193 @@
+// import React, { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router';
+// import { AppRoute } from '../../types';
+
+// const Hero = () => {
+//     const navigate = useNavigate();
+//     const [isVisible, setIsVisible] = useState(false);
+
+//     useEffect(() => {
+//         setIsVisible(true);
+//     }, []);
+
+//     return (
+//         <section className="relative overflow-visible min-h-[500px] flex items-center py-10 md:py-0">
+//             {/* Background Elements */}
+//             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-b from-purple-200/30 to-blue-200/30 rounded-full blur-[80px] -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+
+//             <div className="max-w-7xl mx-auto px-6 md:px-12 xl:px-16 flex flex-col items-center justify-center text-center">
+//                 <div className="z-10 w-full max-w-4xl">
+//                     <h1 className={`text-5xl md:text-[5rem] font-bold leading-[1.0] mb-4 text-[#1A1A1A] tracking-tight transition-all duration-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+//                         Discover & Deploy <br></br>AI Solutions <br />
+//                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6]">
+//                             AI Solutions
+//                         </span>
+//                     </h1>
+
+//                     <p className={`text-lg md:text-2xl text-[#444] mb-8 max-w-2xl mx-auto font-medium transition-all duration-1000 delay-100 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+//                         Your vendors marketplace for intelligent agents
+//                     </p>
+
+//                     <div className={`flex flex-wrap gap-4 justify-center transition-all duration-1000 delay-200 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+//                         <button
+//                             onClick={() => navigate('/dashboard/chat')}
+//                             className="px-8 py-3 rounded-full font-bold text-base text-white bg-[#8b5cf6] hover:bg-[#7c3aed] shadow-lg shadow-purple-500/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/60 active:scale-95 outline-none focus:ring-4 focus:ring-purple-400/50">
+//                             AI Mall
+//                         </button>
+//                         <button
+//                             onClick={() => window.location.href = "https://a-series-bgve.onrender.com"}
+//                             className="px-8 py-3 rounded-full font-bold text-base text-white bg-[#3b82f6] hover:bg-[#2563eb] shadow-lg shadow-blue-500/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/60 active:scale-95 outline-none focus:ring-4 focus:ring-blue-400/50">
+//                             A Series
+//                         </button>
+//                     </div>
+//                 </div>
+//             </div>
+//         </section>
+//     );
+// };
+
+// export default Hero;
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { AppRoute } from '../../types';
 
 const Hero = () => {
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(false);
+    const [showAIMall, setShowAIMall] = useState(false);
+    const [showASeries, setShowASeries] = useState(false);
 
     useEffect(() => {
         setIsVisible(true);
     }, []);
 
-    return (
-        <section className="py-16 pb-24 overflow-hidden relative min-h-[600px] flex items-center">
-            {/* Background Elements */}
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-b from-purple-200/30 to-blue-200/30 rounded-full blur-[80px] -z-10 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+    // Close cards when clicking outside on mobile
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (window.innerWidth < 768) {
+                if (!event.target.closest('.hover-card') && !event.target.closest('button')) {
+                    setShowAIMall(false);
+                    setShowASeries(false);
+                }
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
 
-            <div className="max-w-7xl mx-auto px-6 md:px-12 xl:px-16 grid grid-cols-1 md:grid-cols-2 items-center gap-12 lg:gap-16 text-center md:text-left">
-                <div className="z-10">
-                    <h1 className={`text-4xl md:text-[3.5rem] font-bold leading-[1.2] mb-6 text-[#1A1A1A] transition-all duration-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+    return (
+        <section className="relative overflow-visible min-h-[500px] sm:min-h-[600px] flex items-center py-8 sm:py-12 md:pb-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 xl:px-16 w-full flex flex-col items-center justify-center text-center md:-mt-20">
+                <div className="z-10 max-w-4xl w-full">
+
+                    <h1 className={`text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 text-gray-900 drop-shadow-sm transition-all duration-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                         Discover & Deploy <br />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6]">
-                            AI Solutions
-                        </span>
+                        AI Solutions
                     </h1>
 
-                    <p className={`text-xl text-[#555] mb-10 max-w-[90%] mx-auto md:mx-0 font-medium transition-all duration-1000 delay-100 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    <div className="h-3 sm:h-4 md:h-6" />
+
+                    <p className={`text-sm sm:text-base md:text-xl lg:text-2xl text-gray-800 mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-all duration-1000 delay-100 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
                         Your vendors marketplace for intelligent agents
                     </p>
 
-                    <div className={`flex gap-6 justify-center md:justify-start transition-all duration-1000 delay-200 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-                        <button
-                            onClick={() => navigate('/dashboard/chat')}
-                            className="px-8 py-3.5 rounded-full font-bold text-base text-white bg-[#8b5cf6] hover:bg-[#7c3aed] shadow-lg shadow-purple-500/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/60 active:scale-95 outline-none focus:ring-4 focus:ring-purple-400/50">
-                            AI Mall
-                        </button>
-                        <button
-                            onClick={() => window.location.href = "https://a-series-bgve.onrender.com"}
-                            className="px-8 py-3.5 rounded-full font-bold text-base text-white bg-[#3b82f6] hover:bg-[#2563eb] shadow-lg shadow-blue-500/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/60 active:scale-95 outline-none focus:ring-4 focus:ring-blue-400/50">
-                            A Series
-                        </button>
-                    </div>
-                </div>
+                    <div className={`relative w-full flex flex-row gap-3 sm:gap-6 justify-center items-center transition-all duration-1000 delay-200 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
 
-                <div className={`relative h-[400px] md:h-[500px] flex items-center justify-center perspective-[1000px] transition-all duration-1000 delay-300 ease-out transform ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
-                    <div className="relative w-full max-w-[350px] md:max-w-[500px] aspect-square flex items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
-                        {/* Dreamy Glass Card */}
-                        <div className="glass-card absolute inset-0 md:inset-[40px] bg-gradient-to-br from-white/40 to-white/10 backdrop-blur-3xl rounded-[40px] md:rounded-[50px] border border-white/40 shadow-[0_30px_80px_-20px_rgba(168,85,247,0.25)] flex flex-col items-center justify-center overflow-hidden">
+                        {/* ================= AI MALL ================= */}
+                        <div
+                            className="md:relative"
+                            onMouseEnter={() => setShowAIMall(true)}
+                            onMouseLeave={() => setShowAIMall(false)}
+                        >
+                            <button
+                                onClick={(e) => {
+                                    if (window.innerWidth < 768) {
+                                        e.preventDefault();
+                                        if (showAIMall) navigate('/dashboard/chat');
+                                        else {
+                                            setShowAIMall(true);
+                                            setShowASeries(false);
+                                        }
+                                    } else {
+                                        navigate('/dashboard/chat');
+                                    }
+                                }}
+                                className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#8b5cf6] hover:bg-[#7c3aed]
+                                shadow-lg shadow-purple-500/50 transition-all duration-300
+                                hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/70
+                                active:scale-95 outline-none">
+                                AI Mall
+                            </button>
 
-                            {/* Inner Soft Gradient Glow */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-blue-400/10 via-purple-400/10 to-pink-400/10 mix-blend-overlay"></div>
-
-                            {/* Floating Orbs - Behind Text */}
-                            <div className="orb-1 absolute top-[10%] left-[10%] w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-80"
-                                style={{
-                                    background: 'radial-gradient(circle at 30% 30%, #67e8f9, #3b82f6)',
-                                    transform: 'translateZ(-40px)'
-                                }}></div>
-
-                            <div className="orb-2 absolute bottom-[10%] right-[5%] w-40 h-40 rounded-full mix-blend-multiply filter blur-xl opacity-80"
-                                style={{
-                                    background: 'radial-gradient(circle at 30% 30%, #f472b6, #a855f7)',
-                                    transform: 'translateZ(-20px)'
-                                }}></div>
-
-                            <div className="orb-3 absolute bottom-[20%] left-[15%] w-28 h-28 rounded-full mix-blend-multiply filter blur-xl opacity-80"
-                                style={{
-                                    background: 'radial-gradient(circle at 30% 30%, #4ade80, #0ea5e9)',
-                                    transform: 'translateZ(-60px)'
-                                }}></div>
-
-
-                            {/* Large Stacked Text */}
-                            <div className="relative z-10 flex flex-col items-center justify-center leading-[0.85] animate-zoom">
-                                <h2 className="text-[60px] sm:text-[100px] md:text-[140px] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-blue-500/80 to-purple-600/80 mix-blend-overlay drop-shadow-lg"
-                                    style={{ fontFamily: 'Inter, sans-serif' }}>
-                                    AI
-                                </h2>
-                                <h2 className="text-[60px] sm:text-[100px] md:text-[140px] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-t from-purple-600/80 to-pink-500/80 mix-blend-overlay drop-shadow-lg -mt-2 md:-mt-4"
-                                    style={{ fontFamily: 'Inter, sans-serif' }}>
-                                    MALL
-                                </h2>
+                            {/* AI Mall Card */}
+                            <div className={`hover-card absolute left-0 right-0 mx-auto md:right-full md:left-auto md:translate-x-0 top-full mt-3 w-[220px] sm:w-80 transition-all duration-300 z-50
+                                ${showAIMall ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+                                <div className="rounded-xl p-3 sm:p-5 text-white
+                                    bg-gradient-to-br from-purple-600/90 via-violet-600/85 to-indigo-600/80
+                                    border border-purple-300/40
+                                    shadow-[0_0_25px_rgba(168,85,247,0.5)]
+                                    backdrop-blur-md">
+                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">AI Mall</h4>
+                                    <p className="text-xs sm:text-sm text-white leading-relaxed">
+                                        AI Mall is a marketplace where vendors build,
+                                        showcase, and sell powerful AI agents to the world.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate('/dashboard/chat')}
+                                        className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs sm:text-sm font-semibold transition-colors md:hidden">
+                                        Go to AI Mall →
+                                    </button>
+                                </div>
                             </div>
-
-                            <div className="mt-8 text-sm font-bold text-gray-500/80 uppercase tracking-[0.4em] mix-blend-multiply">
-                                Marketplace for AI
-                            </div>
-
-                            {/* Foreground Particle */}
-                            <div className="particle-1 absolute top-[20%] right-[20%] w-4 h-4 rounded-full bg-cyan-300 blur-sm mix-blend-screen animate-pulse"></div>
-
                         </div>
+
+                        {/* ================= A SERIES ================= */}
+                        <div
+                            className="md:relative"
+                            onMouseEnter={() => setShowASeries(true)}
+                            onMouseLeave={() => setShowASeries(false)}
+                        >
+                            <button
+                                onClick={(e) => {
+                                    if (window.innerWidth < 768) {
+                                        e.preventDefault();
+                                        if (showASeries) window.location.href = "https://a-series-bgve.onrender.com";
+                                        else {
+                                            setShowASeries(true);
+                                            setShowAIMall(false);
+                                        }
+                                    } else {
+                                        window.location.href = "https://a-series-bgve.onrender.com";
+                                    }
+                                }}
+                                className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#3b82f6] hover:bg-[#2563eb]
+                                shadow-lg shadow-blue-500/50 transition-all duration-300
+                                hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/70
+                                active:scale-95 outline-none">
+                                A Series
+                            </button>
+
+                            {/* A Series Card */}
+                            <div className={`hover-card absolute left-0 right-0 mx-auto md:left-full md:translate-x-0 top-full mt-3 w-[220px] sm:w-80 transition-all duration-300 z-50
+                                ${showASeries ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}>
+                                <div className="rounded-xl p-3 sm:p-5 text-white
+                                    bg-gradient-to-br from-[#2563eb] via-[#3b82f6] to-[#1d4ed8]
+                                    border border-blue-300/40
+                                    shadow-[0_0_25px_rgba(59,130,246,0.5)]
+                                    backdrop-blur-md">
+                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">A Series</h4>
+                                    <p className="text-xs sm:text-sm text-white leading-relaxed">
+                                        A Series is a curated collection of smart AI agents
+                                        designed to handle real-world tasks effortlessly.
+                                    </p>
+                                    <button
+                                        onClick={() => window.location.href = "https://a-series-bgve.onrender.com"}
+                                        className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs sm:text-sm font-semibold transition-colors md:hidden">
+                                        Go to A Series →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

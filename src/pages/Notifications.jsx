@@ -7,11 +7,13 @@ import { getUserData, notificationState } from '../userStore/userData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { themeState } from '../userStore/userData';
+import { useLanguage } from '../context/LanguageContext';
 
 const Notifications = () => {
     const navigate = useNavigate();
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
+    const { t } = useLanguage();
     const [notifications, setNotifications] = useRecoilState(notificationState);
     const [loading, setLoading] = useState(true);
     const [appIcons, setAppIcons] = useState({});
@@ -130,8 +132,8 @@ const Notifications = () => {
                 className="max-w-5xl mx-auto relative z-10"
             >
                 <div className="mb-10 md:mb-16">
-                    <h1 className={`text-3xl md:text-5xl lg:text-7xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter mb-4 md:mb-6 leading-none transition-colors`}>Notifications<span className="text-[#8b5cf6]">.</span></h1>
-                    <p className={`${isDark ? 'text-slate-400' : 'text-gray-500'} font-bold text-lg md:text-xl tracking-tight max-w-2xl opacity-70 transition-colors`}>Stay updated with your latest alerts.</p>
+                    <h1 className={`text-3xl md:text-5xl lg:text-7xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter mb-4 md:mb-6 leading-none transition-colors`}>{t('notificationsHeading')}<span className="text-[#8B5CF6]">.</span></h1>
+                    <p className={`${isDark ? 'text-white' : 'text-gray-500'} font-bold text-lg md:text-xl tracking-tight max-w-2xl opacity-70 transition-colors`}>{t('notificationsDesc')}</p>
                 </div>
 
                 <div className="grid gap-6 md:gap-8">
@@ -140,14 +142,14 @@ const Notifications = () => {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl p-10 md:p-24 rounded-[48px] md:rounded-[64px] border text-center relative overflow-hidden transition-all duration-700`}
+                                className={`${isDark ? 'bg-[#161D35] border-[#8B5CF6]/10 shadow-[0_40px_80px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl p-10 md:p-24 rounded-[48px] md:rounded-[64px] border text-center relative overflow-hidden transition-all duration-700`}
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-[#8b5cf6]/5 to-transparent" />
-                                <div className={`w-24 h-24 rounded-[36px] ${isDark ? 'bg-slate-800' : 'bg-white'} flex items-center justify-center text-[#8b5cf6] mx-auto mb-10 shadow-2xl border ${isDark ? 'border-white/5' : 'border-white/60'} relative z-10 transition-colors`}>
+                                <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-br from-[#8B5CF6]/5 to-transparent' : 'bg-gradient-to-br from-[#8b5cf6]/5 to-transparent'}`} />
+                                <div className={`w-24 h-24 rounded-[36px] ${isDark ? 'bg-[#0B0F1A]' : 'bg-white'} flex items-center justify-center text-[#8B5CF6] mx-auto mb-10 shadow-2xl border ${isDark ? 'border-white/5' : 'border-white/60'} relative z-10 transition-colors`}>
                                     <Bell className="w-10 h-10 opacity-30 animate-pulse" />
                                 </div>
-                                <h3 className={`text-2xl md:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight mb-4 relative z-10 uppercase transition-colors`}>Null Void Sequence</h3>
-                                <p className={`${isDark ? 'text-slate-400' : 'text-gray-500'} font-bold text-base md:text-lg max-w-sm mx-auto relative z-10 leading-relaxed transition-colors`}>No neural transmissions detected. Your ecosystem is currently reaching peak stability.</p>
+                                <h3 className={`text-2xl md:text-3xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight mb-4 relative z-10 uppercase transition-colors`}>{t('noNotificationsTitle')}</h3>
+                                <p className={`${isDark ? 'text-white' : 'text-gray-500'} font-bold text-base md:text-lg max-w-sm mx-auto relative z-10 leading-relaxed transition-colors opacity-80`}>{t('noNotificationsDesc')}</p>
                             </motion.div>
                         )}
 
@@ -159,11 +161,11 @@ const Notifications = () => {
                                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                                 transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
                                 key={notif._id}
-                                className={`${isDark ? 'bg-slate-900/60 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]' : 'bg-white/40 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.02)]'} backdrop-blur-3xl p-6 md:p-10 rounded-[40px] md:rounded-[56px] border transition-all flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-10 hover:shadow-[0_40px_80px_-20px_rgba(139,92,246,0.15)] group relative overflow-hidden ${!notif.isRead ? (isDark ? 'border-[#8b5cf6]/60 ring-1 ring-[#8b5cf6]/20' : 'border-[#8b5cf6]/40 ring-1 ring-[#8b5cf6]/10') : (isDark ? 'border-white/5' : 'border-white/60')
+                                className={`${isDark ? 'bg-[#161D35] shadow-[0_20px_40px_rgba(0,0,0,0.3)]' : 'bg-white/40 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.02)]'} backdrop-blur-3xl p-3 md:p-10 rounded-2xl md:rounded-[56px] border transition-all flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-10 hover:shadow-[0_40px_80px_-20px_rgba(139,92,246,0.15)] group relative overflow-hidden ${!notif.isRead ? (isDark ? 'border-[#8B5CF6]/40 ring-1 ring-[#8B5CF6]/10' : 'border-[#8b5cf6]/40 ring-1 ring-[#8b5cf6]/10') : (isDark ? 'border-white/5' : 'border-white/60')
                                     }`}
                             >
                                 {!notif.isRead && (
-                                    <div className="absolute top-0 left-0 w-2 h-full bg-[#8b5cf6]" />
+                                    <div className="absolute top-0 left-0 w-2 h-full bg-[#8B5CF6]" />
                                 )}
 
                                 {notif.title === 'New Support Reply' && (
@@ -173,44 +175,44 @@ const Notifications = () => {
                                     />
                                 )}
 
-                                <div className={`w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-[24px] md:rounded-[32px] flex items-center justify-center shadow-2xl border ${isDark ? 'border-white/5' : 'border-white'} transition-all duration-700 group-hover:rotate-6 ${notif.type === 'ALERT' ? (isDark ? 'bg-red-900/20' : 'bg-red-50') :
-                                    notif.type === 'SUCCESS' ? (isDark ? 'bg-emerald-900/20' : 'bg-emerald-50') : (isDark ? 'bg-slate-800' : 'bg-white')
+                                <div className={`w-10 h-10 md:w-20 md:h-20 shrink-0 rounded-xl md:rounded-[32px] flex items-center justify-center shadow-2xl border ${isDark ? 'border-white/5' : 'border-white'} transition-all duration-700 group-hover:rotate-6 ${notif.type === 'ALERT' ? (isDark ? 'bg-red-900/20' : 'bg-red-50') :
+                                    notif.type === 'SUCCESS' ? (isDark ? 'bg-emerald-900/20' : 'bg-emerald-50') : (isDark ? 'bg-[#0B0F1A]' : 'bg-white')
                                     }`}>
                                     {appIcons[notif.targetId] ? (
-                                        <img src={appIcons[notif.targetId]} alt="App" className="w-10 h-10 md:w-12 md:h-12 rounded-[16px] md:rounded-[20px] object-cover shadow-sm" />
+                                        <img src={appIcons[notif.targetId]} alt="App" className="w-8 h-8 md:w-12 md:h-12 rounded-[12px] md:rounded-[20px] object-cover shadow-sm" />
                                     ) : (
-                                        getIcon(notif.type)
+                                        <div className="scale-75 md:scale-100">{getIcon(notif.type)}</div>
                                     )}
                                 </div>
 
-                                <div className="flex-1 space-y-4 w-full">
-                                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-4">
+                                <div className="flex-1 space-y-3 md:space-y-4 w-full">
+                                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-2 md:gap-4">
                                         <div className="space-y-1 text-center md:text-left">
                                             <div className="flex items-center gap-3 justify-center md:justify-start">
-                                                <h3 className={`text-xl md:text-2xl font-black tracking-tight uppercase transition-colors ${!notif.isRead ? (isDark ? 'text-white' : 'text-gray-900') : (isDark ? 'text-slate-500' : 'text-gray-500')}`}>
+                                                <h3 className={`text-lg md:text-2xl font-black tracking-tight uppercase transition-colors ${!notif.isRead ? (isDark ? 'text-white' : 'text-gray-900') : (isDark ? 'text-white/60' : 'text-gray-500')}`}>
                                                     {notif.title}
                                                 </h3>
                                             </div>
                                             <div className="flex items-center gap-2 justify-center md:justify-start">
                                             </div>
                                         </div>
-                                        <div className={`flex items-center gap-3 ${isDark ? 'bg-slate-800' : 'bg-white/60'} px-5 py-2 rounded-2xl border ${isDark ? 'border-white/5' : 'border-white/80'} shadow-sm transition-colors`}>
-                                            <Clock className="w-4 h-4 text-[#8b5cf6]" />
-                                            <span className={`text-[10px] font-black ${isDark ? 'text-slate-300' : 'text-gray-900'} uppercase tracking-widest transition-colors`}>
+                                        <div className={`flex items-center gap-2 md:gap-3 ${isDark ? 'bg-[#0B0F1A]' : 'bg-white/60'} px-3 md:px-5 py-1.5 md:py-2 rounded-xl md:rounded-2xl border ${isDark ? 'border-white/5' : 'border-white/80'} shadow-sm transition-colors`}>
+                                            <Clock className="w-3 h-3 md:w-4 md:h-4 text-[#8B5CF6]" />
+                                            <span className={`text-[10px] font-black ${isDark ? 'text-white/70' : 'text-gray-900'} uppercase tracking-widest transition-colors`}>
                                                 {new Date(notif.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <p className={`text-base md:text-lg font-bold leading-relaxed max-w-3xl text-center md:text-left transition-colors ${!notif.isRead ? (isDark ? 'text-slate-300' : 'text-gray-600') : (isDark ? 'text-slate-500' : 'text-gray-400')}`}>
+                                    <p className={`text-sm md:text-lg font-bold leading-relaxed max-w-3xl text-center md:text-left transition-colors ${!notif.isRead ? (isDark ? 'text-white' : 'text-gray-600') : (isDark ? 'text-white/60' : 'text-gray-400')}`}>
                                         {notif.message}
                                     </p>
 
-                                    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 pt-4 relative z-10">
+                                    <div className="flex flex-row items-center gap-2 md:gap-8 pt-2 md:pt-4 relative z-10 w-full">
                                         {!notif.isRead && (
                                             <button
                                                 onClick={() => markAsRead(notif._id)}
-                                                className={`w-full md:w-auto text-[11px] font-black text-[#8b5cf6] flex items-center justify-center gap-3 uppercase tracking-[0.2em] hover:bg-[#8b5cf6] hover:text-white px-6 py-3 rounded-2xl transition-all shadow-sm border ${isDark ? 'border-white/5 bg-slate-800' : 'border-[#8b5cf6]/20 bg-white'}`}
+                                                className={`w-fit md:w-auto text-xs md:text-[11px] font-black text-[#8B5CF6] flex items-center justify-center gap-2 md:gap-3 uppercase tracking-[0.2em] hover:bg-[#8B5CF6] hover:text-white px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl transition-all shadow-sm border ${isDark ? 'border-[#8B5CF6]/20 bg-[#161D35]' : 'border-[#8b5cf6]/20 bg-white'}`}
                                             >
                                                 <BadgeCheck className="w-4 h-4" /> Mark as Read
                                             </button>
@@ -218,7 +220,7 @@ const Notifications = () => {
 
                                         <button
                                             onClick={() => deleteNotification(notif._id)}
-                                            className="w-full md:w-auto text-[11px] font-black text-red-500 flex items-center justify-center gap-3 uppercase tracking-[0.2em] px-6 py-3 rounded-2xl transition-all relative group/btn overflow-hidden"
+                                            className="w-fit md:w-auto text-xs md:text-[11px] font-black text-red-500 flex items-center justify-center gap-2 md:gap-3 uppercase tracking-[0.2em] px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl transition-all relative group/btn overflow-hidden"
                                         >
                                             <div className="absolute inset-0 bg-red-500 opacity-0 group-hover/btn:opacity-10 transition-opacity" />
                                             <Trash2 className="w-4 h-4" /> Delete
@@ -235,12 +237,12 @@ const Notifications = () => {
                     {loading && (
                         <div className="flex flex-col items-center justify-center p-20 gap-6">
                             <div className="relative">
-                                <div className="w-20 h-20 rounded-full border-4 border-[#8b5cf6]/10 border-t-[#8b5cf6] animate-spin" />
+                                <div className="w-20 h-20 rounded-full border-4 border-[#8B5CF6]/10 border-t-[#8B5CF6] animate-spin" />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <Zap size={24} className="text-[#8b5cf6] animate-pulse" />
+                                    <Zap size={24} className="text-[#8B5CF6] animate-pulse" />
                                 </div>
                             </div>
-                            <p className="text-[10px] font-black text-[#8b5cf6] uppercase tracking-[0.4em] animate-pulse">Syncing Nexus Data...</p>
+                            <p className="text-[10px] font-black text-[#8B5CF6] uppercase tracking-[0.4em] animate-pulse">Syncing Nexus Data...</p>
                         </div>
                     )}
                 </div>

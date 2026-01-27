@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Loader2, Edit2, EyeOff, Plus, Search, Filter, Package, Zap, ArrowRight, ShieldCheck, Layers, Check, Trash2 } from 'lucide-react';
+import { Activity, Loader2, Edit2, EyeOff, Plus, Search, Filter, Package, Zap, ArrowRight, ShieldCheck, Layers, Check, Trash2, ShoppingBag } from 'lucide-react';
 import apiService from '../../services/apiService';
 import CreateAppModal from './CreateAppModal';
 import AppDetails from './AppDetails';
@@ -12,6 +12,7 @@ const AgentManagement = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [newAppName, setNewAppName] = useState('');
     const [selectedApp, setSelectedApp] = useState(null);
+    const [viewMode, setViewMode] = useState('AIMALL'); // 'AIMALL' or 'ASERIES'
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
     const [showFilterMenu, setShowFilterMenu] = useState(false);
@@ -67,32 +68,54 @@ const AgentManagement = () => {
         return 'Unknown';
     };
 
-    const filteredInventory = statsData?.inventory?.filter(app => {
-        // Strict Requirement: Agent MUST have an owner and cannot be a mock
-        if (!app.owner && !app._id?.startsWith('mock-')) {
-            // If it has no owner and isn't a mock, it's likely a system agent we want to hide
-            // or a malformed entry.
-            return false;
+    const A_SERIES_FALLBACK = [
+        "AISA", "AIDOC", "AIPHOTO", "AIPHARMA", "AIHEALTH", "AIDESK", "AIBRAND", "AIHR", "AISTAFF",
+        "AIDESIGN", "AIVOICE", "AIWRITE", "AISALES", "AILEAD", "AIMARKET", "AITEAM", "AIBILL",
+        "AISCRIPT", "AILAB", "AIANIMATE", "AIMED", "AIMIND", "AIOFFICE", "AIFIT", "AIGENE",
+        "AIBIZ", "AIFUNNEL", "AIVIDEO", "AIAUDIT", "AIPAY", "AITRANS", "AICALL", "AICARE",
+        "AICRM", "AICORE", "AIBOT", "AICONNECT", "AILEGAL", "AISCAN", "AIAD", "AIHIRE",
+        "AIPSYCH", "AIFLOW", "AIBASE", "AITAX", "AIGAME", "AISTREAM", "AICRAFT", "AIMUSIC"
+    ];
+
+    const filteredInventory = (() => {
+        const rawItems = statsData?.inventory || [];
+
+        // Filter based on view mode
+        let filtered = rawItems.filter(app => {
+            const isASeries = !app.owner || app.platform === 'A-SERIES';
+            if (viewMode === 'ASERIES') return isASeries;
+            return !isASeries || app.platform === 'BOTH';
+        });
+
+        // If in A-SERIES mode, ensure all fallback agents are present
+        if (viewMode === 'ASERIES') {
+            const existingNames = new Set(filtered.map(a => a.name?.toUpperCase()));
+            const fallbacks = A_SERIES_FALLBACK.filter(name => !existingNames.has(name))
+                .map(name => ({
+                    id: `fallback-${name}`,
+                    name: name,
+                    status: 'Coming Soon',
+                    pricing: { plans: [] },
+                    usageCount: 0,
+                    category: 'System Agent'
+                }));
+            filtered = [...filtered, ...fallbacks];
         }
-        if (app.id?.startsWith('mock-') || app._id?.startsWith('mock-')) return false;
 
-        // Exclude A-Series Agents (Official)
-        const aSeriesNames = [
-            'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
-            'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
-        ];
-        if (aSeriesNames.includes(app.name?.trim().toUpperCase())) return false;
+        // Apply Search and Filter
+        return filtered.filter(app => {
+            if (app.id?.startsWith('mock-')) return false;
 
-        const matchesSearch = app.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.status?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = app.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                app.id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesFilter = filterStatus === 'All' ||
-            app.status === filterStatus ||
-            app.category === filterStatus;
+            const matchesFilter = filterStatus === 'All' ||
+                app.status === filterStatus ||
+                app.category === filterStatus;
 
-        return matchesSearch && matchesFilter;
-    }) || [];
+            return matchesSearch && matchesFilter;
+        });
+    })();
 
     if (loading) {
         return (
@@ -124,18 +147,52 @@ const AgentManagement = () => {
         <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
+            style={{
+                WebkitFontSmoothing: 'antialiased',
+                textRendering: 'optimizeLegibility',
+                backfaceVisibility: 'hidden'
+            }}
             className="space-y-4 pb-24"
         >
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">AI-MALL Agents</h1>
-                    <p className="text-gray-500 font-medium text-xs">Manage your AI agent inventory and deployments</p>
+                <div className="flex flex-col md:flex-row md:items-center gap-6">
+                    <div>
+                        <h1 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">
+                            {viewMode === 'ASERIES' ? 'A-SERIES' : 'AI-MALL'} Agents
+                        </h1>
+                        <p className="text-gray-500 font-medium text-xs">
+                            {viewMode === 'ASERIES' ? 'Manage your a series agent inventory and deployments' : 'Manage your AI agent inventory and deployments'}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-1.5 bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[24px] shadow-sm">
+                        <button
+                            onClick={() => setViewMode('ASERIES')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'ASERIES'
+                                ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20 scale-105'
+                                : 'text-gray-400 hover:text-gray-900 hover:bg-white/40'
+                                }`}
+                        >
+                            <Layers className="w-4 h-4" />
+                            A SERIES
+                        </button>
+                        <button
+                            onClick={() => setViewMode('AIMALL')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'AIMALL'
+                                ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20 scale-105'
+                                : 'text-gray-400 hover:text-gray-900 hover:bg-white/40'
+                                }`}
+                        >
+                            <ShoppingBag className="w-4 h-4" />
+                            AI MALL
+                        </button>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="bg-gray-900 text-white px-6 py-2 rounded-[20px] text-[10px] font-black uppercase tracking-widest hover:bg-[#8b5cf6] hover:shadow-lg hover:shadow-[#8b5cf6]/20 transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95 group"
+                        className="bg-[#8b5cf6] text-white px-6 py-2 rounded-[20px] text-[10px] font-black uppercase tracking-widest hover:bg-[#7c3aed] shadow-lg shadow-[#8b5cf6]/20 transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95 group"
                     >
                         <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
                         Create New Agent
@@ -224,7 +281,7 @@ const AgentManagement = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left">
                         <thead className="bg-white/30 border-b border-white/60">
                             <tr>
@@ -289,10 +346,10 @@ const AgentManagement = () => {
                                                 <button
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
-                                                        if (window.confirm("Delete this agent permanently?")) {
+                                                        if (window.confirm(`Are you sure you want to permanently delete "${app.name}"? This will remove it from the marketplace and notify all users.`)) {
                                                             try {
-                                                                await apiService.deleteAgent(app.id || app._id);
-                                                                fetchStats();
+                                                                await apiService.deleteAgent(app._id || app.id);
+                                                                await fetchStats(); // Refresh the list
                                                             } catch (error) {
                                                                 alert("Delete failed: " + (error.response?.data?.error || error.message));
                                                             }
@@ -300,7 +357,7 @@ const AgentManagement = () => {
                                                     }}
                                                     className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-600 transition-all hover:shadow-md"
                                                 >
-                                                    <Trash2 className="w-3 h-3" />
+                                                    <Trash2 className="w-3.5 h-3.5" />
                                                 </button>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setSelectedApp(app); }}
@@ -320,7 +377,7 @@ const AgentManagement = () => {
                                             <div className="w-20 h-20 bg-gray-50 rounded-[32px] flex items-center justify-center border border-white shadow-sm">
                                                 <Zap className="w-8 h-8 text-gray-300" />
                                             </div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">No agents found in AI-MALL</p>
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">No agents found in {viewMode === 'ASERIES' ? 'A-SERIES' : 'AI-MALL'}</p>
                                         </div>
                                     </td>
                                 </tr>
