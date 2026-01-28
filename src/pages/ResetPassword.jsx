@@ -28,7 +28,7 @@ const ResetPassword = () => {
         setError('');
 
         try {
-            const response = await axios.post(`http://localhost:8080/api/auth/reset-password/${token}`, {
+            const response = await axios.post(`https://aimall-backend.onrender.com/api/auth/reset-password/${token}`, {
                 password,
                 confirmPassword
             });

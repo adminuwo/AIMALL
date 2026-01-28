@@ -88,5 +88,5 @@ export const apis = {
   chatAgent: `${API}/chat`,
   aibiz: `${API}/aibiz`,
   support: `${API}/support`,
-  BASE_URL: "http://localhost:8080",
+  BASE_URL: "https://aimall-backend.onrender.com",
 };
