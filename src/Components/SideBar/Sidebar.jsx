@@ -152,7 +152,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   // Navigation items configuration
   const allNavItems = [
     { id: 'chat', icon: MessageSquare, label: t('chat'), route: '/dashboard/chat', roles: ['user', 'admin', 'vendor'] },
-    { id: 'myAgents', icon: Bot, label: t('myAgents'), route: AppRoute.MY_AGENTS, roles: ['user', 'admin', 'vendor'] },
+    //{ id: 'myAgents', icon: Bot, label: t('myAgents'), route: AppRoute.MY_AGENTS, roles: ['user', 'admin', 'vendor'] },
     { id: 'marketplace', icon: ShoppingBag, label: t('marketplace'), route: AppRoute.MARKETPLACE, onClick: () => setNotifyTgl(prev => ({ ...prev, marketPlaceMode: 'AIMall' })), roles: ['user', 'admin', 'vendor'] },
     { id: 'settings', icon: Settings, label: t('settings'), route: AppRoute.PROFILE, roles: ['user', 'vendor'] },
     { id: 'admin', icon: LayoutGrid, label: t('adminDashboard'), route: AppRoute.ADMIN, roles: ['admin'] },

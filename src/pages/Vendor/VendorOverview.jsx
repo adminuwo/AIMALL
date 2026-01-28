@@ -22,7 +22,7 @@ const VendorOverview = () => {
         if (showLoading) setLoading(true);
         try {
             // Using a full URL to ensure consistency with backend
-            const response = await axios.get(`https://aimall-backend.onrender.com/api/agents/vendor-users/${userId}`, {
+            const response = await axios.get(`http://localhost:8080/api/agents/vendor-users/${userId}`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             setUsers(Array.isArray(response.data) ? response.data : []);
