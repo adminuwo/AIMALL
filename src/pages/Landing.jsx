@@ -15,7 +15,7 @@ const Landing = () => {
     <div className="min-h-screen font-sans text-gray-900 selection:bg-purple-100 selection:text-purple-900 overflow-hidden relative">
       <div className="fixed inset-0 -z-10">
         <img
-          src="/video/landing_bg.jpg"
+          src="/landing_bg.jpg"
           alt="Background"
           className="w-full h-full object-cover opacity-60"
         />
