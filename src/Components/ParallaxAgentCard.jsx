@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Zap } from 'lucide-react';
+import { Eye, Zap, Play } from 'lucide-react';
 
 const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
     return (
@@ -63,7 +63,7 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                             }}
                             className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white py-3 px-8 rounded-[24px] font-black text-[11px] uppercase tracking-widest shadow-lg shadow-purple-200/50 flex items-center gap-2 transition-all duration-300 hover:shadow-xl hover:translate-x-1 active:scale-95"
                         >
-                            <Zap size={15} fill="white" />
+                            <Play size={15} fill="white" />
                             USE
                         </button>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Search, Star, Play, X, Info, Send, Terminal, Sparkles, Activity, Zap, ChevronRight, Mail, ShieldCheck } from 'lucide-react';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
@@ -12,46 +12,30 @@ import { themeState } from '../userStore/userData';
 import ParallaxAgentCard from '../Components/ParallaxAgentCard';
 import { useLanguage } from '../context/LanguageContext';
 
-const Marketplace = () => {
-    // --- MOCK DATA FOR PREVIEW (Ensures grid is never empty) ---
-    // --- MOCK DATA FOR PREVIEW (Ensures grid is never empty) ---
-    const MOCK_AGENTS = [
-        {
-            _id: 'mock-1',
-            agentName: 'AIBOTT',
-            category: 'Customer Support',
-            description: 'Intelligent conversational agent for 24/7 client engagement and support automation.',
-            avatar: 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png',
-            status: 'Live',
-            reviewStatus: 'Approved',
-            rating: 4.9,
-            owner: 'mock-owner'
-        },
-        {
-            _id: 'mock-2',
-            agentName: 'AIBIZ',
-            category: 'Business OS',
-            description: 'Comprehensive business intelligence suite for data-driven decision making.',
-            avatar: 'https://cdn-icons-png.flaticon.com/512/8649/8649607.png',
-            status: 'Live',
-            reviewStatus: 'Approved',
-            rating: 4.8,
-            owner: 'mock-owner'
-        },
-        {
-            _id: 'mock-3',
-            agentName: 'AIBASE',
-            category: 'Data & Knowledge',
-            description: 'Secure enterprise knowledge base with semantic search and retrieval capabilities.',
-            avatar: 'https://cdn-icons-png.flaticon.com/512/9626/9626649.png',
-            status: 'Live',
-            reviewStatus: 'Approved',
-            rating: 4.7,
-            owner: 'mock-owner'
-        }
-    ];
+const SkeletonCard = ({ isDark }) => (
+    <div className="w-full h-full animate-pulse">
+        <div className={`relative h-[340px] w-full ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-gray-200/50 border-gray-100'} rounded-[48px] border overflow-hidden`}>
+            <div className="flex flex-col items-center justify-between h-full p-8 pt-12 pb-10">
+                <div className="flex flex-col items-center space-y-4 w-full">
+                    <div className={`w-24 h-24 rounded-3xl ${isDark ? 'bg-slate-700/50' : 'bg-gray-300/50'}`} />
+                    <div className="space-y-2 w-full flex flex-col items-center">
+                        <div className={`h-6 w-3/4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-gray-300/50'}`} />
+                        <div className={`h-4 w-1/2 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-gray-300/50'}`} />
+                    </div>
+                </div>
+                <div className="flex items-center gap-3 w-full justify-center px-4">
+                    <div className={`w-12 h-12 rounded-full ${isDark ? 'bg-slate-700/50' : 'bg-gray-300/50'}`} />
+                    <div className={`h-12 w-28 rounded-3xl ${isDark ? 'bg-slate-700/50' : 'bg-gray-300/50'}`} />
+                </div>
+            </div>
+        </div>
+    </div>
+);
 
-    const [agents, setAgents] = useState(MOCK_AGENTS); // Default: Show Mocks immediately
+const Marketplace = () => {
+
+
+    const [agents, setAgents] = useState([]); // Default to empty array to avoid showing placeholders while loading real data
     const [filter, setFilter] = useState('all');
     const [userAgent, setUserAgent] = useState([])
     const [loading, setLoading] = useState(false)
@@ -84,17 +68,14 @@ const Marketplace = () => {
                 const agentsRes = await axios.get(apis.agents);
                 const apiAgents = (agentsRes.data && Array.isArray(agentsRes.data)) ? agentsRes.data : [];
 
-                // Always merge MOCK with real agents to populate the grid visually
-                // We prefer real agents, but keep mocks if list is short
-                // if (apiAgents.length < 3) {
-                //     // Filter out any mocks that might be duplicates if we re-fetch? IDK, just simple merge.
-                //     // But we want mocks first? Or real first?
-                //     // Let's put REAL agents first, then MOCKS.
-                //     setAgents([...apiAgents, ...MOCK_AGENTS]);
-                // } else {
-                //     setAgents(apiAgents);
-                // }
-                setAgents(apiAgents);
+                // Filter to show only AI-MALL and BOTH platform agents
+                // Agents without platform field or platform="" are treated as AI-MALL
+                const filteredPlatformAgents = apiAgents.filter(agent => {
+                    const platform = agent.platform || 'AI-MALL';
+                    return platform === 'AI-MALL' || platform === 'BOTH' || platform === "";
+                });
+
+                setAgents(filteredPlatformAgents);
 
                 if (userId) {
                     try {
@@ -161,43 +142,35 @@ const Marketplace = () => {
     };
 
     // Strict Filter: Only show Live + Approved agents.
-    const filteredAgents = agents.filter(agent => {
-        // Allow mock agents (which might not have these exact fields or status 'Live' is hardcoded)
-        const isLive = !agent.status || agent.status === 'Live' || agent.status === 'active';
-        const isApproved = agent.reviewStatus === 'Approved';
+    const filteredAgents = useMemo(() => {
+        return agents.filter(agent => {
+            const isLive = !agent.status || agent.status === 'Live' || agent.status === 'active';
+            const isApproved = agent.reviewStatus === 'Approved';
 
-        // Always show mocks
-        if (agent._id && agent._id.toString().startsWith('mock-')) return true;
+            const aSeriesNames = [
+                'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
+                'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
+            ];
 
-        // Exclude A-Series Agents (Official)
-        const aSeriesNames = [
-            'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
-            'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
-        ];
+            const name = (agent.agentName || agent.name || "").trim().toUpperCase();
+            const isASeries = aSeriesNames.includes(name);
 
-        const name = (agent.agentName || agent.name || "").trim().toUpperCase();
-        const isASeries = aSeriesNames.includes(name);
+            const matchesCategory = filter === 'all' || agent.category === filter;
+            const matchesSearch = (agent.agentName || agent.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (agent.description || "").toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesCategory = filter === 'all' || agent.category === filter;
-        const matchesSearch = (agent.agentName || agent.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (agent.description || "").toLowerCase().includes(searchQuery.toLowerCase());
-
-        const isVisible = isLive && isApproved && !isASeries && matchesCategory && matchesSearch;
-
-        // Debugging log for each agent
-        if (!agent._id.toString().startsWith('mock-')) {
-            console.log(`[Marketplace Debug] Agent: ${agent.agentName}, Live: ${isLive}, Approved: ${isApproved}, A-Series: ${isASeries}, Visible: ${isVisible}`);
-        }
-
-        return isVisible;
-    });
+            return isLive && isApproved && !isASeries && matchesCategory && matchesSearch;
+        });
+    }, [agents, filter, searchQuery]);
 
     const categories = ['all', "Business OS", "Data & Intelligence", "Sales & Marketing", "HR & Finance", "Design & Creative", "Medical & Health AI"];
     // Exclude A-Series from Top Trending too
-    const topUsedAgents = agents.filter(a => ![
-        'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
-        'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
-    ].includes(a.agentName?.trim().toUpperCase())).slice(0, 3);
+    const topUsedAgents = useMemo(() => {
+        return agents.filter(a => ![
+            'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
+            'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
+        ].includes(a.agentName?.trim().toUpperCase())).slice(0, 3);
+    }, [agents]);
 
     // --- ANIMATION VARIANTS ---
     const containerVariants = {
@@ -474,32 +447,33 @@ const Marketplace = () => {
                     className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-32"
                 >
                     <AnimatePresence mode="popLayout">
-                        {filteredAgents.map((agent) => (
-                            <ParallaxAgentCard
-                                key={agent._id}
-                                agent={agent}
-                                isDark={isDark}
-                                onOpenInfo={openAgentInfo}
-                                toggleBuy={toggleBuy}
-                            />
-                        ))}
+                        {loading && agents.length === 0 ? (
+                            [...Array(8)].map((_, i) => (
+                                <SkeletonCard key={`skeleton-${i}`} isDark={isDark} />
+                            ))
+                        ) : (
+                            filteredAgents.map((agent) => (
+                                <ParallaxAgentCard
+                                    key={agent._id}
+                                    agent={agent}
+                                    isDark={isDark}
+                                    onOpenInfo={openAgentInfo}
+                                    toggleBuy={toggleBuy}
+                                />
+                            ))
+                        )}
                     </AnimatePresence>
                 </motion.div>
 
-                {/* Loading State - Premium Spinner */}
+                {/* Subtle Progress Bar for Loading (Optional) */}
                 <AnimatePresence>
-                    {loading && (
+                    {loading && agents.length > 0 && (
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[300] flex items-center justify-center bg-white/60 backdrop-blur-lg"
-                        >
-                            <div className="relative w-16 h-16">
-                                <span className="absolute inset-0 rounded-full border-4 border-purple-100 opacity-50"></span>
-                                <span className="absolute inset-0 rounded-full border-4 border-t-purple-600 animate-spin"></span>
-                            </div>
-                        </motion.div>
+                            className="fixed top-0 left-0 right-0 h-1 bg-purple-600 origin-left z-[400]"
+                        />
                     )}
                 </AnimatePresence>
 

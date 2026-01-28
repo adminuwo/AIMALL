@@ -17,7 +17,8 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
         description: app?.description || '',
         agentUrl: app?.url || '',
         category: app?.category || 'Business OS',
-        avatar: app?.avatar || ''
+        avatar: app?.avatar || '',
+        platform: app?.platform || 'AI-MALL'
     });
 
     const userData = getUserData();
@@ -30,7 +31,8 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                 description: app.description || '',
                 agentUrl: app.url || '',
                 category: app.category || 'Business OS',
-                avatar: app.avatar || ''
+                avatar: app.avatar || '',
+                platform: app.platform || 'AI-MALL'
             });
         }
     }, [app]);
@@ -89,7 +91,8 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                 description: editData.description,
                 url: editData.agentUrl,
                 category: editData.category,
-                avatar: editData.avatar
+                avatar: editData.avatar,
+                platform: editData.platform
             };
             await apiService.updateAgent(app._id || app.id, payload);
             setIsEditing(false);
@@ -423,6 +426,33 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                                             <p className="text-[#8B5CF6] font-bold text-base">{app.category || 'Business OS'}</p>
                                         </div>
                                     )}
+                                    <div className="pt-6 border-t border-white/60">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600"><Globe className="w-4 h-4" /></div>
+                                            <h3 className="text-xs font-black text-gray-900 uppercase tracking-[0.2em]">Target Marketplace</h3>
+                                        </div>
+
+                                        {isEditing ? (
+                                            <div className="relative">
+                                                <select
+                                                    name="platform"
+                                                    value={editData.platform}
+                                                    onChange={handleChange}
+                                                    className="w-full bg-white/50 border border-[#8B5CF6]/20 rounded-2xl px-5 py-4 text-[#8B5CF6] font-bold text-base outline-none focus:ring-4 focus:ring-[#8B5CF6]/5 transition-all appearance-none cursor-pointer"
+                                                >
+                                                    <option value="AI-MALL">AI-MALL Marketplace</option>
+                                                    <option value="A-SERIES">A-Series Marketplace</option>
+                                                    <option value="BOTH">Both Marketplaces</option>
+                                                </select>
+                                                <Globe className="w-5 h-5 absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                            </div>
+                                        ) : (
+                                            <div className="bg-white/50 border border-white/80 rounded-[24px] p-5">
+                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Platform</p>
+                                                <p className="text-[#8B5CF6] font-bold text-base">{app.platform || 'AI-MALL'}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

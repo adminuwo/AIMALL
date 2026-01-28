@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Sparkles, AlertCircle, Box, Layers, Zap, Image as ImageIcon } from 'lucide-react';
+import { X, Sparkles, AlertCircle, Box, Layers, Zap, Image as ImageIcon, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
@@ -10,7 +10,8 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
         agentUrl: '',
         category: 'Business OS',
         pricing: 'Free',
-        avatar: ''
+        avatar: '',
+        platform: 'AI-MALL'
     };
 
     const [formData, setFormData] = useState(initialFormData);
@@ -245,6 +246,24 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
                                             <option value="Pro (₹1000/yr)">Pro (₹1000/yr)</option>
                                         </select>
                                         <Zap className="w-3.5 h-3.5 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5 col-span-2">
+                                    <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
+                                        Target Marketplace
+                                    </label>
+                                    <div className="relative">
+                                        <select
+                                            name="platform"
+                                            value={formData.platform}
+                                            onChange={handleChange}
+                                            className="w-full bg-white/20 border border-gray-200/50 rounded-[14px] px-4 py-2.5 text-xs font-bold focus:ring-4 focus:ring-[#8b5cf6]/20 focus:border-[#8b5cf6] outline-none transition-all appearance-none cursor-pointer hover:bg-white/40"
+                                        >
+                                            <option value="AI-MALL">AI-MALL Marketplace</option>
+                                            <option value="A-SERIES">A-Series Marketplace</option>
+                                            <option value="BOTH">Both Marketplaces</option>
+                                        </select>
+                                        <Globe className="w-3.5 h-3.5 absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                     </div>
                                 </div>
                             </div>
