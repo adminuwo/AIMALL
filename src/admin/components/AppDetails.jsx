@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Check, Info, ArrowLeft, Trash2, Globe, Loader2, Share2, Eye, Box, Activity, Edit2, Save, X, Image as ImageIcon } from 'lucide-react';
+import { Shield, Check, Info, ArrowLeft, Trash2, Globe, Loader2, Share2, Eye, Box, Activity, Edit2, Save, X, Image as ImageIcon, Layers } from 'lucide-react';
 import apiService from '../../services/apiService';
 import { getUserData } from '../../userStore/userData';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,6 +16,7 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
         agentName: app?.agentName || app?.name || '',
         description: app?.description || '',
         agentUrl: app?.url || '',
+        category: app?.category || 'Business OS',
         avatar: app?.avatar || ''
     });
 
@@ -28,6 +29,7 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                 agentName: app.agentName || app.name || '',
                 description: app.description || '',
                 agentUrl: app.url || '',
+                category: app.category || 'Business OS',
                 avatar: app.avatar || ''
             });
         }
@@ -86,6 +88,7 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                 agentName: editData.agentName,
                 description: editData.description,
                 url: editData.agentUrl,
+                category: editData.category,
                 avatar: editData.avatar
             };
             await apiService.updateAgent(app._id || app.id, payload);
@@ -226,6 +229,7 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                                         agentName: app.agentName || app.name || '',
                                         description: app.description || '',
                                         agentUrl: app.url || '',
+                                        category: app.category || 'Business OS',
                                         avatar: app.avatar || ''
                                     });
                                 }}
@@ -385,6 +389,38 @@ const AppDetails = ({ app, onBack, onDelete, onUpdate, isAdmin: propsIsAdmin }) 
                                         <div className="bg-white/50 border border-white/80 rounded-[24px] p-5 group cursor-pointer hover:bg-white/80 transition-colors">
                                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Live API URL</p>
                                             <p className="text-[#8b5cf6] font-bold text-base break-all">{app.url || 'No URL configured'}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="pt-6 border-t border-white/60">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-2 bg-purple-50 rounded-lg text-purple-600"><Layers className="w-4 h-4" /></div>
+                                        <h3 className="text-xs font-black text-gray-900 uppercase tracking-[0.2em]">Agent Category</h3>
+                                    </div>
+
+                                    {isEditing ? (
+                                        <div className="relative">
+                                            <select
+                                                name="category"
+                                                value={editData.category}
+                                                onChange={handleChange}
+                                                className="w-full bg-white/50 border border-[#8B5CF6]/20 rounded-2xl px-5 py-4 text-[#8B5CF6] font-bold text-base outline-none focus:ring-4 focus:ring-[#8B5CF6]/5 transition-all appearance-none cursor-pointer"
+                                            >
+                                                <option>Business OS</option>
+                                                <option>Data & Intelligence</option>
+                                                <option>Sales & Marketing</option>
+                                                <option>HR & Finance</option>
+                                                <option>Design & Creative</option>
+                                                <option>Medical & Health</option>
+                                                <option>Productivity</option>
+                                            </select>
+                                            <Layers className="w-5 h-5 absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white/50 border border-white/80 rounded-[24px] p-5">
+                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Category</p>
+                                            <p className="text-[#8B5CF6] font-bold text-base">{app.category || 'Business OS'}</p>
                                         </div>
                                     )}
                                 </div>

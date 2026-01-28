@@ -419,10 +419,10 @@ const NewAppModal = ({ isOpen, onClose, onAppCreated }) => {
                                             <motion.div
                                                 onClick={() => fileInputRef.current?.click()}
                                                 whileHover={{ scale: 1.02, shadow: "0 15px 30px -10px rgba(139, 92, 246, 0.25)" }}
-                                                className={`w-[100px] h-[140px] ${formData.avatar ? 'bg-white border-solid shadow-xl' : 'bg-white/60 backdrop-blur-sm border-dashed'} border-2 border-white shadow-sm rounded-[24px] flex items-center justify-center cursor-pointer hover:bg-white hover:border-white/80 transition-all duration-500 overflow-hidden active:scale-95`}
+                                                className={`w-32 h-32 ${formData.avatar ? 'bg-white border-solid shadow-xl' : 'bg-white/60 backdrop-blur-sm border-dashed'} border-2 border-white shadow-sm rounded-[24px] flex items-center justify-center cursor-pointer hover:bg-white hover:border-white/80 transition-all duration-500 overflow-hidden active:scale-95`}
                                             >
                                                 {formData.avatar ? (
-                                                    <img src={formData.avatar} alt="Icon" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                    <img src={formData.avatar} alt="Icon" className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
                                                 ) : (
                                                     <div className="text-center group-hover:scale-110 transition-transform duration-500">
                                                         <div className="p-3 bg-purple-500/10 rounded-xl mb-2 text-[#8b5cf6] group-hover:bg-[#8b5cf6] group-hover:text-white transition-all duration-500 backdrop-blur-sm shadow-sm ring-1 ring-white/10">
@@ -456,7 +456,7 @@ const NewAppModal = ({ isOpen, onClose, onAppCreated }) => {
                                         <div className="flex-1 space-y-3 pt-1">
                                             <h4 className="text-sm font-black text-gray-900 uppercase tracking-tight">Logo</h4>
                                             <p className="text-[10px] text-gray-600 font-bold leading-relaxed tracking-tight group-hover:text-gray-800 transition-colors">
-                                                Recommended size: <span className="text-[#8b5cf6] font-black underline decoration-2 underline-offset-4">800x1200px</span>.
+                                                Recommended size: <span className="text-[#8b5cf6] font-black underline decoration-2 underline-offset-4">512x512px</span>.
                                             </p>
                                             <div className="flex flex-wrap gap-2 pt-1">
                                                 {["Professional", "PNG/JPG", "Max 5MB"].map(tag => (

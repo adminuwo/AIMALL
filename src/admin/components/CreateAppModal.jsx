@@ -52,9 +52,9 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
 
-                // Target 4:7 aspect ratio (e.g., 400x700)
-                const targetWidth = 400;
-                const targetHeight = 700;
+                // Target 1:1 aspect ratio (e.g., 512x512)
+                const targetWidth = 512;
+                const targetHeight = 512;
                 canvas.width = targetWidth;
                 canvas.height = targetHeight;
 
@@ -187,7 +187,7 @@ const CreateAppModal = ({ isOpen, onClose, onSubmit }) => {
                                     <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
                                         Agent Logo
                                     </label>
-                                    <label className="relative group flex items-center justify-center w-16 aspect-[4/7] bg-white/30 border border-dashed border-gray-300 rounded-[12px] cursor-pointer hover:bg-white/50 hover:border-[#8b5cf6]/50 overflow-hidden transition-all shadow-sm">
+                                    <label className="relative group flex items-center justify-center w-20 aspect-square bg-white/30 border border-dashed border-gray-300 rounded-[12px] cursor-pointer hover:bg-white/50 hover:border-[#8b5cf6]/50 overflow-hidden transition-all shadow-sm">
                                         {formData.avatar ? (
                                             <img src={formData.avatar} className="w-full h-full object-cover" />
                                         ) : (
