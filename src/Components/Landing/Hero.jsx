@@ -51,6 +51,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
+import { useLanguage } from '../../context/LanguageContext';
 import './Hero.css';
 
 const Hero = () => {
@@ -60,6 +61,7 @@ const Hero = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [showAIMall, setShowAIMall] = useState(false);
     const [showASeries, setShowASeries] = useState(false);
+    const { t } = useLanguage();
 
     useEffect(() => {
         setIsVisible(true);
@@ -80,26 +82,26 @@ const Hero = () => {
     }, []);
 
     return (
-        <section className="relative overflow-visible min-h-[500px] sm:min-h-[600px] flex items-center py-8 sm:py-12 md:pb-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 xl:px-16 w-full flex flex-col items-center justify-center text-center md:-mt-20">
+        <section className="relative overflow-visible min-h-[400px] sm:min-h-[500px] flex items-center py-6 sm:py-10 md:pb-14">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 xl:px-16 w-full flex flex-col items-center justify-center text-center md:-mt-10">
                 <div className="z-10 max-w-4xl w-full">
 
                     <h1
-                        className={`${isDark ? 'text-white' : 'hero-heading-dark'} text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 drop-shadow-sm transition-all duration-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                        className={`${isDark ? 'text-white' : 'hero-heading-dark'} text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 drop-shadow-sm transition-all duration-300 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                     >
-                        Discover & Deploy <br />
-                        AI Solutions
+                        {t('heroHeading')} <br />
+                        {t('heroHeadingLine2')}
                     </h1>
 
                     <div className="h-3 sm:h-4 md:h-6" />
 
                     <p
-                        className={`${isDark ? 'text-white/90' : 'hero-subtext-dark'} text-sm sm:text-base md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-all duration-1000 delay-100 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                        className={`${isDark ? 'text-white/90' : 'hero-subtext-dark'} text-sm sm:text-base md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-all duration-300 delay-75 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                     >
-                        Your vendors marketplace for intelligent agents
+                        {t('heroSubheading')}
                     </p>
 
-                    <div className={`relative w-full flex flex-row gap-3 sm:gap-6 justify-center items-center transition-all duration-1000 delay-200 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    <div className={`relative w-full flex flex-row gap-3 sm:gap-6 justify-center items-center transition-all duration-300 delay-150 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
 
                         {/* ================= AI MALL ================= */}
                         <div
@@ -124,26 +126,25 @@ const Hero = () => {
                                 shadow-lg shadow-purple-500/50 transition-all duration-300
                                 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/70
                                 active:scale-95 outline-none">
-                                AI Mall<sup className="text-xs font-black ml-0.5">TM</sup>
+                                {t('aiMallButton')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup>
                             </button>
 
                             {/* AI Mall Card */}
-                            <div className={`hover-card absolute left-0 right-0 mx-auto md:right-full md:left-auto md:translate-x-0 top-full mt-3 w-[220px] sm:w-80 transition-all duration-300 z-50
+                            <div className={`hover-card absolute left-0 right-0 mx-auto md:right-full md:left-auto md:translate-x-0 top-full mt-3 w-[270px] sm:w-80 transition-all duration-300 z-50
                                 ${showAIMall ? 'opacity-100 translate-y-0 visible' : 'opacity-0 translate-y-2 pointer-events-none invisible'}`}>
                                 <div className="rounded-xl p-3 sm:p-5 text-white
                                     bg-gradient-to-br from-purple-600/90 via-violet-600/85 to-indigo-600/80
                                     border border-purple-300/40
                                     shadow-[0_0_25px_rgba(168,85,247,0.5)]
                                     backdrop-blur-md">
-                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">AI Mall<sup className="text-xs font-black ml-0.5">TM</sup></h4>
+                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">{t('aiMallCardTitle')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup></h4>
                                     <p className="text-xs sm:text-sm text-white leading-relaxed">
-                                        AI Mall is a marketplace where vendors build,
-                                        showcase, and sell powerful AI agents to the world.
+                                        {t('aiMallCardDesc')}
                                     </p>
                                     <button
                                         onClick={() => navigate('/dashboard/chat')}
                                         className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs sm:text-sm font-semibold transition-colors md:hidden">
-                                        Go to AI Mall<sup className="text-xs font-black ml-0.5">TM</sup> →
+                                        {t('goToAIMall')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup> →
                                     </button>
                                 </div>
                             </div>
@@ -172,26 +173,25 @@ const Hero = () => {
                                 shadow-lg shadow-blue-500/50 transition-all duration-300
                                 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/70
                                 active:scale-95 outline-none">
-                                A Series<sup className="text-xs font-black ml-0.5">TM</sup>
+                                {t('aSeriesButton')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup>
                             </button>
 
                             {/* A Series Card */}
-                            <div className={`hover-card absolute left-0 right-0 mx-auto md:left-full md:translate-x-0 top-full mt-3 w-[220px] sm:w-80 transition-all duration-300 z-50
+                            <div className={`hover-card absolute left-0 right-0 mx-auto md:left-full md:translate-x-0 top-full mt-3 w-[270px] sm:w-80 transition-all duration-300 z-50
                                 ${showASeries ? 'opacity-100 translate-y-0 visible' : 'opacity-0 translate-y-2 pointer-events-none invisible'}`}>
                                 <div className="rounded-xl p-3 sm:p-5 text-white
                                     bg-gradient-to-br from-[#2563eb] via-[#3b82f6] to-[#1d4ed8]
                                     border border-blue-300/40
                                     shadow-[0_0_25px_rgba(59,130,246,0.5)]
                                     backdrop-blur-md">
-                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">A Series<sup className="text-xs font-black ml-0.5">TM</sup></h4>
+                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">{t('aSeriesCardTitle')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup></h4>
                                     <p className="text-xs sm:text-sm text-white leading-relaxed">
-                                        A Series is a curated collection of smart AI agents
-                                        designed to handle real-world tasks effortlessly.
+                                        {t('aSeriesCardDesc')}
                                     </p>
                                     <button
                                         onClick={() => window.location.href = "https://a-series-bgve.onrender.com"}
                                         className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs sm:text-sm font-semibold transition-colors md:hidden">
-                                        Go to A Series<sup className="text-xs font-black ml-0.5">TM</sup> →
+                                        {t('goToASeries')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup> →
                                     </button>
                                 </div>
                             </div>

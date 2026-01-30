@@ -198,7 +198,7 @@ const Chat = () => {
               >
                 <div className="flex items-center gap-3">
                   <Clock size={14} className={currentSessionId === session.sessionId ? 'text-[#8B5CF6]' : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
-                  <div className="flex-1 truncate text-xs font-bold uppercase tracking-tight">{session.title || t('untitledSession')}</div>
+                  <div className="flex-1 truncate text-xs font-bold uppercase tracking-tight">{(session.title?.toUpperCase() === 'NEW CHAT' || !session.title) ? t('untitledSession') : session.title}</div>
                 </div>
               </button>
               <button
@@ -240,7 +240,7 @@ const Chat = () => {
               <img src="/AISA (2).svg" alt="AISA Logo" className="w-10 h-10 object-contain" />
               <div className="flex flex-col">
                 <h3 className={`text-xl font-black uppercase tracking-tighter leading-none transition-colors ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>
-                  AISA
+                  {t('aisa')}
                 </h3>
                 <span className={`text-[11px] font-bold ${isDark ? 'text-[#8B5CF6]' : 'text-[#8b5cf6]'} uppercase tracking-widest opacity-80`}>{t('onlineReady')}</span>
               </div>
@@ -251,7 +251,7 @@ const Chat = () => {
         {!isChatHistoryEnabled && (
           <div className={`px-10 py-3 ${isDark ? 'bg-[#ef4444]/10 border-b border-[#ef4444]/20' : 'bg-red-50 border-b border-red-100'} flex items-center justify-center gap-2 animate-in slide-in-from-top duration-500`}>
             <History size={14} className="text-[#ef4444]" />
-            <span className={`text-[10px] uppercase font-black tracking-widest ${isDark ? 'text-[#ef4444]' : 'text-red-500'}`}>Ephemeral Mode: Chat history is not being saved</span>
+            <span className={`text-[10px] uppercase font-black tracking-widest ${isDark ? 'text-[#ef4444]' : 'text-red-500'}`}>{t('ephemeralModeMsg')}</span>
           </div>
         )}
 
@@ -302,7 +302,7 @@ const Chat = () => {
 
               {isLoading && (
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-white border border-white/60 flex items-center justify-center text-[#8b5cf6] shadow-sm animate-pulse">
+                  <div className="w-10 h-10 rounded-2xl bg-white border border-white/60 flex items-center justify-center text-[#8b5cf6]">
                     <Sparkles size={18} />
                   </div>
                   <div className={`px-6 py-4 rounded-[28px] rounded-tl-none ${isDark ? 'bg-[#242f49] border-white/5' : 'bg-white/20 border-white/40'} backdrop-blur-md border flex items-center gap-2 transition-colors`}>

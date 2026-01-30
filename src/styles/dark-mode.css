@@ -167,43 +167,52 @@ body.dark-mode .marketplace-hero-card sup,
 
 /* Specific glowing blue links for Footer */
 .footer-glow-link {
-    color: #3b82f6 !important;
+    color: #000000 !important;
 }
 
 body.dark-mode .footer-glow-link {
     color: #FFFFFF !important;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Specific glowing purple links for Footer */
 .footer-glow-purple {
-    color: #8b5cf6 !important;
+    color: #000000 !important;
 }
 
 body.dark-mode .footer-glow-purple {
     color: #FFFFFF !important;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.15) !important;
 }
 
 .footer-glow-link:hover,
 .footer-glow-purple:hover {
-    filter: brightness(1.2);
+    color: #8b5cf6 !important;
+    text-shadow: 0 0 15px rgba(139, 92, 246, 0.6) !important;
+    transform: scale(1.05) translateX(5px);
+    filter: brightness(1.1);
+}
+
+/* Heading/Text glow for Footer - Light Mode */
+.footer-text-glow {
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Generic glowing white text for Footer descriptions */
 body.dark-mode .footer-text-glow {
     color: #FFFFFF !important;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.15) !important;
 }
 
-/* Force glowing icons in How It Works */
+/* Force icons in How It Works */
 .how-it-works-icon {
     color: #3b82f6 !important;
 }
 
-body.dark-mode .how-it-works-icon {
-    color: #3b82f6 !important;
-    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.9)) !important;
+body.dark-mode .how-it-works-icon svg {
+    color: #a855f7 !important;
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.6)) !important;
+    stroke: #a855f7 !important;
 }
 
 /* Sidebar Theme System for Dark Mode */
@@ -241,7 +250,17 @@ body.dark-mode .sidebar-purple-btn span {
     opacity: 1 !important;
 }
 
-/* Specific Exception: Profile initial turns black on hover */
+/* Specific Exception: Profile initial turns black when background is white in Dark mode */
+body.dark-mode .sidebar-purple-btn .profile-initial {
+    color: #ec4899 !important;
+    /* Keep pink initial */
+}
+
+body.dark-mode .sidebar-active .profile-initial {
+    color: #ec4899 !important;
+    /* Pink initial on active white background */
+}
+
 body.dark-mode .sidebar-purple-btn:hover .profile-initial {
     color: #000000 !important;
 }

@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const [currentUserData] = useRecoilState(userData);
   const token = localStorage.getItem('token');
   const isLoggedIn = !!token;
-  const user = (isLoggedIn && currentUserData?.user) ? currentUserData.user : { name: "Guest", email: "", role: "guest" };
+  const user = (isLoggedIn && currentUserData?.user) ? currentUserData.user : { name: t('guest') || "Guest", email: "", role: "guest" };
   const userRole = (user.role === 'admin' || user.role === 'Admin') ? 'admin' : user.role;
   // Check both role and email for admin access, but ONLY if logged in
   const isAdminView = isLoggedIn && (userRole === 'admin' || user.email === 'admin@uwo24.com');
@@ -253,7 +253,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           >
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className={`text-xl font-black ${isDark ? 'text-[#E6E9F2]' : 'text-gray-900'} tracking-tighter uppercase leading-none transition-colors`}>AI MALL<sup className="text-xs font-black ml-0.5">TM</sup></span>
+                <span className={`text-xl font-black ${isDark ? 'text-[#E6E9F2]' : 'text-gray-900'} tracking-tighter uppercase leading-none transition-colors`}>{t('headerLogoText')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup></span>
               </div>
             </div>
           </Link>
@@ -277,21 +277,25 @@ const Sidebar = ({ isOpen, onClose }) => {
                 key={item.id}
                 to={item.route}
                 onClick={(e) => handleNavClick(e, item)}
-                className={({ isActive }) =>
-                  `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isActive
-                    ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-white text-[#7c3aed] border-purple-100 shadow-[0_10px_20px_-5px_rgba(124,58,237,0.2)]'} scale-[1.02]`
-                    : `${isDark ? 'sidebar-purple-btn' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`
-                  }`
-                }
+                className={({ isActive }) => {
+                  const isTabActive = isActive && !isFaqOpen;
+                  return `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isTabActive
+                    ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
+                    : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
+                    }`;
+                }}
               >
-                {({ isActive }) => (
-                  <>
-                    {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
-                    <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isActive ? 'text-white' : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
-                    <span className="relative z-10">{item.label}</span>
-                    {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
-                  </>
-                )}
+                {({ isActive }) => {
+                  const isTabActive = isActive && !isFaqOpen;
+                  return (
+                    <>
+                      {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isTabActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
+                      <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
+                      <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : ''}`}>{item.label}</span>
+                      {isTabActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
+                    </>
+                  );
+                }}
               </NavLink>
             );
           })}
@@ -313,28 +317,32 @@ const Sidebar = ({ isOpen, onClose }) => {
                 onClose();
               }
             }}
-            className={({ isActive }) =>
-              `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isActive
-                ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-white text-[#7c3aed] border-purple-100 shadow-[0_10px_20px_-5px_rgba(124,58,237,0.2)]'} scale-[1.02]`
-                : `${isDark ? 'sidebar-purple-btn' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`
-              }`
-            }
+            className={({ isActive }) => {
+              const isTabActive = isActive && !isFaqOpen;
+              return `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isTabActive
+                ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
+                : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
+                }`;
+            }}
           >
-            {({ isActive }) => (
-              <>
-                {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
-                <div className="relative mr-3 z-10">
-                  <Bell size={14} className={`transition-colors ${isActive ? 'text-white' : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
-                  {notifications.filter(n => !n.isRead).length > 0 && (
-                    <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-black text-white flex items-center justify-center border ${isDark ? 'border-[#1a2235]' : 'border-white'}`}>
-                      {notifications.filter(n => !n.isRead).length}
-                    </div>
-                  )}
-                </div>
-                <span className="relative z-10">{t('notifications')}</span>
-                {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
-              </>
-            )}
+            {({ isActive }) => {
+              const isTabActive = isActive && !isFaqOpen;
+              return (
+                <>
+                  {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isTabActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
+                  <div className="relative mr-3 z-10">
+                    <Bell size={14} className={`transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
+                    {notifications.filter(n => !n.isRead).length > 0 && (
+                      <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-black text-white flex items-center justify-center border ${isDark ? 'border-[#1a2235]' : 'border-white'}`}>
+                        {notifications.filter(n => !n.isRead).length}
+                      </div>
+                    )}
+                  </div>
+                  <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t('notifications')}</span>
+                  {isTabActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
+                </>
+              );
+            }}
           </NavLink>
         </div>
 
@@ -351,27 +359,33 @@ const Sidebar = ({ isOpen, onClose }) => {
                 onClose();
               }
             }}
-            className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isDark
-              ? 'sidebar-purple-btn'
-              : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'
-              } hover:shadow-lg hover:scale-[1.02]`}
+            className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen)
+              ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
+              : `${isDark ? 'sidebar-purple-btn' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`
+              }`}
           >
-            <div className={`absolute inset-0 ${!isDark ? 'bg-gradient-to-r from-[#d946ef] to-[#8b5cf6]' : ''} opacity-0 transition-opacity duration-300 group-hover:opacity-10`} />
-            <div className={`profile-initial w-6 h-6 rounded-lg mr-3 flex items-center justify-center ${isDark ? 'bg-white/20 text-white' : 'bg-gray-100 text-[#7c3aed]'} font-black text-[10px] z-10 group-hover:bg-white transition-all shadow-sm`}>
+            {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? 'opacity-0' : 'group-hover:opacity-10'}`} />}
+            <div className={`profile-initial w-6 h-6 rounded-lg mr-3 flex items-center justify-center font-black text-[10px] z-10 transition-all shadow-sm ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen)
+              ? 'bg-white text-[#ec4899]'
+              : `${isDark ? 'bg-white/20 text-white group-hover:bg-white group-hover:text-black' : 'bg-gray-100 text-[#7c3aed] group-hover:bg-white group-hover:text-[#ec4899]'}`
+              }`}>
               {user.name.charAt(0)}
             </div>
-            <span className="relative z-10">{user.name}</span>
+            <span className={`relative z-10 transition-colors ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? (isDark ? 'text-white' : 'text-black') : ''}`}>{user.name}</span>
+            {((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
           </button>
 
           <button
             onClick={() => { setIsFaqOpen(true); onClose(); }}
-            className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isDark
-              ? 'sidebar-purple-btn'
-              : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'
-              } hover:shadow-lg hover:scale-[1.02]`}
+            className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isFaqOpen
+              ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
+              : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
+              }`}
           >
-            <HelpCircle size={15} className={`mr-3 ${isDark ? 'text-white' : 'text-gray-400'} group-hover:text-white transition-colors relative z-10`} />
-            <span className="relative z-10">{t('helpFaq')}</span>
+            {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isFaqOpen ? 'opacity-0' : 'group-hover:opacity-10'}`} />}
+            <HelpCircle size={15} className={`mr-3 transition-colors relative z-10 ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-white' : 'text-gray-400 group-hover:text-[#ec4899]'}`}`} />
+            <span className={`relative z-10 transition-colors ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t('helpFaq')}</span>
+            {isFaqOpen && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
           </button>
 
           <div className="pt-1">
@@ -466,16 +480,12 @@ const Sidebar = ({ isOpen, onClose }) => {
                         onChange={(e) => setIssueType(e.target.value)}
                         className={`w-full p-5 pr-12 rounded-[24px] ${isDark ? 'bg-[#131c31] border-white/10 text-[#E6E9F2]' : 'bg-white/60 border-white/80 text-slate-900'} border focus:border-[#8B5CF6]/50 focus:ring-4 focus:ring-[#8B5CF6]/5 outline-none appearance-none font-black text-sm transition-all`}
                       >
-                        {[
-                          { value: "General Inquiry", label: t('generalInquiry') },
-                          { value: "Payment Issue", label: t('paymentIssue') },
-                          { value: "Refund Request", label: t('refundRequest') },
-                          { value: "Technical Support", label: t('technicalSupport') },
-                          { value: "Account Access", label: t('accountAccess') },
-                          { value: "Other", label: t('other') }
-                        ].map((opt) => (
-                          <option key={opt.value} value={opt.value} className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{opt.label}</option>
-                        ))}
+                        <option value="General Inquiry" className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{t('inquiryGeneral')}</option>
+                        <option value="Payment Issue" className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{t('inquiryPayment')}</option>
+                        <option value="Refund Request" className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{t('inquiryRefund')}</option>
+                        <option value="Technical Support" className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{t('inquiryTechnical')}</option>
+                        <option value="Account Access" className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{t('inquiryAccount')}</option>
+                        <option value="Other" className={isDark ? 'bg-[#131c31] text-[#E6E9F2]' : 'bg-white text-slate-900'}>{t('inquiryOther')}</option>
                       </select>
                       <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6F76A8] pointer-events-none group-focus-within/select:rotate-180 transition-transform" />
                     </div>
@@ -524,7 +534,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className={`p-8 border-t ${isDark ? 'border-white/5 bg-[#131c31]/30' : 'border-white/40 bg-white/20'} flex justify-center shrink-0`}>
               <button
                 onClick={() => setIsFaqOpen(false)}
-                className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#C7CBEA] hover:text-[#E6E9F2]' : 'text-slate-500 hover:text-slate-900'} px-10 py-3 rounded-full hover:bg-white/5 transition-all outline-none border-none`}
+                className="px-10 py-3 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 rounded-full text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-purple-200/50 shadow-sm"
               >
                 {t('dismiss')}
               </button>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, ChevronUp, Loader2, CheckCircle2 } from 'lucide-react';
 import { apiService } from '../../services/apiService';
+import { useLanguage } from '../../context/LanguageContext';
 
 const HelpCenterModal = ({ isOpen, onClose }) => {
+    const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('KNOWLEDGE');
     const [expandedFaq, setExpandedFaq] = useState(null);
     const [supportCategory, setSupportCategory] = useState('General Inquiry');
@@ -16,6 +18,8 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
             document.body.style.overflow = 'hidden';
             setSubmitted(false);
             setMessage('');
+            // Set default category localized
+            setSupportCategory('General Inquiry');
         } else {
             document.body.style.overflow = 'unset';
         }
@@ -50,40 +54,40 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
 
     const faqs = [
         {
-            question: "What exactly is AI-Mall?",
-            answer: "AI-Mall is India's first dedicated marketplace for AI agents, offering a wide range of specialized AI solutions for various needs."
+            question: t('faq1_q') || "What exactly is AI-Mall?",
+            answer: t('faq1_a') || "AI-Mall is India's first dedicated marketplace for AI agents, offering a wide range of specialized AI solutions for various needs."
         },
         {
-            question: "How does the subscription plan work?",
-            answer: "We offer flexible subscription tiers. You can choose a monthly or annual plan that best fits your usage requirements."
+            question: t('faq2_q') || "How does the subscription plan work?",
+            answer: t('faq2_a') || "We offer flexible subscription tiers. You can choose a monthly or annual plan that best fits your usage requirements."
         },
         {
-            question: "Which AI models power these agents?",
-            answer: "Our agents are powered by state-of-the-art LLMs including GPT-4, Claude 3, and specialized open-source models optimized for specific tasks."
+            question: t('faq3_q') || "Which AI models power these agents?",
+            answer: t('faq3_a') || "Our agents are powered by state-of-the-art LLMs including GPT-4, Claude 3, and specialized open-source models optimized for specific tasks."
         },
         {
-            question: "Is my data secure on the server?",
-            answer: "Yes, we prioritize data security. All data is encrypted at rest and in transit, following industry-standard security protocols."
+            question: t('faq4_q') || "Is my data secure on the server?",
+            answer: t('faq4_a') || "Yes, we prioritize data security. All data is encrypted at rest and in transit, following industry-standard security protocols."
         },
         {
-            question: "How many agents can I use right now?",
-            answer: "Depending on your plan, you can access multiple agents simultaneously. Check your plan details for specific limits."
+            question: t('faq5_q') || "How many agents can I use right now?",
+            answer: t('faq5_a') || "Depending on your plan, you can access multiple agents simultaneously. Check your plan details for specific limits."
         },
         {
-            question: "Can I create my own agent?",
-            answer: "Yes! Our Vendor Dashboard allows developers to create, test, and monetize their own custom AI agents on the marketplace."
+            question: t('faq6_q') || "Can I create my own agent?",
+            answer: t('faq6_a') || "Yes! Our Vendor Dashboard allows developers to create, test, and monetize their own custom AI agents on the marketplace."
         },
         {
-            question: "Why should I use this over other AI solutions?",
-            answer: "AI-Mall offers a curated, secure, and integrated environment where you can find specialized agents for specific workflows, saving you time on prompt engineering."
+            question: t('faq7_q') || "Why should I use this over other AI solutions?",
+            answer: t('faq7_a') || "AI-Mall offers a curated, secure, and integrated environment where you can find specialized agents for specific workflows, saving you time on prompt engineering."
         },
         {
-            question: "Is it mobile-friendly?",
-            answer: "Absolutely. The AI-Mall interface is fully responsive and optimized for a seamless experience on smartphones and tablets."
+            question: t('faq8_q') || "Is it mobile-friendly?",
+            answer: t('faq8_a') || "Absolutely. The AI-Mall interface is fully responsive and optimized for a seamless experience on smartphones and tablets."
         },
         {
-            question: "How do I get started?",
-            answer: "Simply sign up for an account, browse the marketplace, pick an agent, and start chatting immediately!"
+            question: t('faq9_q') || "How do I get started?",
+            answer: t('faq9_a') || "Simply sign up for an account, browse the marketplace, pick an agent, and start chatting immediately!"
         }
     ];
 
@@ -112,7 +116,7 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
                                 : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            KNOWLEDGE
+                            {t('knowledge') || 'KNOWLEDGE'}
                         </button>
                         <button
                             onClick={() => setActiveTab('SUPPORT')}
@@ -121,7 +125,7 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
                                 : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
-                            SUPPORT
+                            {t('supportHeading') || 'SUPPORT'}
                         </button>
                     </div>
 
@@ -138,7 +142,7 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
 
                     {activeTab === 'KNOWLEDGE' && (
                         <div className="space-y-4 md:space-y-6">
-                            <h3 className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">General Guidelines</h3>
+                            <h3 className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">{t('generalGuidelines')}</h3>
                             <div className="space-y-3">
                                 {faqs.map((faq, index) => (
                                     <div key={index} className="overflow-hidden rounded-2xl md:rounded-3xl bg-white/40 border border-white/40 hover:bg-white/50 transition-colors">
@@ -173,37 +177,37 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
                                         <CheckCircle2 size={32} />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-gray-900">Ticket Initialized!</h3>
-                                        <p className="text-sm text-gray-500">Our support team has been notified.</p>
+                                        <h3 className="text-lg font-bold text-gray-900">{t('ticketInitialized') || 'Ticket Initialized!'}</h3>
+                                        <p className="text-sm text-gray-500">{t('ticketNotified') || 'Our support team has been notified.'}</p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Issue Category</label>
+                                        <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">{t('issueCategory') || 'Issue Category'}</label>
                                         <div className="relative">
                                             <select
                                                 value={supportCategory}
                                                 onChange={(e) => setSupportCategory(e.target.value)}
                                                 className="w-full p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/40 border border-white/40 text-sm md:text-base text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
                                             >
-                                                <option>General Inquiry</option>
-                                                <option>Payment Issue</option>
-                                                <option>Refund Request</option>
-                                                <option>Technical Support</option>
-                                                <option>Account Access</option>
-                                                <option>Other</option>
+                                                <option value="General Inquiry">{t('inquiryGeneral')}</option>
+                                                <option value="Payment Issue">{t('inquiryPayment')}</option>
+                                                <option value="Refund Request">{t('inquiryRefund')}</option>
+                                                <option value="Technical Support">{t('inquiryTechnical')}</option>
+                                                <option value="Account Access">{t('inquiryAccount')}</option>
+                                                <option value="Other">{t('inquiryOther')}</option>
                                             </select>
                                             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Case Details</label>
+                                        <label className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">{t('caseDetails') || 'Case Details'}</label>
                                         <textarea
                                             value={message}
                                             onChange={(e) => setMessage(e.target.value)}
-                                            placeholder="Specify your request..."
+                                            placeholder={t('specifyRequest') || "Specify your request..."}
                                             className="w-full p-3 md:p-4 h-32 md:h-40 rounded-xl md:rounded-2xl bg-white/40 border border-white/40 text-sm md:text-base text-gray-800 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"
                                         ></textarea>
                                     </div>
@@ -216,15 +220,15 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
                                         {loading ? (
                                             <>
                                                 <Loader2 className="animate-spin" size={18} />
-                                                SUBMITTING...
+                                                {t('submitting') || 'SUBMITTING...'}
                                             </>
                                         ) : (
-                                            'Initialize Ticket'
+                                            t('initializeTicket') || 'Initialize Ticket'
                                         )}
                                     </button>
 
                                     <div className="text-center pt-2 md:pt-4">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest"> Direct Channel: <a href="mailto:admin@uwo24.com" className="text-blue-500 hover:text-blue-600 block md:inline mt-1 md:mt-0">admin@uwo24.com</a></p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest"> {t('directChannel') || 'Direct Channel'}: <a href="mailto:admin@uwo24.com" className="text-blue-500 hover:text-blue-600 block md:inline mt-1 md:mt-0">admin@uwo24.com</a></p>
                                     </div>
                                 </div>
                             )}
@@ -235,9 +239,12 @@ const HelpCenterModal = ({ isOpen, onClose }) => {
 
                 {/* Footer Dismiss */}
                 {!isOpen ? null : (
-                    <div className="p-3 md:p-4 border-t border-white/20 bg-white/10 text-center">
-                        <button onClick={onClose} className="text-[10px] font-bold text-gray-500 hover:text-gray-700 uppercase tracking-[0.2em] transition-colors">
-                            Dismiss
+                    <div className="p-4 border-t border-purple-100/30 bg-purple-50/20 text-center">
+                        <button
+                            onClick={onClose}
+                            className="px-8 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 border border-purple-200/50 shadow-sm"
+                        >
+                            {t('dismiss') || 'Dismiss'}
                         </button>
                     </div>
                 )}

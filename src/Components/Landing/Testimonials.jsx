@@ -1,23 +1,25 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
-
-const testimonials = [
-    { id: 1, name: "Sarah L.", role: "CTO @ TechFlow", text: "The variety of AI agents here is mind-blowing. We automated our entire support flow in days." },
-    { id: 2, name: "James K.", role: "Indie Maker", text: "Finally, a marketplace that curates top-tier tools. The integration process was seamless." },
-    { id: 3, name: "Elena R.", role: "Product Lead", text: "The quality of vendors on AI-MALL is unmatched. Highly recommended for scaling startups." },
-    { id: 4, name: "Michael T.", role: "DevOps Engineer", text: "Found the perfect monitoring agent. Saved us weeks of custom development time." },
-    { id: 5, name: "Priya M.", role: "Founder", text: "A game-changer for non-technical founders. Plug and play AI at its finest." }
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const Testimonials = () => {
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
+    const { t } = useLanguage();
+
+    const testimonials = [
+        { id: 1, name: t('test1Name'), role: t('test1Role'), text: t('test1Text') },
+        { id: 2, name: t('test2Name'), role: t('test2Role'), text: t('test2Text') },
+        { id: 3, name: t('test3Name'), role: t('test3Role'), text: t('test3Text') },
+        { id: 4, name: t('test4Name'), role: t('test4Role'), text: t('test4Text') },
+        { id: 5, name: t('test5Name'), role: t('test5Role'), text: t('test5Text') }
+    ];
 
     return (
         <section className="py-20 overflow-hidden relative">
             <div className="container relative z-10 mb-10 text-center mx-auto">
-                <h2 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-[#1A1A1A]'}`}>Loved by Innovators</h2>
+                <h2 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-[#1A1A1A]'}`}>{t('testimonialsHeading')}</h2>
             </div>
 
             {/* Gradient Fade Masks */}
@@ -30,8 +32,8 @@ const Testimonials = () => {
                     {/* Render twice for seamless loop */}
                     {[...testimonials, ...testimonials].map((t, i) => (
                         <div key={i} className={`min-w-[280px] sm:min-w-[350px] p-6 sm:p-8 backdrop-blur-xl border rounded-[24px] shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] transition-colors ${isDark
-                                ? 'bg-white/10 border-white/20 hover:bg-white/20 text-white'
-                                : 'bg-white/40 border-white/60 hover:bg-white/60'
+                            ? 'bg-white/10 border-white/20 hover:bg-white/20 text-white'
+                            : 'bg-white/40 border-white/60 hover:bg-white/60'
                             }`}>
                             <p className={`italic mb-6 leading-relaxed ${isDark ? 'text-white/80' : 'text-gray-600'}`}>"{t.text}"</p>
                             <div className="flex items-center gap-4">

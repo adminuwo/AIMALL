@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router';
 import { Bot, User, Zap, ArrowRight, UserCircle } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../userStore/userData';
+import { useLanguage } from '../context/LanguageContext';
 
 const Series = () => {
+    const { t } = useLanguage();
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
     const navigate = useNavigate();
@@ -18,7 +20,10 @@ const Series = () => {
                     <img src={Logo} alt="AI Mall Logo" className="w-8 h-8 object-contain" />
                     <span className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight transition-colors`}>A-Series™</span>
                 </div>
-                <button className={`${isDark ? 'text-blue-400 hover:bg-slate-900' : 'text-blue-600 hover:bg-blue-50'} p-2 rounded-full transition-all`}>
+                <button
+                    onClick={() => navigate('/dashboard/profile')}
+                    className={`${isDark ? 'text-blue-400 hover:bg-slate-900' : 'text-blue-600 hover:bg-blue-50'} p-2 rounded-full transition-all`}
+                >
                     <UserCircle className="w-8 h-8" strokeWidth={1.5} />
                 </button>
             </header>
@@ -28,30 +33,30 @@ const Series = () => {
 
                 {/* Badge */}
                 <div className="mb-10 animate-fade-in-up">
-                    <span className={`px-5 py-2 rounded-full ${isDark ? 'bg-slate-900 text-slate-400' : 'bg-gray-100 text-gray-600'} text-sm font-medium tracking-wide transition-colors`}>
-                        Powered by UWO
+                    <span className={`px-5 py-2 rounded-full ${isDark ? 'bg-slate-950 text-slate-400' : 'bg-gray-100 text-gray-600'} text-sm font-medium tracking-wide transition-colors`}>
+                        {t('poweredBy')}
                     </span>
                 </div>
 
                 {/* Headline */}
                 <h1 className={`text-6xl md:text-7xl lg:text-8xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-[1.1] mb-8 max-w-4xl animate-fade-in-up delay-100 transition-colors`}>
-                    The Future of <br />
-                    <span className="text-[#2563eb]">Conversational AI</span>
+                    {t('seriesFutureOf')} <br />
+                    <span className="text-[#2563eb]">{t('seriesConversationalAI')}</span>
                 </h1>
 
                 {/* Subheadline */}
                 <p className={`text-xl ${isDark ? 'text-slate-400' : 'text-gray-600'} max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-up delay-200 transition-colors`}>
-                    Experience the next generation of intelligent assistance. A-Series™ learns, adapts, and creates with you in real-time through a stunning interface.
+                    {t('seriesDesc')}
                 </p>
 
                 {/* CTA Button */}
                 <div className="animate-fade-in-up delay-300">
                     <button
-                        onClick={() => window.location.href = 'https://ai-mall.onrender.com/dashboard/chat'}
+                        onClick={() => navigate('/dashboard/chat')}
                         className="group relative px-10 py-5 bg-[#2563eb] text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-500/30 hover:shadow-blue-600/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                     >
                         <div className="relative z-10 flex items-center gap-2">
-                            Start Now
+                            {t('seriesStartNow')}
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -70,7 +75,7 @@ const Series = () => {
                         </div>
                         <div className="text-left">
                             <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} transition-colors`}>100+</div>
-                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Agents</div>
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('activeAgentsLabel')}</div>
                         </div>
                     </div>
 
@@ -80,7 +85,7 @@ const Series = () => {
                         </div>
                         <div className="text-left">
                             <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} transition-colors`}>10k+</div>
-                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Happy Users</div>
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('happyUsersLabel')}</div>
                         </div>
                     </div>
 
@@ -90,7 +95,7 @@ const Series = () => {
                         </div>
                         <div className="text-left">
                             <div className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'} transition-colors`}>&lt;50ms</div>
-                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Fast Inference</div>
+                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('fastInferenceLabel')}</div>
                         </div>
                     </div>
 

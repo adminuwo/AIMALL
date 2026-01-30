@@ -2,18 +2,20 @@ import React, { useRef, useEffect } from 'react';
 import { Search, Zap, BarChart2, Layers } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
-
-const steps = [
-    { id: 1, title: '1. Browse', desc: 'Find tools at our market items resources', icon: <Search size={28} /> },
-    { id: 2, title: '2. Integrate', desc: 'Connect via seamless integration instantly', icon: <Layers size={28} /> },
-    { id: 3, title: '3. Deploy', desc: 'View tensor market relay start resources', icon: <Zap size={28} /> },
-    { id: 4, title: '4. Scale', desc: 'New workflows automation hidden services', icon: <BarChart2 size={28} /> },
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const HowItWorks = () => {
     const containerRef = useRef(null);
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
+    const { t } = useLanguage();
+
+    const steps = [
+        { id: 1, title: t('step1Title'), desc: t('step1Desc'), icon: <Search size={28} /> },
+        { id: 2, title: t('step2Title'), desc: t('step2Desc'), icon: <Layers size={28} /> },
+        { id: 3, title: t('step3Title'), desc: t('step3Desc'), icon: <Zap size={28} /> },
+        { id: 4, title: t('step4Title'), desc: t('step4Desc'), icon: <BarChart2 size={28} /> },
+    ];
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -41,7 +43,7 @@ const HowItWorks = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-blue-400/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
 
             <div className="max-w-7xl mx-auto px-6 md:px-12 xl:px-16 relative z-10">
-                <h2 className={`text-3xl font-bold mb-12 text-center ${isDark ? 'text-white' : 'text-[#1A1A1A]'}`}>How It Works</h2>
+                <h2 className={`text-3xl font-bold mb-12 text-center ${isDark ? 'text-white' : 'text-[#1A1A1A]'}`}>{t('howItWorks')}</h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {steps.map((step, index) => (

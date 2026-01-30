@@ -4,7 +4,7 @@ import { AppRoute } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { useRecoilState } from 'recoil';
 import { themeState } from '../../userStore/userData';
-import { Sun, Moon, Globe, Search, ChevronDown, Check } from 'lucide-react';
+import { Globe, Search, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const logo = '/logo/Logo.png';
@@ -62,7 +62,7 @@ const Header = () => {
             <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
           </div>
           <span className={`font-black text-lg md:text-2xl tracking-tighter uppercase transition-colors duration-300 ${theme === 'Dark' ? 'text-white' : 'text-[#1A1A1A]'}`}>
-            AI MALL<sup className="text-[10px] md:text-xs font-bold ml-0.5">™</sup>
+            {t('headerLogoText') || 'AI MALL'}<sup className="text-[10px] md:text-xs font-black ml-0.5">{t('trademark')}</sup>
           </span>
         </div>
 
@@ -100,7 +100,7 @@ const Header = () => {
                       <Search className="w-4 h-4 opacity-50 mr-2" />
                       <input
                         type="text"
-                        placeholder="Search Language..."
+                        placeholder={t('searchLanguage')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="bg-transparent border-none outline-none text-xs w-full font-bold"
@@ -134,7 +134,7 @@ const Header = () => {
                     ))}
                     {filteredLanguages.length === 0 && (
                       <div className="py-8 text-center text-xs opacity-50 font-bold uppercase tracking-widest">
-                        No Languages Found
+                        {t('noLanguagesFound')}
                       </div>
                     )}
                   </div>
@@ -146,23 +146,33 @@ const Header = () => {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`p-2 md:p-3 rounded-2xl transition-all duration-500 backdrop-blur-md border group relative overflow-hidden ${theme === 'Dark'
-              ? 'bg-white/5 border-white/10 hover:bg-white/10 text-yellow-400'
-              : 'bg-black/5 border-black/5 hover:bg-black/10 text-purple-600'
-              }`}
+            className={`p-2.5 md:p-1.5 transition-transform duration-150 group relative active:scale-95 touch-manipulation rounded-full ${theme === 'Dark' ? 'hover:bg-white/5' : 'hover:bg-black/5'}`}
+            aria-label="Toggle Theme"
           >
-            <motion.div
-              initial={false}
-              animate={{ rotate: theme === 'Dark' ? 0 : 180 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            >
-              {theme === 'Dark' ? (
-                <Moon className="w-5 h-5 md:w-6 md:h-6 fill-yellow-400/20" />
-              ) : (
-                <Sun className="w-5 h-5 md:w-6 md:h-6" />
-              )}
-            </motion.div>
-            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${theme === 'Dark' ? 'bg-yellow-400/10' : 'bg-purple-600/10'}`}></div>
+            <AnimatePresence>
+              <motion.div
+                key={theme}
+                initial={{ opacity: 0, scale: 0.5, rotate: -30 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                exit={{ opacity: 0, scale: 0.5, rotate: 30 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="flex items-center justify-center"
+              >
+                {theme === 'Dark' ? (
+                  <img
+                    src="/sun.gif"
+                    alt="Sun"
+                    className="w-10 h-10 md:w-11 md:h-11 object-contain -scale-x-125 scale-y-125 drop-shadow-[0_0_15px_rgba(255,165,0,0.8)] filter brightness-110"
+                  />
+                ) : (
+                  <img
+                    src="/moon.gif"
+                    alt="Moon"
+                    className="w-8 h-8 md:w-9 md:h-9 object-contain -scale-x-110 scale-y-110 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] filter brightness-125 contrast-125"
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </button>
         </div>
       </div>

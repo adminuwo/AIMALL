@@ -278,7 +278,7 @@ const Marketplace = () => {
                                                 {t(selectedAgent.agentName)}
                                             </h2>
                                             <div className="bg-[#8B5CF6]/20 text-[#8B5CF6] px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">
-                                                {t(selectedAgent.category)}
+                                                {categories.find(c => c.id === selectedAgent.category)?.label || selectedAgent.category}
                                             </div>
                                             <p className={`text-xs ${isDark ? 'text-[#C7CBEA]' : 'text-gray-600'} font-semibold leading-relaxed text-center md:text-left`}>
                                                 {t(selectedAgent.description)}
@@ -289,7 +289,7 @@ const Marketplace = () => {
                                 {/* More in Category Section */}
                                 <div className={`p-6 md:p-8 pt-8 flex-1 ${isDark ? 'bg-[#0B0F1A]' : 'bg-white'}`}>
                                     <h3 className={`text-[10px] font-black ${isDark ? 'text-[#E6E9F2]' : 'text-black'} uppercase tracking-[0.1em] mb-4`}>
-                                        {t('moreIn').replace('{category}', t(selectedAgent.category))}
+                                        {t('moreIn').replace('{category}', categories.find(c => c.id === selectedAgent.category)?.label || selectedAgent.category)}
                                     </h3>
                                     <div className={`flex items-center justify-center h-20 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} italic font-bold text-[13px]`}>
                                         {t('noOtherApps')}
@@ -327,7 +327,7 @@ const Marketplace = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-                    className={`marketplace-hero-card relative w-full min-h-[250px] md:min-h-[360px] mb-12 rounded-[60px] overflow-hidden bg-white shadow-[0_20px_50px_-10px_rgba(100,50,255,0.1)] border border-white/50 transition-all duration-700 flex items-center group`}
+                    className={`marketplace-hero-card relative w-full min-h-[250px] md:min-h-[360px] mb-12 rounded-[60px] overflow-hidden bg-white shadow-[0_30px_100px_-20px_rgba(139,92,246,0.3),0_10px_30px_-5px_rgba(236,72,153,0.1)] border border-white/50 transition-all duration-700 flex items-center group hover:scale-[1.005] hover:shadow-[0_40px_120px_-10px_rgba(139,92,246,0.45)]`}
                 >
                     {/* Subtle Gradient Glowing Mixture (Blue, Purple, Pink) */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden">

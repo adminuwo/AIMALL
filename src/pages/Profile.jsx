@@ -113,40 +113,22 @@ const Profile = () => {
                 id: Date.now(),
                 device: current.device,
                 type: current.type,
-                location: 'Jabalpur, India',
-                time: 'Active now',
-                lastActive: 'Currently Online',
+                location: 'Jabalpur, India', // This could ideally be fetched from a geo-IP API
+                time: t('activeNow'),
+                lastActive: t('currentlyOnline'),
                 current: true
-            },
-            {
-                id: Date.now() + 1,
-                device: 'iPhone 15 Pro',
-                type: 'Mobile',
-                location: 'Indore, India',
-                time: '2 hours ago',
-                lastActive: '2h ago',
-                current: false
-            },
-            {
-                id: Date.now() + 2,
-                device: 'Safari on iPad',
-                type: 'Mobile',
-                location: 'Mumbai, India',
-                time: 'Yesterday',
-                lastActive: '14h ago',
-                current: false
             }
         ]);
     }, []);
 
     const handleTerminateSession = (id) => {
-        if (window.confirm('Are you sure you want to log out from this device?')) {
+        if (window.confirm(t('confirmLogoutDevice'))) {
             setSessions(prev => prev.filter(s => s.id !== id));
         }
     };
 
     const handleLogOutAll = () => {
-        if (window.confirm('Are you sure you want to log out from all other devices?')) {
+        if (window.confirm(t('confirmLogoutAll'))) {
             setSessions(prev => prev.filter(s => s.current));
         }
     };
@@ -289,7 +271,7 @@ const Profile = () => {
                                     <UserIcon className="w-10 h-10 md:w-16 md:h-16" strokeWidth={1.5} />
                                 )}
                                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                                    <span className="text-white text-xs font-bold uppercase tracking-wider">Change</span>
+                                    <span className="text-white text-xs font-bold uppercase tracking-wider">{t('change')}</span>
                                 </div>
                             </div>
                         </div>
@@ -312,7 +294,7 @@ const Profile = () => {
                                                 value={editForm.name}
                                                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                                                 className={`w-full pl-12 pr-6 py-4 rounded-2xl ${isDark ? 'bg-[#1a2235] border-[#8B5CF6]/20 text-[#f1f5f9]' : 'bg-white border-gray-100 text-gray-900'} border-2 focus:border-[#8B5CF6] outline-none transition-all font-bold text-lg tracking-tight`}
-                                                placeholder="Enter Name"
+                                                placeholder={t('enterName')}
                                             />
                                         </div>
                                         <div className="relative group/input">
@@ -324,7 +306,7 @@ const Profile = () => {
                                                 value={editForm.email}
                                                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                                                 className={`w-full pl-12 pr-6 py-4 rounded-2xl ${isDark ? 'bg-[#1a2235] border-[#8B5CF6]/20 text-[#f1f5f9]' : 'bg-white border-gray-100 text-gray-900'} border-2 focus:border-[#8B5CF6] outline-none transition-all font-bold text-lg tracking-tight`}
-                                                placeholder="Enter Email"
+                                                placeholder={t('enterEmail')}
                                             />
                                         </div>
 
@@ -334,14 +316,14 @@ const Profile = () => {
                                                 className={`flex-[2] flex items-center justify-center gap-2 py-3.5 rounded-2xl ${isDark ? 'bg-[#8B5CF6]/10 border-[#8B5CF6]/30 hover:bg-[#8B5CF6]/20' : 'bg-white border-[#8B5CF6]/10 hover:border-[#8B5CF6]'} border-2 text-[#8B5CF6] font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:scale-[1.02] active:scale-95 transition-all outline-none`}
                                             >
                                                 <Check size={14} className="text-[#8B5CF6]" />
-                                                Save Changes
+                                                {t('saveChanges')}
                                             </button>
                                             <button
                                                 onClick={handleCancel}
                                                 className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all border ${isDark ? 'bg-[#1a2235] border-white/10 text-[#cbd5e1] hover:text-[#f1f5f9] hover:border-white/20' : 'bg-white border-gray-100 text-gray-400 hover:text-gray-900 hover:border-gray-200'}`}
                                             >
                                                 <X size={14} />
-                                                Cancel
+                                                {t('cancel')}
                                             </button>
                                         </div>
                                     </div>
@@ -359,7 +341,7 @@ const Profile = () => {
                                     className={`h-fit px-6 py-3 rounded-2xl border flex items-center gap-2 font-black text-[10px] uppercase tracking-widest transition-all ${isDark ? 'bg-white/5 border-white/10 text-[#f1f5f9] hover:bg-[#8B5CF6] hover:border-[#8B5CF6]' : 'bg-white border-gray-100 text-gray-500 hover:border-[#8B5CF6] hover:text-[#8B5CF6] shadow-sm'}`}
                                 >
                                     <Edit3 size={14} />
-                                    Edit Profile
+                                    {t('editProfile')}
                                 </button>
                             )}
                         </div>
@@ -371,7 +353,7 @@ const Profile = () => {
                             </div>
                             <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${isDark ? 'bg-[#1a2235] border-white/5 text-[#cbd5e1]' : 'bg-white/40 border-white/60 text-gray-400'} px-4 py-2 rounded-xl border transition-all`}>
                                 <Shield size={12} className="text-[#8B5CF6]" />
-                                Shield Active
+                                {t('shieldActive')}
                             </div>
                         </div>
                     </div>
@@ -396,7 +378,7 @@ const Profile = () => {
                             <div className="space-y-6 pt-10 border-t border-white/5">
                                 <div className="flex items-center gap-3">
                                     <Sparkles className="w-5 h-5 text-[#8B5CF6]" />
-                                    <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>Personalization</h3>
+                                    <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('personalization')}</h3>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -409,7 +391,7 @@ const Profile = () => {
                                             <div className="flex items-center gap-4 md:gap-6">
                                                 <Type className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-[#6F76A8] group-hover:text-[#8B5CF6]' : 'text-gray-300 group-hover:text-[#8b5cf6]'} transition-colors`} />
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>Font Size</span>
+                                                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('fontSize')}</span>
                                                     <span className={`text-sm md:text-base font-black uppercase tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{fontSize}</span>
                                                 </div>
                                             </div>
@@ -455,7 +437,7 @@ const Profile = () => {
                                             <div className="flex items-center gap-4 md:gap-6">
                                                 <Monitor className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-[#6F76A8] group-hover:text-[#8B5CF6]' : 'text-gray-300 group-hover:text-[#8b5cf6]'} transition-colors`} />
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>Typography</span>
+                                                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('typography')}</span>
                                                     <span className={`text-sm md:text-base font-black uppercase tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{fontStyle}</span>
                                                 </div>
                                             </div>
@@ -480,7 +462,7 @@ const Profile = () => {
                                                         <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-focus-within/search-font:text-[#8B5CF6] transition-colors`} />
                                                         <input
                                                             type="text"
-                                                            placeholder="Search fonts..."
+                                                            placeholder={t('searchFonts')}
                                                             value={fontSearchQuery}
                                                             onChange={(e) => setFontSearchQuery(e.target.value)}
                                                             className={`w-full pl-10 pr-4 py-3 rounded-2xl ${isDark ? 'bg-[#242f49] border-white/5 text-[#f1f5f9]' : 'bg-white border-gray-100 text-gray-900'} border-2 focus:border-[#8B5CF6] outline-none transition-all font-bold text-xs uppercase tracking-widest shadow-sm`}
@@ -531,13 +513,13 @@ const Profile = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <Lock className="w-5 h-5 text-[#8B5CF6]" />
-                                        <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>Privacy & Security</h3>
+                                        <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('privacySecurity')}</h3>
                                     </div>
                                     <button
                                         onClick={handleLogOutAll}
                                         className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-lg'} border`}
                                     >
-                                        Log Out All
+                                        {t('logOutAll')}
                                     </button>
                                 </div>
 
@@ -549,8 +531,8 @@ const Profile = () => {
                                                 <History className="w-5 h-5 md:w-6 md:h-6 text-[#8B5CF6]" />
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className={`text-sm md:text-base font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>Chat Conversation History</span>
-                                                <span className={`text-[10px] md:text-[11px] font-bold ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>If disabled, conversations won't be saved or used for AI improvement.</span>
+                                                <span className={`text-sm md:text-base font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{t('chatHistoryTitle')}</span>
+                                                <span className={`text-[10px] md:text-[11px] font-bold ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('chatHistoryDesc')}</span>
                                             </div>
                                         </div>
                                         <div
@@ -570,30 +552,42 @@ const Profile = () => {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 pl-4">
                                             <Monitor className={`w-4 h-4 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>Device Activity</span>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('deviceActivity')}</span>
                                         </div>
 
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
                                             {sessions.map((session) => (
                                                 <div
                                                     key={session.id}
-                                                    className={`p-5 md:p-6 flex items-center justify-between ${isDark ? 'bg-[#1a2235]/60 border-white/5' : 'bg-white/40 border-white'} border rounded-[28px] hover:-translate-y-1 transition-all duration-300`}
+                                                    className={`group p-6 md:p-8 flex items-center justify-between border rounded-[36px] transition-all duration-500 relative overflow-hidden ${isDark
+                                                        ? 'bg-[#1a2235]/60 border-white/5 hover:bg-[#242f49] hover:border-[#8B5CF6]/30 shadow-2xl'
+                                                        : 'bg-white/60 border-white hover:bg-white hover:shadow-[0_20px_50px_rgba(139,92,246,0.15)]'
+                                                        }`}
                                                 >
-                                                    <div className="flex items-center gap-4 md:gap-5">
-                                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isDark ? 'bg-[#242f49] text-[#f1f5f9]' : 'bg-white text-gray-900 shadow-sm'} border border-white/10`}>
-                                                            {session.type === 'Laptop' ? <Laptop size={20} /> : session.type === 'Mobile' ? <Smartphone size={20} /> : <Globe size={20} />}
+                                                    {/* Background Glow Effect */}
+                                                    <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] transition-opacity duration-700 opacity-0 group-hover:opacity-10 ${isDark ? 'bg-[#8B5CF6]/10' : 'bg-purple-100/50'}`} />
+
+                                                    <div className="flex items-center gap-6 md:gap-8 relative z-10">
+                                                        <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[22px] flex items-center justify-center transition-all duration-500 ${isDark
+                                                            ? 'bg-[#242f49] text-white border-white/10 group-hover:bg-[#8B5CF6] group-hover:text-white'
+                                                            : 'bg-white text-gray-900 border-gray-100 group-hover:bg-gradient-to-br group-hover:from-[#ec4899] group-hover:to-[#8b5cf6] group-hover:text-white group-hover:shadow-lg'
+                                                            } border`}>
+                                                            {session.type === 'Laptop' ? <Laptop size={24} /> : session.type === 'Mobile' ? <Smartphone size={24} /> : <Globe size={24} />}
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className={`text-sm md:text-base font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{session.device}</span>
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <div className="flex items-center gap-3">
+                                                                <span className={`text-base md:text-lg font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{session.device}</span>
                                                                 {session.current && (
-                                                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-tighter">Current</span>
+                                                                    <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest shadow-[0_4px_10px_rgba(16,185,129,0.3)] animate-pulse">{t('live')}</span>
                                                                 )}
                                                             </div>
-                                                            <div className="flex items-center gap-3 text-[10px] md:text-[11px] font-bold text-[#6F76A8]">
-                                                                <span className="flex items-center gap-1"><MapPin size={10} /> {session.location}</span>
-                                                                <span className="w-1 h-1 rounded-full bg-slate-700" />
-                                                                <span>{session.time}</span>
+                                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] md:text-[12px] font-bold transition-colors">
+                                                                <span className={`flex items-center gap-1.5 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>
+                                                                    <MapPin size={12} className="text-[#8B5CF6]" />
+                                                                    {session.location}
+                                                                </span>
+                                                                <span className={`w-1 h-1 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
+                                                                <span className={`${isDark ? 'text-[#8B5CF6]' : 'text-[#8B5CF6]'}`}>{session.time}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -601,9 +595,12 @@ const Profile = () => {
                                                     {!session.current && (
                                                         <button
                                                             onClick={() => handleTerminateSession(session.id)}
-                                                            className={`p-3 rounded-xl transition-all ${isDark ? 'bg-red-500/5 hover:bg-red-500 text-red-400 hover:text-white' : 'bg-red-50 hover:bg-red-500 text-red-500 hover:text-white shadow-sm'} group/btn`}
+                                                            className={`p-4 rounded-2xl transition-all relative z-10 ${isDark
+                                                                ? 'bg-red-500/5 hover:bg-red-500 text-red-400 hover:text-white shadow-lg shadow-red-500/10'
+                                                                : 'bg-red-50 hover:bg-red-500 text-red-500 hover:text-white shadow-[0_8px_20px_rgba(239,68,68,0.1)]'
+                                                                }`}
                                                         >
-                                                            <Trash2 size={16} />
+                                                            <Trash2 size={18} />
                                                         </button>
                                                     )}
                                                 </div>

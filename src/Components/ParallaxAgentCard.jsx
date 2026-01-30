@@ -8,7 +8,7 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
     return (
         <div className="w-full h-full">
             <div
-                className={`relative h-[340px] w-full ${isDark ? 'bg-[#12182B] border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(139,92,246,0.2)]' : 'bg-white border-gray-100 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.12)]'} rounded-[48px] border overflow-hidden flex flex-col transition-all duration-300 ease-out cursor-pointer transform hover:-translate-y-2 hover:scale-[1.04] group`}
+                className={`relative h-[340px] w-full ${isDark ? 'bg-[#12182B] border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(139,92,246,0.2)]' : 'bg-white border-white shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:shadow-[0_30px_60px_-10px_rgba(139,92,246,0.35)]'} rounded-[48px] border overflow-hidden flex flex-col transition-all duration-300 ease-out cursor-pointer transform hover:-translate-y-2 hover:scale-[1.04] group`}
             >
                 {/* Background Layer: Radial Glow & Watermark Icon */}
                 <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none">

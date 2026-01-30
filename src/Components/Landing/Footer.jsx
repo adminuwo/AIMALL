@@ -149,12 +149,14 @@ import InstagramIcon from '../../assets/social-icons/instagram.webp';
 import YoutubeIcon from '../../assets/social-icons/youtube.webp';
 import HelpCenterModal from './HelpCenterModal';
 import SecurityGuidelinesModal from './SecurityGuidelinesModal';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Footer = () => {
     const [isHelpCenterOpen, setIsHelpCenterOpen] = useState(false);
     const [isSecurityOpen, setIsSecurityOpen] = useState(false);
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
+    const { t } = useLanguage();
 
     return (
         <>
@@ -169,7 +171,7 @@ const Footer = () => {
                 pt-24 pb-10
                 rounded-t-[80px]
                 shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.08)]
-                overflow-hidden transition-colors duration-700
+                overflow-hidden transition-colors duration-250
                 ${isDark
                         ? 'bg-white/5 border-white/10'
                         : 'bg-[linear-gradient(135deg,rgba(59,130,246,0.12),rgba(139,92,246,0.12))] border-white/35'
@@ -192,10 +194,10 @@ const Footer = () => {
                         {/* Brand */}
                         <div className="space-y-2">
                             <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-16 h-16 object-contain" />
-                            <p className={`text-sm leading-relaxed font-medium ${isDark ? 'footer-text-glow' : 'text-slate-600'}`}>
-                                AI-MALL<sup className="text-xs font-black ml-0.5">TM</sup> — India's First AI App Marketplace.<br />
-                                100 AI Apps | AI-MALL<sup className="text-xs font-black ml-0.5">TM</sup> | Partner Integrations<br />
-                                Powered by UWO<sup className="text-xs font-black ml-0.5">TM</sup>
+                            <p className={`text-sm leading-relaxed font-medium ${isDark ? 'footer-text-glow' : 'text-black'}`}>
+                                AI-MALL<sup className="text-xs font-black ml-0.5">TM</sup> — {t('footerTagline')}<br />
+                                {t('aiAppsCount')} | AI-MALL<sup className="text-xs font-black ml-0.5">TM</sup> | {t('partnerIntegrations')}<br />
+                                {t('poweredBy')}<sup className="text-xs font-black ml-0.5">TM</sup>
                             </p>
 
                             <div className="flex gap-3 pt-2">
@@ -225,12 +227,12 @@ const Footer = () => {
 
                         {/* Explore */}
                         <div>
-                            <h3 className={`text-sm font-bold uppercase tracking-wider mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>Explore</h3>
+                            <h3 className={`text-sm font-black uppercase tracking-wider mb-6 underline underline-offset-4 footer-text-glow ${isDark ? 'text-white' : 'text-black'}`}>{t('explore')}</h3>
                             <ul className="space-y-4">
                                 {[
-                                    { name: 'Marketplace', link: '/dashboard/marketplace' },
-                                    { name: 'My Agents', link: '/dashboard/agents' },
-                                    { name: 'Become a Vendor', link: '/vendor-register' }
+                                    { name: t('marketplace'), link: '/dashboard/marketplace' },
+                                    { name: t('myAgentsNav'), link: '/dashboard/agents' },
+                                    { name: t('becomeVendor'), link: '/vendor-register' }
                                 ].map((item, i) => (
                                     <li key={i}>
                                         <Link
@@ -246,14 +248,14 @@ const Footer = () => {
 
                         {/* Support */}
                         <div>
-                            <h3 className={`text-sm font-bold uppercase tracking-wider mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>Support</h3>
+                            <h3 className={`text-sm font-black uppercase tracking-wider mb-6 underline underline-offset-4 footer-text-glow ${isDark ? 'text-white' : 'text-black'}`}>{t('supportHeading')}</h3>
                             <ul className="space-y-4">
                                 <li>
                                     <button
                                         onClick={() => setIsHelpCenterOpen(true)}
                                         className="footer-glow-purple font-bold transition-all duration-300 hover:translate-x-2"
                                     >
-                                        Help Center
+                                        {t('helpCenter')}
                                     </button>
                                 </li>
                                 <li>
@@ -261,7 +263,7 @@ const Footer = () => {
                                         onClick={() => setIsSecurityOpen(true)}
                                         className="footer-glow-purple font-bold transition-all duration-300 hover:translate-x-2"
                                     >
-                                        Security & Guidelines
+                                        {t('securityGuidelines')}
                                     </button>
                                 </li>
                             </ul>
@@ -269,32 +271,32 @@ const Footer = () => {
 
                         {/* Contact */}
                         <div>
-                            <h3 className={`text-sm font-bold uppercase tracking-wider mb-6 ${isDark ? 'text-white' : 'text-blue-900'}`}>Contact</h3>
+                            <h3 className={`text-sm font-black uppercase tracking-wider mb-6 underline underline-offset-4 footer-text-glow ${isDark ? 'text-white' : 'text-black'}`}>{t('contactHeading')}</h3>
                             <ul className="space-y-5">
-                                <li className="flex gap-3">
-                                    <MapPin size={20} className="footer-glow-link" />
+                                <li className="flex gap-3 group cursor-pointer">
+                                    <MapPin size={20} className="footer-glow-link group-hover:text-[#8b5cf6] transition-all duration-300" />
                                     <a
                                         href="https://www.google.com/maps/place/Jabalpur,+Madhya+Pradesh/"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="footer-glow-link font-bold transition-all"
+                                        className="footer-glow-link font-bold transition-all group-hover:translate-x-1"
                                     >
-                                        Jabalpur, Madhya Pradesh
+                                        {t('jabalpurAddress')}
                                     </a>
                                 </li>
-                                <li className="flex gap-3">
-                                    <Mail size={20} className="footer-glow-link" />
+                                <li className="flex gap-3 group cursor-pointer">
+                                    <Mail size={20} className="footer-glow-link group-hover:text-[#8b5cf6] transition-all duration-300" />
                                     <a
                                         href="mailto:admin@uwo24.com"
-                                        className="footer-glow-link font-bold transition-all"
+                                        className="footer-glow-link font-bold transition-all group-hover:translate-x-1"
                                     >
                                         admin@uwo24.com
                                     </a>
                                 </li>
-                                <li className="flex gap-3">
-                                    <Phone size={20} className="footer-glow-purple" />
+                                <li className="flex gap-3 group cursor-pointer">
+                                    <Phone size={20} className="footer-glow-purple group-hover:text-[#8b5cf6] transition-all duration-300" />
                                     <span
-                                        className="footer-glow-purple font-bold transition-all"
+                                        className="footer-glow-purple font-bold transition-all group-hover:translate-x-1"
                                     >
                                         +91 83589 90909
                                     </span>
@@ -305,7 +307,7 @@ const Footer = () => {
 
                     {/* Bottom */}
                     <div className={`pt-8 border-t text-sm font-bold text-center drop-shadow-[0_2px_8px_rgba(255,255,255,0.1)] ${isDark ? 'border-white/10 footer-text-glow' : 'border-white/30 text-black'}`}>
-                        © 2026 AI Mall<sup className="text-xs font-black ml-0.5">TM</sup>. All rights reserved. Partnered with UWO<sup className="text-xs font-black ml-0.5">TM</sup>-LINK.
+                        {t('copyright')}<sup className="text-xs font-black ml-0.5">TM</sup>. {t('allRightsReserved')}<sup className="text-xs font-black ml-0.5">TM</sup>-LINK.
                     </div>
 
                 </div>
