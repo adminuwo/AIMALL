@@ -87,7 +87,7 @@ const Hero = () => {
                 <div className="z-10 max-w-4xl w-full">
 
                     <h1
-                        className={`${isDark ? 'text-white' : 'hero-heading-dark'} text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 drop-shadow-sm transition-all duration-300 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                        className={`${isDark ? 'text-white' : 'hero-heading-dark'} text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 drop-shadow-sm transition-[opacity,transform,color] duration-500 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                     >
                         {t('heroHeading')} <br />
                         {t('heroHeadingLine2')}
@@ -96,25 +96,26 @@ const Hero = () => {
                     <div className="h-3 sm:h-4 md:h-6" />
 
                     <p
-                        className={`${isDark ? 'text-white/90' : 'hero-subtext-dark'} text-sm sm:text-base md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-all duration-300 delay-75 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                        className={`${isDark ? 'text-white/90' : 'hero-subtext-dark'} text-sm sm:text-base md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-[opacity,transform,color] duration-500 delay-75 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                     >
                         {t('heroSubheading')}
                     </p>
 
-                    <div className={`relative w-full flex flex-row gap-3 sm:gap-6 justify-center items-center transition-all duration-300 delay-150 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    <div className={`relative w-full flex flex-col md:flex-row gap-4 sm:gap-6 justify-center items-center transition-[opacity,transform] duration-500 delay-150 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
 
                         {/* ================= AI MALL ================= */}
                         <div
-                            className="md:relative"
-                            onMouseEnter={() => setShowAIMall(true)}
-                            onMouseLeave={() => setShowAIMall(false)}
+                            className="relative w-full max-w-[280px] md:w-auto flex flex-col items-center"
+                            onMouseEnter={() => window.innerWidth >= 768 && setShowAIMall(true)}
+                            onMouseLeave={() => window.innerWidth >= 768 && setShowAIMall(false)}
                         >
                             <button
                                 onClick={(e) => {
+                                    e.stopPropagation();
                                     if (window.innerWidth < 768) {
-                                        e.preventDefault();
-                                        if (showAIMall) navigate('/dashboard/chat');
-                                        else {
+                                        if (showAIMall) {
+                                            navigate('/dashboard/chat');
+                                        } else {
                                             setShowAIMall(true);
                                             setShowASeries(false);
                                         }
@@ -122,7 +123,7 @@ const Hero = () => {
                                         navigate('/dashboard/chat');
                                     }
                                 }}
-                                className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#8b5cf6] hover:bg-[#7c3aed]
+                                className="w-full md:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#8b5cf6] hover:bg-[#7c3aed]
                                 shadow-lg shadow-purple-500/50 transition-all duration-300
                                 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/70
                                 active:scale-95 outline-none">
@@ -130,7 +131,7 @@ const Hero = () => {
                             </button>
 
                             {/* AI Mall Card */}
-                            <div className={`hover-card absolute left-0 right-0 mx-auto md:right-full md:left-auto md:translate-x-0 top-full mt-3 w-[270px] sm:w-80 transition-all duration-300 z-50
+                            <div className={`hover-card absolute left-0 right-0 mx-auto md:left-auto md:right-full md:translate-x-0 top-full mt-3 w-full sm:w-80 transition-all duration-300 z-50
                                 ${showAIMall ? 'opacity-100 translate-y-0 visible' : 'opacity-0 translate-y-2 pointer-events-none invisible'}`}>
                                 <div className="rounded-xl p-3 sm:p-5 text-white
                                     bg-gradient-to-br from-purple-600/90 via-violet-600/85 to-indigo-600/80
@@ -152,16 +153,17 @@ const Hero = () => {
 
                         {/* ================= A SERIES ================= */}
                         <div
-                            className="md:relative"
-                            onMouseEnter={() => setShowASeries(true)}
-                            onMouseLeave={() => setShowASeries(false)}
+                            className="relative w-full max-w-[280px] md:w-auto flex flex-col items-center"
+                            onMouseEnter={() => window.innerWidth >= 768 && setShowASeries(true)}
+                            onMouseLeave={() => window.innerWidth >= 768 && setShowASeries(false)}
                         >
                             <button
                                 onClick={(e) => {
+                                    e.stopPropagation();
                                     if (window.innerWidth < 768) {
-                                        e.preventDefault();
-                                        if (showASeries) window.location.href = "https://a-series-bgve.onrender.com";
-                                        else {
+                                        if (showASeries) {
+                                            window.location.href = "https://a-series-bgve.onrender.com";
+                                        } else {
                                             setShowASeries(true);
                                             setShowAIMall(false);
                                         }
@@ -169,7 +171,7 @@ const Hero = () => {
                                         window.location.href = "https://a-series-bgve.onrender.com";
                                     }
                                 }}
-                                className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#3b82f6] hover:bg-[#2563eb]
+                                className="w-full md:w-auto px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base text-white bg-[#3b82f6] hover:bg-[#2563eb]
                                 shadow-lg shadow-blue-500/50 transition-all duration-300
                                 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/70
                                 active:scale-95 outline-none">
@@ -177,7 +179,7 @@ const Hero = () => {
                             </button>
 
                             {/* A Series Card */}
-                            <div className={`hover-card absolute left-0 right-0 mx-auto md:left-full md:translate-x-0 top-full mt-3 w-[270px] sm:w-80 transition-all duration-300 z-50
+                            <div className={`hover-card absolute left-0 right-0 mx-auto md:right-auto md:left-full md:translate-x-0 top-full mt-3 w-full sm:w-80 transition-all duration-300 z-50
                                 ${showASeries ? 'opacity-100 translate-y-0 visible' : 'opacity-0 translate-y-2 pointer-events-none invisible'}`}>
                                 <div className="rounded-xl p-3 sm:p-5 text-white
                                     bg-gradient-to-br from-[#2563eb] via-[#3b82f6] to-[#1d4ed8]
@@ -198,6 +200,11 @@ const Hero = () => {
                         </div>
 
                     </div>
+
+                    {/* Dynamic Spacer for mobile - pushes HowItWorks down ONLY when A Series card is open */}
+                    <div
+                        className={`transition-all duration-300 ease-in-out md:hidden ${showASeries ? 'h-[150px]' : 'h-0'}`}
+                    />
                 </div>
             </div>
         </section>

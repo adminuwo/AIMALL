@@ -17,7 +17,8 @@ import {
   User as UserIcon,
   ShieldAlert,
   Loader2,
-  CheckCircle
+  CheckCircle,
+  Zap
 } from 'lucide-react';
 import { apis, AppRoute } from '../../types';
 import { faqs } from '../../constants';
@@ -152,17 +153,20 @@ const Sidebar = ({ isOpen, onClose }) => {
     setIsFaqOpen(false);
   }, [location.pathname]);
 
-  if (notifiyTgl.notify) {
-    setTimeout(() => {
-      setNotifyTgl({ notify: false });
-    }, 2000);
-  }
+  useEffect(() => {
+    if (notifiyTgl?.notify) {
+      const timer = setTimeout(() => {
+        setNotifyTgl(prev => ({ ...prev, notify: false }));
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [notifiyTgl?.notify, setNotifyTgl]);
 
   // Navigation items configuration
   const allNavItems = [
     { id: 'chat', icon: MessageSquare, label: t('chat'), route: '/dashboard/chat', roles: ['user', 'admin', 'vendor'] },
     //{ id: 'myAgents', icon: Bot, label: t('myAgents'), route: AppRoute.MY_AGENTS, roles: ['user', 'admin', 'vendor'] },
-    { id: 'marketplace', icon: ShoppingBag, label: t('marketplace'), route: AppRoute.MARKETPLACE, onClick: () => setNotifyTgl(prev => ({ ...prev, marketPlaceMode: 'AIMall' })), roles: ['user', 'admin', 'vendor'] },
+    { id: 'marketplace', icon: ShoppingBag, label: t('marketplace') || "Marketplace", route: AppRoute.MARKETPLACE, roles: ['user', 'admin', 'vendor'] },
     { id: 'settings', icon: Settings, label: t('settings'), route: AppRoute.PROFILE, roles: ['user', 'vendor'] },
     { id: 'admin', icon: LayoutGrid, label: t('adminDashboard'), route: AppRoute.ADMIN, roles: ['admin'] },
   ];
@@ -278,7 +282,14 @@ const Sidebar = ({ isOpen, onClose }) => {
                 to={item.route}
                 onClick={(e) => handleNavClick(e, item)}
                 className={({ isActive }) => {
-                  const isTabActive = isActive && !isFaqOpen;
+                  let isTabActive = isActive && !isFaqOpen;
+
+                  if (item.id === 'marketplace') {
+                    isTabActive = isTabActive && (notifiyTgl.marketPlaceMode === 'AIMall' || !notifiyTgl.marketPlaceMode);
+                  } else if (item.id === 'aseries_marketplace') {
+                    isTabActive = isTabActive && notifiyTgl.marketPlaceMode === 'ASeries';
+                  }
+
                   return `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isTabActive
                     ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
                     : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
@@ -286,13 +297,20 @@ const Sidebar = ({ isOpen, onClose }) => {
                 }}
               >
                 {({ isActive }) => {
-                  const isTabActive = isActive && !isFaqOpen;
+                  let isTabActive = isActive && !isFaqOpen;
+
+                  if (item.id === 'marketplace') {
+                    isTabActive = isTabActive && (notifiyTgl.marketPlaceMode === 'AIMall' || !notifiyTgl.marketPlaceMode);
+                  } else if (item.id === 'aseries_marketplace') {
+                    isTabActive = isTabActive && notifiyTgl.marketPlaceMode === 'ASeries';
+                  }
+
                   return (
                     <>
                       {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isTabActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
                       <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
                       <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : ''}`}>{item.label}</span>
-                      {isTabActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
+                      {isTabActive && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
                     </>
                   );
                 }}
@@ -339,7 +357,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     )}
                   </div>
                   <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t('notifications')}</span>
-                  {isTabActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
+                  {isTabActive && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
                 </>
               );
             }}
@@ -369,10 +387,10 @@ const Sidebar = ({ isOpen, onClose }) => {
               ? 'bg-white text-[#ec4899]'
               : `${isDark ? 'bg-white/20 text-white group-hover:bg-white group-hover:text-black' : 'bg-gray-100 text-[#7c3aed] group-hover:bg-white group-hover:text-[#ec4899]'}`
               }`}>
-              {user.name.charAt(0)}
+              {t(user.name?.toUpperCase())?.charAt(0)}
             </div>
-            <span className={`relative z-10 transition-colors ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? (isDark ? 'text-white' : 'text-black') : ''}`}>{user.name}</span>
-            {((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
+            <span className={`relative z-10 transition-colors ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t(user.name?.toUpperCase())}</span>
+            {((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
           </button>
 
           <button
@@ -385,7 +403,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isFaqOpen ? 'opacity-0' : 'group-hover:opacity-10'}`} />}
             <HelpCircle size={15} className={`mr-3 transition-colors relative z-10 ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-white' : 'text-gray-400 group-hover:text-[#ec4899]'}`}`} />
             <span className={`relative z-10 transition-colors ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t('helpFaq')}</span>
-            {isFaqOpen && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]" />}
+            {isFaqOpen && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
           </button>
 
           <div className="pt-1">

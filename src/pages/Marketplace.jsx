@@ -73,14 +73,7 @@ const Marketplace = () => {
                 const agentsRes = await axios.get(apis.agents);
                 const apiAgents = (agentsRes.data && Array.isArray(agentsRes.data)) ? agentsRes.data : [];
 
-                // Filter to show only AI-MALL and BOTH platform agents
-                // Agents without platform field or platform="" are treated as AI-MALL
-                const filteredPlatformAgents = apiAgents.filter(agent => {
-                    const platform = agent.platform || 'AI-MALL';
-                    return platform === 'AI-MALL' || platform === 'BOTH' || platform === "";
-                });
-
-                setAgents(filteredPlatformAgents);
+                setAgents(apiAgents);
 
                 if (userId) {
                     try {
@@ -385,7 +378,7 @@ const Marketplace = () => {
                                     transition={{ delay: 0.2 }}
                                     className="relative z-10 block"
                                 >
-                                    {t('marketplaceHeading').split(' ').slice(0, 2).join(' ')}
+                                    {subToggle.marketPlaceMode === 'ASeries' ? t('aseriesMarketplace') : t('aiMallMarketplace')}
                                     <sup className="text-sm md:text-3xl font-black ml-0.5 relative md:-top-8" style={{ color: '#000000 !important', opacity: 1 }}>TM</sup>
                                 </motion.span>
                                 <motion.span
@@ -407,7 +400,7 @@ const Marketplace = () => {
                                 className="flex justify-start pt-4"
                             >
                                 <p className="text-[10px] md:text-lg font-black uppercase tracking-[0.5em] text-black transition-all">
-                                    {t('marketplaceSubheading')}
+                                    {subToggle.marketPlaceMode === 'ASeries' ? t('aseriesSubheading') : t('marketplaceSubheading')}
                                 </p>
                             </motion.div>
                         </div>

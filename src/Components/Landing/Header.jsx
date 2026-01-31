@@ -78,7 +78,7 @@ const Header = () => {
                 }`}
             >
               <Globe className="w-4 h-4 md:w-5 md:h-5 opacity-70" />
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest hidden sm:block">
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest block">
                 {languages[language]?.title.split(' ')[0]}
               </span>
               <ChevronDown className={`w-3 h-3 md:w-4 md:h-4 transition-transform duration-300 ${showLangMenu ? 'rotate-180' : ''}`} />

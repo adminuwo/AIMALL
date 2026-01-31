@@ -25,7 +25,8 @@ const Notifications = () => {
         'SERVICES RESTORED': 'servicesRestored',
         'SYSTEM RESTORED': 'systemRestored',
         'SUBSCRIPTION EXPIRING SOON': 'subExpiringSoon',
-        'NEW SUPPORT REPLY': 'newSupportReply'
+        'NEW SUPPORT REPLY': 'newSupportReply',
+        'NEW APP ARRIVAL': 'newAppArrival'
     };
 
     const getTranslatedTitle = (title) => {
@@ -56,6 +57,13 @@ const Notifications = () => {
         if (msg.startsWith("A new reply has been added to your ticket: ")) {
             const subject = msg.replace("A new reply has been added to your ticket: ", "");
             return t('supportReplyMsg').replace('{subject}', subject);
+        }
+
+        // Dynamic: New App Arrival
+        if (msg.startsWith("Exciting News: '")) {
+            const match = msg.match(/'([^']+)'/);
+            const agentName = match ? match[1] : '...';
+            return t('newAppArrivalMsg').replace('{agentName}', agentName);
         }
 
         return msg;

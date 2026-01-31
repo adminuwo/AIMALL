@@ -9,6 +9,7 @@ const HowItWorks = () => {
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
     const { t } = useLanguage();
+    const [isVisible, setIsVisible] = React.useState(false);
 
     const steps = [
         { id: 1, title: t('step1Title'), desc: t('step1Desc'), icon: <Search size={28} /> },
@@ -22,8 +23,7 @@ const HowItWorks = () => {
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.remove('opacity-0', 'translate-y-12');
-                        entry.target.classList.add('opacity-100', 'translate-y-0');
+                        setIsVisible(true);
                         observer.unobserve(entry.target);
                     }
                 });
@@ -49,22 +49,26 @@ const HowItWorks = () => {
                     {steps.map((step, index) => (
                         <div
                             key={step.id}
-                            style={{ transitionDelay: `${index * 150}ms` }}
-                            className={`step-card opacity-0 translate-y-12 group backdrop-blur-xl border rounded-[30px] py-10 px-8 flex flex-col items-center text-center transition-all duration-700 ease-out shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:-translate-y-2 cursor-pointer ${isDark
-                                ? 'bg-white/10 border-white/20 hover:bg-white/20 hover:shadow-[0_20px_40px_-10px_rgba(255,255,255,0.05)]'
-                                : 'bg-white/30 border-white/60 hover:bg-white/50 hover:shadow-[0_20px_40px_-10px_rgba(168,85,247,0.15)]'
+                            style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
+                            className={`step-card group backdrop-blur-lg border rounded-[30px] py-10 px-8 flex flex-col items-center text-center transition-[opacity,transform,background-color,border-color,box-shadow] duration-500 ease-out shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:-translate-y-2 cursor-pointer
+                                ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}
+                                ${isDark
+                                    ? 'bg-white/10 border-white/10 hover:bg-white/20 hover:shadow-[0_20px_40px_-10px_rgba(255,255,255,0.05)] text-white'
+                                    : 'bg-white/40 border-white/60 hover:bg-white/60 hover:shadow-[0_20px_40px_-10px_rgba(168,85,247,0.1)] text-[#1A1A1A]'
                                 }`}
                         >
                             <div
-                                className={`w-20 h-20 rounded-[24px] flex items-center justify-center mb-6 shadow-sm transition-all duration-500 how-it-works-icon ${isDark
-                                    ? 'bg-white/10 group-hover:bg-white/20'
-                                    : 'bg-gradient-to-br from-blue-50 to-purple-50 group-hover:from-blue-100 group-hover:to-purple-100'
+                                className={`w-20 h-20 rounded-[24px] flex items-center justify-center mb-6 shadow-sm transition-all duration-300 how-it-works-icon ${isDark
+                                    ? 'bg-white/5 group-hover:bg-white/10'
+                                    : 'bg-gradient-to-br from-blue-50/50 to-purple-50/50 group-hover:from-blue-100/50 group-hover:to-purple-100/50'
                                     }`}
                             >
-                                {step.icon}
+                                <div className={`${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                                    {step.icon}
+                                </div>
                             </div>
-                            <h3 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-[#1A1A1A]'}`}>{step.title}</h3>
-                            <p className={`text-sm leading-relaxed font-medium ${isDark ? 'text-white/60' : 'text-[#666]'}`}>{step.desc}</p>
+                            <h3 className={`text-xl font-bold mb-4 transition-colors duration-300 ${isDark ? 'text-white' : 'text-[#1A1A1A]'}`}>{step.title}</h3>
+                            <p className={`text-sm leading-relaxed font-medium transition-colors duration-300 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{step.desc}</p>
                         </div>
                     ))}
                 </div>
