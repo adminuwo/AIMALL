@@ -214,7 +214,7 @@ const Notifications = () => {
                                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                                 transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
                                 key={notif._id}
-                                className={`${isDark ? 'bg-[#242f49] shadow-[0_20px_40px_rgba(0,0,0,0.3)]' : 'bg-white/40 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.02)]'} backdrop-blur-3xl p-4 md:p-10 rounded-2xl md:rounded-[56px] border transition-all flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-10 hover:shadow-[0_40px_80px_-20px_rgba(139,92,246,0.15)] group relative overflow-hidden ${!notif.isRead ? (isDark ? 'border-[#8B5CF6]/40 shadow-[0_0_20px_rgba(139,92,246,0.1)]' : 'border-[#8b5cf6]/40 ring-1 ring-[#8b5cf6]/10') : (isDark ? 'border-white/5' : 'border-white/60')
+                                className={`${isDark ? 'bg-[#242f49] shadow-[0_20px_40px_rgba(0,0,0,0.3)]' : 'bg-white/40 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.02)]'} backdrop-blur-3xl p-3 md:p-10 rounded-2xl md:rounded-[56px] border transition-all flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-10 hover:shadow-[0_40px_80px_-20px_rgba(139,92,246,0.15)] group relative overflow-hidden ${!notif.isRead ? (isDark ? 'border-[#8B5CF6]/40 shadow-[0_0_20px_rgba(139,92,246,0.1)]' : 'border-[#8b5cf6]/40 ring-1 ring-[#8b5cf6]/10') : (isDark ? 'border-white/5' : 'border-white/60')
                                     }`}
                             >
                                 {!notif.isRead && (
@@ -228,7 +228,7 @@ const Notifications = () => {
                                     />
                                 )}
 
-                                <div className={`w-14 h-14 md:w-20 md:h-20 shrink-0 rounded-2xl md:rounded-[32px] flex items-center justify-center shadow-2xl border ${isDark ? 'border-white/5' : 'border-white'} transition-all duration-700 group-hover:rotate-6 ${notif.type === 'ALERT' ? (isDark ? 'bg-red-900/20' : 'bg-red-50') :
+                                <div className={`w-12 h-12 md:w-20 md:h-20 shrink-0 rounded-2xl md:rounded-[32px] flex items-center justify-center shadow-2xl border ${isDark ? 'border-white/5' : 'border-white'} transition-all duration-700 group-hover:rotate-6 ${notif.type === 'ALERT' ? (isDark ? 'bg-red-900/20' : 'bg-red-50') :
                                     notif.type === 'SUCCESS' ? (isDark ? 'bg-emerald-900/20' : 'bg-emerald-50') : (isDark ? 'bg-[#1a2235]' : 'bg-white')
                                     }`}>
                                     {appIcons[notif.targetId] ? (
@@ -271,7 +271,7 @@ const Notifications = () => {
 
                                         <button
                                             onClick={() => deleteNotification(notif._id)}
-                                            className={`w-fit md:w-auto text-xs md:text-[11px] font-black ${isDark ? 'text-red-400' : 'text-red-500'} flex items-center justify-center gap-2 md:gap-3 uppercase tracking-[0.2em] px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl transition-all relative group/btn overflow-hidden`}
+                                            className={`w-fit md:w-auto text-xs md:text-[11px] font-black ${isDark ? 'text-red-500' : 'text-red-500'} flex items-center justify-center gap-2 md:gap-3 uppercase tracking-[0.2em] px-3 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl transition-all relative group/btn overflow-hidden`}
                                         >
                                             <div className="absolute inset-0 bg-red-500 opacity-0 group-hover/btn:opacity-10 transition-opacity" />
                                             <Trash2 className="w-4 h-4" /> {t('delete')}
