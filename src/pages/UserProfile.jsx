@@ -161,7 +161,7 @@ const UserProfile = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="max-w-7xl mx-auto px-8 lg:px-12 py-12 pb-32 space-y-20 relative z-10"
+                className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-12 pb-32 space-y-12 md:space-y-20 relative z-10"
             >
                 {/* Systematic Header */}
                 <header className="flex flex-col md:flex-row justify-between items-end md:items-center gap-10">
@@ -193,16 +193,16 @@ const UserProfile = () => {
                 </header>
 
                 {/* Profile Identity Card */}
-                <section className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)]' : 'bg-white/40 backdrop-blur-3xl border-white/60 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]'} rounded-[64px] p-12 lg:p-16 relative overflow-hidden transition-all duration-700 border border-b-4 border-b-white/10`}>
+                <section className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.5)]' : 'bg-white/40 backdrop-blur-3xl border-white/60 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]'} rounded-[32px] md:rounded-[64px] p-6 md:p-12 lg:p-16 relative overflow-hidden transition-all duration-700 border border-b-4 border-b-white/10`}>
                     <div className={`absolute top-0 right-0 w-96 h-96 ${isDark ? 'bg-purple-900/10' : 'bg-[#8b5cf6]/5'} rounded-full blur-[100px] pointer-events-none transition-colors`} />
 
                     <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-end">
                         <div className="relative group shrink-0">
                             <motion.div
                                 whileHover={{ scale: 1.05, rotate: -3 }}
-                                className={`w-48 h-48 lg:w-64 lg:h-64 rounded-[56px] ${isDark ? 'bg-slate-800 border-white/10' : 'bg-white border-white/80'} p-2 border shadow-2xl relative z-10 overflow-hidden transition-colors`}
+                                className={`w-36 h-36 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-[32px] md:rounded-[56px] ${isDark ? 'bg-slate-800 border-white/10' : 'bg-white border-white/80'} p-2 border shadow-2xl relative z-10 overflow-hidden transition-colors`}
                             >
-                                <div className={`w-full h-full rounded-[48px] ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-gray-50 to-white'} flex items-center justify-center text-6xl font-black text-[#8b5cf6] overflow-hidden transition-colors`}>
+                                <div className={`w-full h-full rounded-[28px] md:rounded-[48px] ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-gray-50 to-white'} flex items-center justify-center text-4xl md:text-6xl font-black text-[#8b5cf6] overflow-hidden transition-colors`}>
                                     {user.avatar && user.avatar !== '/User.jpeg' ? (
                                         <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
                                     ) : (
@@ -235,38 +235,38 @@ const UserProfile = () => {
                                     )}
                                 </div>
 
-                                <div className="flex items-center justify-center lg:justify-start gap-4 h-24">
+                                <div className="flex items-center justify-center lg:justify-start gap-4 h-16 md:h-24">
                                     {isEditing ? (
-                                        <div className="flex items-center gap-3 w-full max-w-lg">
+                                        <div className="flex items-center gap-2 md:gap-3 w-full max-w-lg">
                                             <input
                                                 type="text"
                                                 value={newName}
                                                 onChange={(e) => setNewName(e.target.value)}
-                                                className={`flex-1 ${isDark ? 'bg-slate-800 text-white border-white/10' : 'bg-white text-gray-900 border-[#8b5cf6]/30'} border-2 rounded-[28px] px-8 py-5 text-3xl font-black focus:outline-none focus:border-[#8b5cf6] focus:ring-8 focus:ring-[#8b5cf6]/5 transition-all tracking-tighter`}
+                                                className={`flex-1 ${isDark ? 'bg-slate-800 text-white border-white/10' : 'bg-white text-gray-900 border-[#8b5cf6]/30'} border-2 rounded-[20px] md:rounded-[28px] px-4 md:px-8 py-3 md:py-5 text-xl md:text-3xl font-black focus:outline-none focus:border-[#8b5cf6] focus:ring-8 focus:ring-[#8b5cf6]/5 transition-all tracking-tighter`}
                                                 autoFocus
                                             />
                                             <button
                                                 onClick={handleUpdateName}
                                                 disabled={isSaving}
-                                                className="p-5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/20 disabled:opacity-50 active:scale-95"
+                                                className="p-3 md:p-5 bg-emerald-500 text-white rounded-xl md:rounded-2xl hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/20 disabled:opacity-50 active:scale-95"
                                             >
-                                                {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Check className="w-6 h-6" strokeWidth={3} />}
+                                                {isSaving ? <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> : <Check className="w-5 h-5 md:w-6 md:h-6" strokeWidth={3} />}
                                             </button>
                                             <button
                                                 onClick={() => {
                                                     setIsEditing(false);
                                                     setNewName(user.name);
                                                 }}
-                                                className="p-5 bg-white border border-gray-200 text-gray-400 rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
+                                                className="p-3 md:p-5 bg-white border border-gray-200 text-gray-400 rounded-xl md:rounded-2xl hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all active:scale-95"
                                             >
-                                                <X className="w-6 h-6" strokeWidth={3} />
+                                                <X className="w-5 h-5 md:w-6 md:h-6" strokeWidth={3} />
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="group flex items-center justify-center lg:justify-start gap-6 cursor-pointer" onClick={() => setIsEditing(true)}>
-                                            <h1 className={`text-5xl lg:text-7xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-none hover:text-[#8b5cf6] transition-colors`}>{user.name}</h1>
-                                            <div className={`p-3 ${isDark ? 'bg-slate-800 border-white/10' : 'bg-white/60 border-white'} border rounded-2xl opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0`}>
-                                                <Edit2 className="w-5 h-5 text-[#8b5cf6]" />
+                                        <div className="group flex items-center justify-center lg:justify-start gap-4 md:gap-6 cursor-pointer" onClick={() => setIsEditing(true)}>
+                                            <h1 className={`text-4xl md:text-5xl lg:text-7xl font-black ${isDark ? 'text-white' : 'text-gray-900'} tracking-tighter leading-none hover:text-[#8b5cf6] transition-colors`}>{user.name}</h1>
+                                            <div className={`p-2 md:p-3 ${isDark ? 'bg-slate-800 border-white/10' : 'bg-white/60 border-white'} border rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0`}>
+                                                <Edit2 className="w-4 h-4 md:w-5 md:h-5 text-[#8b5cf6]" />
                                             </div>
                                         </div>
                                     )}
@@ -470,28 +470,28 @@ const UserProfile = () => {
                                 initial={{ opacity: 0, scale: 0.95, y: 40 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: 40 }}
-                                className={`${isDark ? 'bg-slate-900/90 border-white/10 shadow-[0_64px_128px_-32px_rgba(0,0,0,0.8)]' : 'bg-white/90 border-white shadow-[0_64px_128px_-32px_rgba(0,0,0,0.3)]'} backdrop-blur-3xl rounded-[64px] w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col border relative z-10 border-b-[8px] transition-colors duration-700 ${isDark ? 'border-b-purple-900/40' : 'border-b-[#8b5cf6]/20'}`}
+                                className={`${isDark ? 'bg-slate-900/90 border-white/10 shadow-[0_64px_128px_-32px_rgba(0,0,0,0.8)]' : 'bg-white/90 border-white shadow-[0_64px_128px_-32px_rgba(0,0,0,0.3)]'} backdrop-blur-3xl rounded-[32px] md:rounded-[64px] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border relative z-10 border-b-[8px] transition-colors duration-700 ${isDark ? 'border-b-purple-900/40' : 'border-b-[#8b5cf6]/20'}`}
                             >
-                                <div className={`p-10 lg:p-14 border-b ${isDark ? 'border-white/5 bg-slate-900/40' : 'border-gray-100 bg-white/40'} flex flex-col md:flex-row justify-between items-center gap-8 transition-colors`}>
-                                    <div className={`flex ${isDark ? 'bg-slate-800' : 'bg-gray-100'} p-2 rounded-[32px] gap-2 transition-colors`}>
+                                <div className={`p-6 md:p-10 lg:p-14 border-b ${isDark ? 'border-white/5 bg-slate-900/40' : 'border-gray-100 bg-white/40'} flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 transition-colors`}>
+                                    <div className={`flex ${isDark ? 'bg-slate-800' : 'bg-gray-100'} p-1.5 md:p-2 rounded-[24px] md:rounded-[32px] gap-1 md:gap-2 transition-colors`}>
                                         <button
                                             onClick={() => setActiveTab('faq')}
-                                            className={`px-10 py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] transition-all ${activeTab === 'faq' ? (isDark ? 'bg-slate-700 text-purple-400 shadow-xl' : 'bg-white text-[#8b5cf6] shadow-xl') : 'text-gray-400 hover:text-gray-600'}`}
+                                            className={`px-4 md:px-10 py-3 md:py-5 rounded-[18px] md:rounded-[24px] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all ${activeTab === 'faq' ? (isDark ? 'bg-slate-700 text-purple-400 shadow-xl' : 'bg-white text-[#8b5cf6] shadow-xl') : 'text-gray-400 hover:text-gray-600'}`}
                                         >
-                                            Consolidated FAQ
+                                            FAQ
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('help')}
-                                            className={`px-10 py-5 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] transition-all ${activeTab === 'help' ? (isDark ? 'bg-slate-700 text-purple-400 shadow-xl' : 'bg-white text-[#8b5cf6] shadow-xl') : 'text-gray-400 hover:text-gray-600'}`}
+                                            className={`px-4 md:px-10 py-3 md:py-5 rounded-[18px] md:rounded-[24px] font-black text-[10px] md:text-xs uppercase tracking-[0.2em] transition-all ${activeTab === 'help' ? (isDark ? 'bg-slate-700 text-purple-400 shadow-xl' : 'bg-white text-[#8b5cf6] shadow-xl') : 'text-gray-400 hover:text-gray-600'}`}
                                         >
-                                            System Support
+                                            Support
                                         </button>
                                     </div>
                                     <button
                                         onClick={() => setIsFaqOpen(false)}
-                                        className={`w-16 h-16 ${isDark ? 'bg-slate-800 border-white/5 hover:bg-red-900/20' : 'bg-white border-gray-100 hover:bg-red-50'} border rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 transition-all shadow-sm`}
+                                        className={`w-12 h-12 md:w-16 md:h-16 ${isDark ? 'bg-slate-800 border-white/5 hover:bg-red-900/20' : 'bg-white border-gray-100 hover:bg-red-50'} border rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-100 transition-all shadow-sm`}
                                     >
-                                        <X size={28} strokeWidth={2.5} />
+                                        <X size={20} md:size={28} strokeWidth={2.5} />
                                     </button>
                                 </div>
 
@@ -602,7 +602,7 @@ const StatsCard = ({ icon, label, value, subLabel, color, accent }) => {
     return (
         <motion.div
             whileHover={{ y: -10 }}
-            className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.03)] border-b-white/50'} backdrop-blur-3xl p-10 rounded-[56px] border hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] transition-all duration-700 relative overflow-hidden flex flex-col items-center text-center border-b-4 transition-all duration-700`}
+            className={`${isDark ? 'bg-slate-900/60 border-white/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.03)] border-b-white/50'} backdrop-blur-3xl p-6 md:p-10 rounded-[32px] md:rounded-[56px] border hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)] transition-all duration-700 relative overflow-hidden flex flex-col items-center text-center border-b-4 transition-all duration-700`}
         >
             <div className={`absolute top-0 right-0 w-32 h-32 ${isDark ? 'bg-white/5' : 'bg-gray-50/50'} rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-white transition-all duration-1000`} />
 

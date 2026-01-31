@@ -258,7 +258,7 @@ const Profile = () => {
             <div className="max-w-5xl mx-auto w-full space-y-6 md:space-y-12 pb-24 animate-in fade-in slide-in-from-bottom duration-700 relative z-10">
 
                 {/* Profile Header - High Fidelity Glass */}
-                <div className={`flex flex-col md:flex-row items-center gap-6 md:gap-10 ${isDark ? 'bg-[#242f49] border-white/5 shadow-[0_40px_80px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl border p-6 md:p-10 lg:p-16 rounded-[40px] md:rounded-[64px] relative overflow-hidden group transition-all duration-700`}>
+                <div className={`flex flex-col md:flex-row items-center gap-6 md:gap-10 ${isDark ? 'bg-[#242f49] border-white/5 shadow-[0_40px_80px_rgba(0,0,0,0.5)]' : 'bg-white/40 border-white/60 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl border p-5 md:p-10 lg:p-16 rounded-[32px] md:rounded-[64px] relative overflow-hidden group transition-all duration-700`}>
                     <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6]/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-1000"></div>
                     <div className={`absolute top-0 right-0 w-64 h-64 ${isDark ? 'bg-[#8B5CF6]/10' : 'bg-[#8b5cf6]/5'} rounded-full blur-[100px] pointer-events-none`} />
 
@@ -364,7 +364,7 @@ const Profile = () => {
 
                 <div className="space-y-6 md:space-y-12">
                     {/* Settings Card */}
-                    <div className={`${isDark ? 'bg-[#242f49] border-white/5 shadow-[0_30px_60px_rgba(0,0,0,0.4)]' : 'bg-white/40 border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl border rounded-[40px] md:rounded-[64px] p-6 md:p-12 space-y-8 md:space-y-12 transition-all duration-700 w-full`}>
+                    <div className={`${isDark ? 'bg-[#242f49] border-white/5 shadow-[0_30px_60px_rgba(0,0,0,0.4)]' : 'bg-white/40 border-white/60 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]'} backdrop-blur-3xl border rounded-[32px] md:rounded-[64px] p-5 md:p-12 space-y-8 md:space-y-12 transition-all duration-700 w-full`}>
                         <div className="flex items-center gap-4 md:gap-5">
                             <div className={`w-10 h-10 md:w-14 md:h-14 rounded-[16px] md:rounded-[20px] ${isDark ? 'bg-[#8B5CF6]/20 border-[#8B5CF6]/20' : 'bg-[#8b5cf6]/10 border-[#8b5cf6]/20'} flex items-center justify-center text-[#8B5CF6] border shadow-sm transition-colors`}>
                                 <Settings size={18} className="md:w-6 md:h-6" />
@@ -386,13 +386,13 @@ const Profile = () => {
                                     <div className="flex flex-col gap-4">
                                         <div
                                             onClick={() => setIsFontSizeOpen(!isFontSizeOpen)}
-                                            className={`flex justify-between items-center p-6 md:p-8 ${isDark ? 'bg-[#1a2235] border-white/5 hover:bg-[#242f49] hover:shadow-[0_0_30px_rgba(139,92,246,0.1)]' : 'bg-white/40 border-white hover:bg-white hover:shadow-2xl'} border rounded-[32px] transition-all duration-500 cursor-pointer group`}
+                                            className={`flex justify-between items-center p-5 md:p-8 ${isDark ? 'bg-[#1a2235] border-white/5 hover:bg-[#242f49] hover:shadow-[0_0_30px_rgba(139,92,246,0.1)]' : 'bg-white/40 border-white hover:bg-white hover:shadow-2xl'} border rounded-[28px] md:rounded-[32px] transition-all duration-500 cursor-pointer group`}
                                         >
-                                            <div className="flex items-center gap-4 md:gap-6">
+                                            <div className="flex items-center gap-3 md:gap-6">
                                                 <Type className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-[#6F76A8] group-hover:text-[#8B5CF6]' : 'text-gray-300 group-hover:text-[#8b5cf6]'} transition-colors`} />
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('fontSize')}</span>
-                                                    <span className={`text-sm md:text-base font-black uppercase tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{fontSize}</span>
+                                                    <span className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('fontSize')}</span>
+                                                    <span className={`text-xs md:text-base font-black uppercase tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{fontSize}</span>
                                                 </div>
                                             </div>
                                             <motion.div
@@ -432,13 +432,13 @@ const Profile = () => {
                                     <div className="flex flex-col gap-4">
                                         <div
                                             onClick={() => setIsFontStyleOpen(!isFontStyleOpen)}
-                                            className={`flex justify-between items-center p-6 md:p-8 ${isDark ? 'bg-[#1a2235] border-white/5 hover:bg-[#242f49] hover:shadow-[0_0_30px_rgba(139,92,246,0.1)]' : 'bg-white/40 border-white hover:bg-white hover:shadow-2xl'} border rounded-[32px] transition-all duration-500 cursor-pointer group`}
+                                            className={`flex justify-between items-center p-5 md:p-8 ${isDark ? 'bg-[#1a2235] border-white/5 hover:bg-[#242f49] hover:shadow-[0_0_30px_rgba(139,92,246,0.1)]' : 'bg-white/40 border-white hover:bg-white hover:shadow-2xl'} border rounded-[28px] md:rounded-[32px] transition-all duration-500 cursor-pointer group`}
                                         >
-                                            <div className="flex items-center gap-4 md:gap-6">
+                                            <div className="flex items-center gap-3 md:gap-6">
                                                 <Monitor className={`w-5 h-5 md:w-6 md:h-6 ${isDark ? 'text-[#6F76A8] group-hover:text-[#8B5CF6]' : 'text-gray-300 group-hover:text-[#8b5cf6]'} transition-colors`} />
                                                 <div className="flex flex-col">
-                                                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('typography')}</span>
-                                                    <span className={`text-sm md:text-base font-black uppercase tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{fontStyle}</span>
+                                                    <span className={`text-[8px] md:text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('typography')}</span>
+                                                    <span className={`text-xs md:text-base font-black uppercase tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{fontStyle}</span>
                                                 </div>
                                             </div>
                                             <motion.div
@@ -510,14 +510,14 @@ const Profile = () => {
 
                             {/* Privacy & Security Section */}
                             <div className="space-y-8 pt-10 border-t border-white/5">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div className="flex items-center gap-3">
                                         <Lock className="w-5 h-5 text-[#8B5CF6]" />
                                         <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('privacySecurity')}</h3>
                                     </div>
                                     <button
                                         onClick={handleLogOutAll}
-                                        className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-lg'} border`}
+                                        className={`w-fit px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-lg'} border`}
                                     >
                                         {t('logOutAll')}
                                     </button>
@@ -525,7 +525,7 @@ const Profile = () => {
 
                                 <div className="grid grid-cols-1 gap-6">
                                     {/* Chat History Toggle */}
-                                    <div className={`flex justify-between items-center p-6 md:p-8 ${isDark ? 'bg-[#1a2235] border-white/5 shadow-inner' : 'bg-white/40 border-white'} border rounded-[32px] group`}>
+                                    <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 md:p-8 gap-6 ${isDark ? 'bg-[#1a2235] border-white/5 shadow-inner' : 'bg-white/40 border-white'} border rounded-[28px] md:rounded-[32px] group`}>
                                         <div className="flex items-center gap-4 md:gap-6">
                                             <div className={`p-3 rounded-2xl ${isDark ? 'bg-[#8B5CF6]/20' : 'bg-[#8B5CF6]/10'}`}>
                                                 <History className="w-5 h-5 md:w-6 md:h-6 text-[#8B5CF6]" />
@@ -537,7 +537,7 @@ const Profile = () => {
                                         </div>
                                         <div
                                             onClick={() => setChatHistory(prev => prev === 'ON' ? 'OFF' : 'ON')}
-                                            className={`relative w-16 h-8 md:w-20 md:h-10 p-1 rounded-full cursor-pointer transition-colors duration-500 ${chatHistory === 'ON' ? 'bg-[#8B5CF6]' : (isDark ? 'bg-gray-800' : 'bg-gray-200 shadow-inner')}`}
+                                            className={`relative w-16 h-8 md:w-20 md:h-10 p-1 rounded-full cursor-pointer transition-colors duration-500 shrink-0 ${chatHistory === 'ON' ? 'bg-[#8B5CF6]' : (isDark ? 'bg-gray-800' : 'bg-gray-200 shadow-inner')}`}
                                         >
                                             <motion.div
                                                 animate={{ x: chatHistory === 'ON' ? (window.innerWidth >= 768 ? 40 : 32) : 0 }}
@@ -559,7 +559,7 @@ const Profile = () => {
                                             {sessions.map((session) => (
                                                 <div
                                                     key={session.id}
-                                                    className={`group p-6 md:p-8 flex items-center justify-between border rounded-[36px] transition-all duration-500 relative overflow-hidden ${isDark
+                                                    className={`group p-5 md:p-8 flex flex-col sm:flex-row items-center sm:items-center justify-between border rounded-[28px] md:rounded-[36px] transition-all duration-500 relative overflow-hidden gap-6 ${isDark
                                                         ? 'bg-[#1a2235]/60 border-white/5 hover:bg-[#242f49] hover:border-[#8B5CF6]/30 shadow-2xl'
                                                         : 'bg-white/60 border-white hover:bg-white hover:shadow-[0_20px_50px_rgba(139,92,246,0.15)]'
                                                         }`}
@@ -567,26 +567,26 @@ const Profile = () => {
                                                     {/* Background Glow Effect */}
                                                     <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] transition-opacity duration-700 opacity-0 group-hover:opacity-10 ${isDark ? 'bg-[#8B5CF6]/10' : 'bg-purple-100/50'}`} />
 
-                                                    <div className="flex items-center gap-6 md:gap-8 relative z-10">
-                                                        <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[22px] flex items-center justify-center transition-all duration-500 ${isDark
+                                                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-8 relative z-10 w-full sm:w-auto text-center sm:text-left">
+                                                        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] flex items-center justify-center transition-all duration-500 shrink-0 ${isDark
                                                             ? 'bg-[#242f49] text-white border-white/10 group-hover:bg-[#8B5CF6] group-hover:text-white'
                                                             : 'bg-white text-gray-900 border-gray-100 group-hover:bg-gradient-to-br group-hover:from-[#ec4899] group-hover:to-[#8b5cf6] group-hover:text-white group-hover:shadow-lg'
                                                             } border`}>
-                                                            {session.type === 'Laptop' ? <Laptop size={24} /> : session.type === 'Mobile' ? <Smartphone size={24} /> : <Globe size={24} />}
+                                                            {session.type === 'Laptop' ? <Laptop size={20} className="md:w-6 md:h-6" /> : session.type === 'Mobile' ? <Smartphone size={20} className="md:w-6 md:h-6" /> : <Globe size={20} className="md:w-6 md:h-6" />}
                                                         </div>
-                                                        <div className="flex flex-col gap-1.5">
-                                                            <div className="flex items-center gap-3">
-                                                                <span className={`text-base md:text-lg font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>{session.device}</span>
+                                                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                                                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 md:gap-3">
+                                                                <span className={`text-sm md:text-lg font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'} truncate`}>{session.device}</span>
                                                                 {session.current && (
-                                                                    <span className="px-3 py-1 rounded-full bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest shadow-[0_4px_10px_rgba(16,185,129,0.3)] animate-pulse">{t('live')}</span>
+                                                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest shadow-[0_4px_10px_rgba(16,185,129,0.3)] animate-pulse">{t('live')}</span>
                                                                 )}
                                                             </div>
-                                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] md:text-[12px] font-bold transition-colors">
+                                                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 text-[9px] md:text-[12px] font-bold transition-colors">
                                                                 <span className={`flex items-center gap-1.5 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>
-                                                                    <MapPin size={12} className="text-[#8B5CF6]" />
+                                                                    <MapPin size={10} className="text-[#8B5CF6] md:w-3 md:h-3" />
                                                                     {session.location}
                                                                 </span>
-                                                                <span className={`w-1 h-1 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
+                                                                <span className={`hidden sm:block w-1 h-1 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
                                                                 <span className={`${isDark ? 'text-[#8B5CF6]' : 'text-[#8B5CF6]'}`}>{session.time}</span>
                                                             </div>
                                                         </div>
@@ -595,12 +595,13 @@ const Profile = () => {
                                                     {!session.current && (
                                                         <button
                                                             onClick={() => handleTerminateSession(session.id)}
-                                                            className={`p-4 rounded-2xl transition-all relative z-10 ${isDark
-                                                                ? 'bg-red-500/5 hover:bg-red-500 text-red-400 hover:text-white shadow-lg shadow-red-500/10'
+                                                            className={`w-full sm:w-auto p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all relative z-10 flex items-center justify-center gap-2 font-black text-[9px] uppercase tracking-widest ${isDark
+                                                                ? 'bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white shadow-lg shadow-red-500/10 border border-red-500/20'
                                                                 : 'bg-red-50 hover:bg-red-500 text-red-500 hover:text-white shadow-[0_8px_20px_rgba(239,68,68,0.1)]'
                                                                 }`}
                                                         >
-                                                            <Trash2 size={18} />
+                                                            <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
+                                                            <span className="sm:hidden">Terminate Session</span>
                                                         </button>
                                                     )}
                                                 </div>
