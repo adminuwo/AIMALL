@@ -540,74 +540,70 @@ const Profile = () => {
                                         </div>
                                     </div>
 
-                                    {/* Device Activity List */}
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 pl-4">
+                                    <div className="flex items-center justify-between gap-2 pl-4 mb-4">
+                                        <div className="flex items-center gap-2">
                                             <Monitor className={`w-4 h-4 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
                                             <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('deviceActivity')}</span>
                                         </div>
+                                        <button
+                                            onClick={handleLogOutAll}
+                                            className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-lg'} border shadow-sm active:scale-95`}
+                                        >
+                                            {t('logOutAll')}
+                                        </button>
+                                    </div>
 
-                                        <div className="space-y-4">
-                                            {sessions.map((session) => (
-                                                <div
-                                                    key={session.id}
-                                                    className={`group p-5 md:p-8 flex flex-col sm:flex-row items-center sm:items-center justify-between border rounded-[28px] md:rounded-[36px] transition-all duration-500 relative overflow-hidden gap-6 ${isDark
-                                                        ? 'bg-[#1a2235]/60 border-white/5 hover:bg-[#242f49] hover:border-[#8B5CF6]/30 shadow-2xl'
-                                                        : 'bg-white/60 border-white hover:bg-white hover:shadow-[0_20px_50px_rgba(139,92,246,0.15)]'
-                                                        }`}
-                                                >
-                                                    {/* Background Glow Effect */}
-                                                    <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] transition-opacity duration-700 opacity-0 group-hover:opacity-10 ${isDark ? 'bg-[#8B5CF6]/10' : 'bg-purple-100/50'}`} />
+                                    <div className="space-y-4">
+                                        {sessions.map((session) => (
+                                            <div
+                                                key={session.id}
+                                                className={`group p-5 md:p-8 flex flex-col sm:flex-row items-center sm:items-center justify-between border rounded-[28px] md:rounded-[36px] transition-all duration-500 relative overflow-hidden gap-6 ${isDark
+                                                    ? 'bg-[#1a2235]/60 border-white/5 hover:bg-[#242f49] hover:border-[#8B5CF6]/30 shadow-2xl'
+                                                    : 'bg-white/60 border-white hover:bg-white hover:shadow-[0_20px_50px_rgba(139,92,246,0.15)]'
+                                                    }`}
+                                            >
+                                                {/* Background Glow Effect */}
+                                                <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] transition-opacity duration-700 opacity-0 group-hover:opacity-10 ${isDark ? 'bg-[#8B5CF6]/10' : 'bg-purple-100/50'}`} />
 
-                                                    <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-8 relative z-10 w-full sm:w-auto text-center sm:text-left">
-                                                        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] flex items-center justify-center transition-all duration-500 shrink-0 ${isDark
-                                                            ? 'bg-[#242f49] text-white border-white/10 group-hover:bg-[#8B5CF6] group-hover:text-white'
-                                                            : 'bg-white text-gray-900 border-gray-100 group-hover:bg-gradient-to-br group-hover:from-[#ec4899] group-hover:to-[#8b5cf6] group-hover:text-white group-hover:shadow-lg'
-                                                            } border`}>
-                                                            {session.type === 'Laptop' ? <Laptop size={20} className="md:w-6 md:h-6" /> : session.type === 'Mobile' ? <Smartphone size={20} className="md:w-6 md:h-6" /> : <Globe size={20} className="md:w-6 md:h-6" />}
+                                                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 md:gap-8 relative z-10 w-full sm:w-auto text-center sm:text-left">
+                                                    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-[18px] md:rounded-[22px] flex items-center justify-center transition-all duration-500 shrink-0 ${isDark
+                                                        ? 'bg-[#242f49] text-white border-white/10 group-hover:bg-[#8B5CF6] group-hover:text-white'
+                                                        : 'bg-white text-gray-900 border-gray-100 group-hover:bg-gradient-to-br group-hover:from-[#ec4899] group-hover:to-[#8b5cf6] group-hover:text-white group-hover:shadow-lg'
+                                                        } border`}>
+                                                        {session.type === 'Laptop' ? <Laptop size={20} className="md:w-6 md:h-6" /> : session.type === 'Mobile' ? <Smartphone size={20} className="md:w-6 md:h-6" /> : <Globe size={20} className="md:w-6 md:h-6" />}
+                                                    </div>
+                                                    <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 md:gap-3">
+                                                            <span className={`text-sm md:text-lg font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'} truncate`}>{session.device}</span>
+                                                            {session.current && (
+                                                                <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest shadow-[0_4px_10px_rgba(16,185,129,0.3)] animate-pulse">{t('live')}</span>
+                                                            )}
                                                         </div>
-                                                        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                                                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 md:gap-3">
-                                                                <span className={`text-sm md:text-lg font-black tracking-tight ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'} truncate`}>{session.device}</span>
-                                                                {session.current && (
-                                                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest shadow-[0_4px_10px_rgba(16,185,129,0.3)] animate-pulse">{t('live')}</span>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 text-[9px] md:text-[12px] font-bold transition-colors">
-                                                                <span className={`flex items-center gap-1.5 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>
-                                                                    <MapPin size={10} className="text-[#8B5CF6] md:w-3 md:h-3" />
-                                                                    {session.location}
-                                                                </span>
-                                                                <span className={`hidden sm:block w-1 h-1 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
-                                                                <span className={`${isDark ? 'text-[#8B5CF6]' : 'text-[#8B5CF6]'}`}>{session.time}</span>
-                                                            </div>
+                                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 text-[9px] md:text-[12px] font-bold transition-colors">
+                                                            <span className={`flex items-center gap-1.5 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>
+                                                                <MapPin size={10} className="text-[#8B5CF6] md:w-3 md:h-3" />
+                                                                {session.location}
+                                                            </span>
+                                                            <span className={`hidden sm:block w-1 h-1 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
+                                                            <span className={`${isDark ? 'text-[#8B5CF6]' : 'text-[#8B5CF6]'}`}>{session.time}</span>
                                                         </div>
                                                     </div>
-
-                                                    {!session.current && (
-                                                        <button
-                                                            onClick={() => handleTerminateSession(session.id)}
-                                                            className={`w-full sm:w-auto p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all relative z-10 flex items-center justify-center gap-2 font-black text-[9px] uppercase tracking-widest ${isDark
-                                                                ? 'bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white shadow-lg shadow-red-500/10 border border-red-500/20'
-                                                                : 'bg-red-50 hover:bg-red-500 text-red-500 hover:text-white shadow-[0_8px_20px_rgba(239,68,68,0.1)]'
-                                                                }`}
-                                                        >
-                                                            <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
-                                                            <span className="sm:hidden">Terminate Session</span>
-                                                        </button>
-                                                    )}
                                                 </div>
-                                            ))}
-                                        </div>
 
-                                        <div className="flex justify-center pt-4">
-                                            <button
-                                                onClick={handleLogOutAll}
-                                                className={`w-full sm:w-auto px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-xl'} border shadow-sm active:scale-95`}
-                                            >
-                                                {t('logOutAll')}
-                                            </button>
-                                        </div>
+                                                {!session.current && (
+                                                    <button
+                                                        onClick={() => handleTerminateSession(session.id)}
+                                                        className={`w-full sm:w-auto p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all relative z-10 flex items-center justify-center gap-2 font-black text-[9px] uppercase tracking-widest ${isDark
+                                                            ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white shadow-lg shadow-red-500/10 border border-red-500/20'
+                                                            : 'bg-red-50 hover:bg-red-500 text-red-500 hover:text-white shadow-[0_8px_20px_rgba(239,68,68,0.1)]'
+                                                            }`}
+                                                    >
+                                                        <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
+                                                        <span className="sm:hidden">Terminate Session</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>

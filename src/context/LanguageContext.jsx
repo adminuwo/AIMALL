@@ -37,7 +37,7 @@ export const LanguageProvider = ({ children }) => {
             memoryEmpty: 'No History',
             initializeLogic: 'START CHAT',
             chatGreeting: 'Hello! Your AI agent is ready. How can I help you today?',
-            askPlaceholder: 'Ask anything...',
+            askPlaceholder: 'Ask AISA...',
             aisa: 'AISA',
             ADITI: "ADITI",
             guest: 'Guest',
@@ -389,7 +389,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "and",
             signupPrivacy: "Privacy Policy",
             signupAgreeError: "Please agree to the Terms of Service to continue.",
-            signupAgreedTail: ".",
+            signupAgreedTail: "."
+            ,
             welcome: "Welcome",
             explorer: "Explorer",
             dashboardDesc: "Your intelligent neural workspace is operational. All advanced systems are at peak performance.",
@@ -689,7 +690,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "و",
             signupPrivacy: "سياسة الخصوصية",
             signupAgreeError: "يجب الموافقة على الشروط للمتابعة.",
-            signupAgreedTail: ".",
+            signupAgreedTail: "."
+            ,
             welcome: "مرحباً",
             explorer: "مستكشف",
             dashboardDesc: "مساحة العمل العصبية الذكية الخاصة بك جاهزة للعمل. جميع الأنظمة المتقدمة في ذروة الأداء.",
@@ -1064,7 +1066,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "और",
             signupPrivacy: "गोपनीयता नीति",
             signupAgreeError: "जारी रखने के लिए कृपया शर्तों से सहमत हों।",
-            signupAgreedTail: "से सहमत हूँ।",
+            signupAgreedTail: "से सहमत हूँ।"
+            ,
             welcome: "स्वागत है",
             explorer: "अन्वेषक",
             dashboardDesc: "आपका बुद्धिमान तंत्रिका कार्यक्षेत्र क्रियाशील है। सभी उन्नत प्रणालियाँ चरम प्रदर्शन पर हैं।",
@@ -1346,7 +1349,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "y",
             signupPrivacy: "Política de Privacidad",
             signupAgreeError: "Debe aceptar los términos para continuar.",
-            signupAgreedTail: "de AI Mall.",
+            signupAgreedTail: "de AI Mall."
+            ,
             newAppArrival: "NUEVA LLEGADA DE APP",
             newAppArrivalMsg: "Noticias emocionantes: '{agentName}' acaba de llegar al mercado de AI Mall. ¡Despliégalo ahora!",
             welcome: "Welcome",
@@ -1598,7 +1602,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "et",
             signupPrivacy: "Politique de Confidentialité",
             signupAgreeError: "Veuillez accepter les conditions pour continuer.",
-            signupAgreedTail: ".",
+            signupAgreedTail: "."
+            ,
             newAppArrival: "NOUVELLE ARRIVÉE D'APP",
             newAppArrivalMsg: "Nouvelles excitantes : '{agentName}' vient d'arriver sur le marché d'AI Mall. Déployez-le maintenant !",
             delete: "DELETE",
@@ -1849,7 +1854,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "und",
             signupPrivacy: "Datenschutzrichtlinie",
             signupAgreeError: "Bitte akzeptieren Sie die Bedingungen.",
-            signupAgreedTail: ".",
+            signupAgreedTail: "."
+            ,
             newAppArrival: "NEUE APP-ANKUNFT",
             newAppArrivalMsg: "Spannende Neuigkeiten: '{agentName}' ist gerade auf dem AI Mall Marktplatz gelandet. Jetzt einsetzen!",
             delete: "DELETE",
@@ -2103,7 +2109,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "и",
             signupPrivacy: "Политику конфиденциальности",
             signupAgreeError: "Примите условия для продолжения.",
-            signupAgreedTail: ".",
+            signupAgreedTail: "."
+            ,
             newAppArrival: "НОВОЕ ПОСТУПЛЕНИЕ ПРИЛОЖЕНИЙ",
             newAppArrivalMsg: "Новости: '{agentName}' только что появился на маркетплейсе AI Mall. Разверните его сейчас!",
             delete: "DELETE",
@@ -2358,7 +2365,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "和",
             signupPrivacy: "隐私政策",
             signupAgreeError: "请同意条款以继续。",
-            signupAgreedTail: "。",
+            signupAgreedTail: "。"
+            ,
             newAppArrival: "新应用上架",
             newAppArrivalMsg: "Exciting News: '{agentName}' has just landed in the AI Mall Marketplace. Deploy it now!",
             delete: "DELETE",
@@ -2612,7 +2620,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "と",
             signupPrivacy: "プライバシーポリシー",
             signupAgreeError: "続けるには規約に同意してください。",
-            signupAgreedTail: "に同意します。",
+            signupAgreedTail: "に同意します。"
+            ,
             newAppArrival: "新着アプリ",
             newAppArrivalMsg: "エキサイティングなニュース：'{agentName}' が AI Mall マーケットプレイスに登場しました。今すぐ展開しましょう！",
             delete: "削除",
@@ -2866,7 +2875,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "e",
             signupPrivacy: "Política de Privacidade",
             signupAgreeError: "Aceite os termos para continuar.",
-            signupAgreedTail: ".",
+            signupAgreedTail: "."
+            ,
             newAppArrival: "NOVA CHEGADA DE APP",
             newAppArrivalMsg: "Notícias: '{agentName}' acaba de chegar ao mercado do AI Mall. Implemente-o agora!",
             delete: "DELETE",
@@ -3139,7 +3149,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "च",
             signupPrivacy: "गोपनीयतानीतिं",
             signupAgreeError: "कृपया अग्रे गन्तुं नियमान् स्वीकरोतु।",
-            signupAgreedTail: "स्वीकरोमि।",
+            signupAgreedTail: "स्वीकरोमि।"
+            ,
             welcome: "स्वागतम्",
             explorer: "अन्वेषकः",
             dashboardDesc: "भवतः बुद्धिमान् न्यूरल-कार्यक्षेत्रं क्रियाशीलम् अस्ति। सर्वाः उन्नतप्रणालयः शिखरप्रदर्शने सन्ति।",
@@ -3393,7 +3404,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "आणि",
             signupPrivacy: "गोपनीयता धोरणाशी",
             signupAgreeError: "कृपया पुढे जाण्यासाठी अटी मान्य करा.",
-            signupAgreedTail: "सहमत आहे.",
+            signupAgreedTail: "सहमत आहे."
+            ,
             welcome: "स्वागत आहे",
             explorer: "एक्स्प्लोरर",
             dashboardDesc: "तुमचे बुद्धिमान न्युरल वर्कस्पेस कार्यरत आहे. सर्व प्रगत प्रणाली सर्वोच्च कामगिरीवर आहेत।",
@@ -3656,7 +3668,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "এবং",
             signupPrivacy: "গোপনীয়তা নীতিতে",
             signupAgreeError: "চালিয়ে যেতে শর্তাবলী গ্রহণ করুন।",
-            signupAgreedTail: "সম্মত।",
+            signupAgreedTail: "সম্মত।"
+            ,
             welcome: "স্বাগতম",
             explorer: "অন্বেষক",
             dashboardDesc: "আপনার বুদ্ধিমান নিউরাল ওয়ার্কস্পেস সচল আছে। সমস্ত উন্নত সিস্টেম সর্বোচ্চ পারফরম্যান্সে আছে।",
@@ -3896,7 +3909,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "மற்றும்",
             signupPrivacy: "தனியுரிமை கொள்கையை",
             signupAgreeError: "தொடர விதிமுறைகளை ஏற்கவும்.",
-            signupAgreedTail: "ஏற்கிறேன்.",
+            signupAgreedTail: "ஏற்கிறேன்."
+            ,
             newAppArrival: "புதிய செயலி வருகை",
             newAppArrivalMsg: "உற்சாகமான செய்தி: '{agentName}' இப்போதுதான் AI மால் மார்க்கெட்பிளேஸில் வந்துள்ளது. இப்போது அதைப் பயன்படுத்தவும்!",
             welcome: "வரவேற்கிறோம்",
@@ -4140,7 +4154,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "ਅਤੇ",
             signupPrivacy: "ਗੋਪਨੀਯਤਾ ਨੀਤੀ",
             signupAgreeError: "ਜਾਰੀ ਰੱਖਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਸ਼ਰਤਾਂ ਨੂੰ ਸਵੀਕਾਰ ਕਰੋ।",
-            signupAgreedTail: "ਨਾਲ ਸਹਿਮਤ ਹਾਂ।",
+            signupAgreedTail: "ਨਾਲ ਸਹਿਮਤ ਹਾਂ।"
+            ,
             newAppArrival: "ਨਵਾਂ ਐਪ ਆਗਮਨ",
             newAppArrivalMsg: "ਸ਼ਾਨਦਾਰ ਖ਼ਬਰ: '{agentName}' ਹੁਣੇ ਹੀ AI ਮਾਲ ਮਾਰਕੀਟਪਲੇਸ ਵਿੱਚ ਆਇਆ ਹੈ। ਇਸਨੂੰ ਹੁਣੇ ਲਾਗੂ ਕਰੋ!",
             welcome: "ਜੀ ਆਇਆਂ ਨੂੰ",
@@ -4396,7 +4411,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "અને",
             signupPrivacy: "ગોપનીયતા નીતિ",
             signupAgreeError: "કૃપા કરીને આગળ વધવા માટે શરતો સ્વીકારો.",
-            signupAgreedTail: "સાથે સંમત છું.",
+            signupAgreedTail: "સાથે સંમત છું."
+            ,
             welcome: "સ્વાગત છે",
             explorer: "એક્સપ્લોરર",
             dashboardDesc: "તમારું બુદ્ધિશાળી ન્યુરલ વર્કસ્પેસ કાર્યરત છે. બધી અદ્યતન સિસ્ટમ્સ શ્રેષ્ઠ પ્રદર્શન પર છે.",
@@ -4650,7 +4666,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "ಮತ್ತು",
             signupPrivacy: "ಗೌಪ್ಯತೆ ನೀತಿಯನ್ನು",
             signupAgreeError: "ಮುಂದುವರೆಯಲು ದಯವಿಟ್ಟು ನಿಯಮಗಳನ್ನು ಒಪ್ಪಿಕೊಳ್ಳಿ.",
-            signupAgreedTail: "ಒಪ್ಪುತ್ತೇನೆ.",
+            signupAgreedTail: "ಒಪ್ಪುತ್ತೇನೆ."
+            ,
             welcome: "ಸ್ವಾಗತ",
             explorer: "ಅನ್ವೇಷಕ",
             dashboardDesc: "ನಿಮ್ಮ ಬುದ್ಧಿವಂತ ನ್ಯೂರಲ್ ಕಾರ್ಯಕ್ಷೇತ್ರವು ಚಾಲನೆಯಲ್ಲಿದೆ. ಎಲ್ಲಾ ಸುಧಾರಿತ ಸಿಸ್ಟಮ್‌ಗಳು ಗರಿಷ್ಠ ಕಾರ್ಯಕ್ಷಮತೆಯಲ್ಲಿವೆ.",
@@ -4904,7 +4921,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "మరియు",
             signupPrivacy: "గోప్యతా విధానాన్ని",
             signupAgreeError: "కొనసాగించడానికి దయచేసి నిబంధనలను అంగీకరించండి.",
-            signupAgreedTail: "అంగీకరిస్తున్నాను.",
+            signupAgreedTail: "అంగీకరిస్తున్నాను."
+            ,
             welcome: "స్వాగతం",
             explorer: "అన్వేషకుడు",
             dashboardDesc: "మీ మేధోపరమైన న్యూరల్ వర్క్‌స్పేస్ పని చేస్తోంది. అన్ని అధునాతన సిస్టమ్‌లు గరిష్ట పనితీరులో ఉన్నాయి.",
@@ -5158,7 +5176,8 @@ export const LanguageProvider = ({ children }) => {
             signupAnd: "ഒപ്പം",
             signupPrivacy: "സ്വകാര്യതാ നയം",
             signupAgreeError: "തുടരുന്നതിന് ദയവായി നിബന്ധനകൾ അംഗീകരിക്കുക.",
-            signupAgreedTail: "അംഗീകരിക്കുന്നു.",
+            signupAgreedTail: "അംഗീകരിക്കുന്നു."
+            ,
             welcome: "സ്വാഗതം",
             explorer: "എക്സ്പ്ലോറർ",
             dashboardDesc: "നിങ്ങളുടെ ബുദ്ധിപരമായ ന്യൂറൽ വർക്ക്‌സ്‌പെയ്‌സ് പ്രവർത്തനക്ഷമമാണ്. എല്ലാ നൂതന സംവിധാനങ്ങളും മികച്ച പ്രകടനത്തിലാണ്.",

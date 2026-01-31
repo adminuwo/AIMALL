@@ -333,7 +333,7 @@ const Chat = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={t('askPlaceholder')}
-                className={`w-full h-[60px] ${isDark ? 'bg-[#1a2235] border-white/20 text-white placeholder-[#6F76A8]' : 'bg-white/60 border-white text-gray-900 placeholder-gray-400'} backdrop-blur-3xl border rounded-[32px] pl-6 pr-48 py-4 text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-[#8B5CF6]/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all resize-none overflow-y-auto no-scrollbar`}
+                className={`w-full h-[60px] ${isDark ? 'bg-[#1a2235] border-white/20 text-white placeholder-[#6F76A8]' : 'bg-white/60 border-white text-gray-900 placeholder-gray-400'} backdrop-blur-3xl border rounded-[32px] pl-6 pr-14 md:pr-48 py-4 text-[13px] md:text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-[#8B5CF6]/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all resize-none overflow-y-auto no-scrollbar`}
               />
 
               <div className="absolute right-6 top-0 h-full flex items-center gap-2">
