@@ -540,17 +540,9 @@ const Profile = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-2 pl-4 mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <Monitor className={`w-4 h-4 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('deviceActivity')}</span>
-                                        </div>
-                                        <button
-                                            onClick={handleLogOutAll}
-                                            className={`px-4 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white' : 'bg-red-50 border-red-100 text-red-500 hover:bg-red-600 hover:text-white hover:shadow-lg'} border shadow-sm active:scale-95`}
-                                        >
-                                            {t('logOutAll')}
-                                        </button>
+                                    <div className="flex items-center gap-2 pl-4 mb-4">
+                                        <Monitor className={`w-4 h-4 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
+                                        <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('deviceActivity')}</span>
                                     </div>
 
                                     <div className="space-y-4">
