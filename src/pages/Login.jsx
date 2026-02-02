@@ -64,21 +64,14 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-md">
 
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-0">
           <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`inline-flex items-center justify-center w-24 h-24 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/40 border-white/60'} backdrop-blur-xl rounded-[32px] shadow-glass border mb-8 mx-auto group hover:rotate-12 transition-transform duration-500 ring-4 ${isDark ? 'ring-purple-500/10' : 'ring-white/20'}`}
+            className="mb-0 mx-auto flex items-center justify-center p-0"
           >
-            <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-20 h-20 object-contain drop-shadow-md" />
+            <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-32 h-32 object-contain" />
           </motion.div>
-
-          <h2 className={`text-3xl md:text-5xl font-black tracking-tighter mb-2 transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {t('secure')} <span className="text-[#8b5cf6] drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">{t('access')}.</span>
-          </h2>
-          <p className={`text-sm md:text-base font-medium transition-colors ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
-            {t('initializeNeuralSession')}
-          </p>
         </div>
 
         {/* Card */}

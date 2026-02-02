@@ -142,11 +142,12 @@ import { Link } from 'react-router';
 import { MapPin, Mail, Phone } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
-import LinkedinIcon from '../../assets/social-icons/linkedin.webp';
-import TwitterIcon from '../../assets/social-icons/twitter.webp';
-import FacebookIcon from '../../assets/social-icons/facebook.webp';
-import InstagramIcon from '../../assets/social-icons/instagram.webp';
-import YoutubeIcon from '../../assets/social-icons/youtube.webp';
+import LinkedinIcon from '../../assets/social-icons/Linkedin.svg';
+import TwitterIcon from '../../assets/social-icons/X.svg';
+import FacebookIcon from '../../assets/social-icons/FB.svg';
+import InstagramIcon from '../../assets/social-icons/Insta.svg';
+import YoutubeIcon from '../../assets/social-icons/YT.svg';
+import ThreadIcon from '../../assets/social-icons/Threads.svg';
 import HelpCenterModal from './HelpCenterModal';
 import SecurityGuidelinesModal from './SecurityGuidelinesModal';
 import { useLanguage } from '../../context/LanguageContext';
@@ -206,7 +207,8 @@ const Footer = () => {
                                     { icon: TwitterIcon, link: 'https://x.com/aimallglobal' },
                                     { icon: FacebookIcon, link: 'https://www.facebook.com/aimallglobal/' },
                                     { icon: InstagramIcon, link: 'https://www.instagram.com/aimall.global/' },
-                                    { icon: YoutubeIcon, link: 'https://www.youtube.com/@aimallglobal' }
+                                    { icon: YoutubeIcon, link: 'https://www.youtube.com/@aimallglobal' },
+                                    { icon: ThreadIcon, link: 'https://www.threads.com/@aimallglobal' }
                                 ].map((social, index) => (
                                     <a
                                         key={index}
