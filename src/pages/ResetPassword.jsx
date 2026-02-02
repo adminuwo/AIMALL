@@ -109,24 +109,36 @@ const ResetPassword = () => {
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] ml-2">
                                 New Token
                             </label>
-                            <div className="relative group/input">
-                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-[#8b5cf6] transition-colors" />
+                            <div className="relative group/input flex items-center">
+                                <div className="absolute left-6 inset-y-0 flex items-center pointer-events-none">
+                                    <Lock className="w-5 h-5 text-gray-400 group-focus-within/input:text-[#8b5cf6] transition-colors" />
+                                </div>
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-white/60 border border-white/80 rounded-[24px] py-5 pl-16 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 shadow-sm transition-all font-medium"
+                                    className="w-full bg-white/60 border border-white/80 rounded-[24px] py-5 pl-16 pr-14 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 shadow-sm transition-all font-medium"
                                     placeholder="••••••••"
                                     required
                                     minLength={6}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#8b5cf6] transition-colors"
-                                >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                </button>
+                                <div className="absolute right-4 inset-y-0 flex items-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#8b5cf6]/10 text-gray-400 hover:text-[#8b5cf6]"
+                                    >
+                                        <motion.div
+                                            key={showPassword ? 'eye' : 'eye-off'}
+                                            initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                            exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
+                                        >
+                                            {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                                        </motion.div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -134,17 +146,36 @@ const ResetPassword = () => {
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] ml-2">
                                 Verify Token
                             </label>
-                            <div className="relative group/input">
-                                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-[#8b5cf6] transition-colors" />
+                            <div className="relative group/input flex items-center">
+                                <div className="absolute left-6 inset-y-0 flex items-center pointer-events-none">
+                                    <Lock className="w-5 h-5 text-gray-400 group-focus-within/input:text-[#8b5cf6] transition-colors" />
+                                </div>
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full bg-white/60 border border-white/80 rounded-[24px] py-5 pl-16 pr-12 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 shadow-sm transition-all font-medium"
+                                    className="w-full bg-white/60 border border-white/80 rounded-[24px] py-5 pl-16 pr-14 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 shadow-sm transition-all font-medium"
                                     placeholder="••••••••"
                                     required
                                     minLength={6}
                                 />
+                                <div className="absolute right-4 inset-y-0 flex items-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-[#8b5cf6]/10 text-gray-400 hover:text-[#8b5cf6]"
+                                    >
+                                        <motion.div
+                                            key={showPassword ? 'eye-v' : 'eye-off-v'}
+                                            initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                            exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
+                                            transition={{ duration: 0.2, ease: "easeOut" }}
+                                        >
+                                            {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                                        </motion.div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

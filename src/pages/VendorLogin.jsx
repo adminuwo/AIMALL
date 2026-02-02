@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { Mail, Lock, Loader2, AlertCircle, Clock, XCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, Clock, XCircle, Eye, EyeOff } from 'lucide-react';
+import { motion } from 'framer-motion';
 import apiService from '../services/apiService';
 
 const VendorLogin = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -144,17 +146,40 @@ const VendorLogin = () => {
                         <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-2">
                             Password
                         </label>
-                        <div className="relative">
-                            <Lock className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <div className="relative flex items-center">
+                            <div className="absolute left-4 inset-y-0 flex items-center pointer-events-none">
+                                <Lock className="w-5 h-5 text-slate-400" />
+                            </div>
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className="w-full bg-white/60 border border-white/80 rounded-[24px] pl-12 pr-4 py-4 text-sm outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all font-medium"
+                                className="w-full bg-white/60 border border-white/80 rounded-[24px] pl-12 pr-12 py-4 text-sm outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 transition-all font-medium"
                                 placeholder="Enter your password"
                                 required
                             />
+                            <div className="absolute right-4 inset-y-0 flex items-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 hover:scale-110 active:scale-95 hover:bg-slate-100/50"
+                                >
+                                    <motion.div
+                                        key={showPassword ? 'eye' : 'eye-off'}
+                                        initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                        exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                    >
+                                        {showPassword ? (
+                                            <Eye className="w-4 h-4 text-slate-400" />
+                                        ) : (
+                                            <EyeOff className="w-4 h-4 text-slate-400" />
+                                        )}
+                                    </motion.div>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

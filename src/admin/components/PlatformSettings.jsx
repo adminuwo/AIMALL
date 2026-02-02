@@ -294,7 +294,7 @@ const PlatformSettings = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className="font-black text-sm text-gray-900 truncate group-hover:text-[#8b5cf6] transition-colors">{admin.name}</h4>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{admin.email}</p>
+                                    <p className="text-[10px] font-bold text-gray-400 tracking-widest truncate normal-case">{admin.email}</p>
                                 </div>
                                 <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-[#8b5cf6]/10 transition-colors">
                                     <Info className="w-4 h-4 text-gray-400 group-hover:text-[#8b5cf6]" />
@@ -348,7 +348,7 @@ const PlatformSettings = () => {
                                     </div>
                                 </div>
                                 <h4 className="text-2xl font-black text-gray-900 tracking-tighter uppercase">{selectedAdmin.name}</h4>
-                                <p className="text-xs font-bold text-[#8b5cf6] uppercase tracking-[0.2em]">{selectedAdmin.email}</p>
+                                <p className="text-xs font-bold text-[#8b5cf6] tracking-[0.2em] normal-case">{selectedAdmin.email}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

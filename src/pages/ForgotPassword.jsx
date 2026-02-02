@@ -3,8 +3,10 @@ import { Link } from 'react-router';
 import { ArrowLeft, Mail, Loader, CheckCircle, AlertCircle, RefreshCcw } from 'lucide-react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 const ForgotPassword = () => {
+    const { t } = useLanguage();
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -47,8 +49,8 @@ const ForgotPassword = () => {
                         </div>
                     </motion.div>
 
-                    <h2 className="text-5xl font-black text-gray-900 tracking-tighter mb-2">Access <span className="text-[#8b5cf6]">Recovery.</span></h2>
-                    <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-[10px] opacity-70">Initialize Credential Reset Sequence</p>
+                    <h2 className="text-5xl font-black text-gray-900 tracking-tighter mb-2">{t('access')} <span className="text-[#8b5cf6]">{t('recovery') || 'Recovery'}.</span></h2>
+                    <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-[10px] opacity-70">{t('initResetSequence')}</p>
                 </div>
 
                 {/* Card */}
@@ -86,7 +88,7 @@ const ForgotPassword = () => {
                     <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
                         <div className="space-y-3">
                             <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] ml-2">
-                                Neural Address
+                                {t('neuralAddress')}
                             </label>
                             <div className="relative group/input">
                                 <Mail className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-[#8b5cf6] transition-colors" />
@@ -95,7 +97,7 @@ const ForgotPassword = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full bg-white/60 border border-white/80 rounded-[24px] py-5 pl-16 pr-8 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-[#8b5cf6]/10 shadow-sm transition-all font-medium"
-                                    placeholder="name@example.com"
+                                    placeholder={t('emailPlaceholder') || "name@example.com"}
                                     required
                                 />
                             </div>
@@ -109,7 +111,7 @@ const ForgotPassword = () => {
                             {loading ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                <> <RefreshCcw size={18} /> Initiate Recovery </>
+                                <> <RefreshCcw size={18} /> {t('initiateRecovery')} </>
                             )}
                         </button>
                     </form>
@@ -120,7 +122,7 @@ const ForgotPassword = () => {
                     to="/login"
                     className="mt-12 flex items-center justify-center gap-3 text-gray-400 hover:text-gray-900 transition-all font-black text-[10px] uppercase tracking-[0.3em]"
                 >
-                    <ArrowLeft className="w-4 h-4" strokeWidth={3} /> Abort & Return to Login
+                    <ArrowLeft className="w-4 h-4" strokeWidth={3} /> {t('abortReturnLogin')}
                 </Link>
             </div>
         </div>

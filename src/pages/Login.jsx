@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router';
-import { Cpu, Mail, Lock, ArrowLeft, AlertCircle, Sparkles } from 'lucide-react';
+import { Cpu, Mail, Lock, ArrowLeft, AlertCircle, Sparkles, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { apis, AppRoute } from '../types';
@@ -16,6 +16,7 @@ const Login = () => {
   const isDark = theme === 'Dark';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -134,19 +135,42 @@ const Login = () => {
               <label className={`text-[10px] font-black uppercase tracking-[0.25em] ml-2 ${isDark ? 'text-purple-300' : 'text-gray-400'}`}>
                 {t('password')}
               </label>
-              <div className="relative group/input">
-                <Lock className={`absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors ${isDark ? 'text-purple-400 group-focus-within/input:text-white' : 'text-gray-400 group-focus-within/input:text-[#8b5cf6]'}`} />
+              <div className="relative group/input flex items-center">
+                <div className="absolute left-6 inset-y-0 flex items-center pointer-events-none">
+                  <Lock className={`w-5 h-5 transition-colors ${isDark ? 'text-purple-400 group-focus-within/input:text-white' : 'text-gray-400 group-focus-within/input:text-[#8b5cf6]'}`} />
+                </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t('passwordPlaceholder')}
-                  className={`w-full border rounded-[24px] py-5 pl-16 pr-8 transition-all font-medium focus:outline-none focus:ring-4 ${isDark
+                  className={`w-full border rounded-[24px] py-5 pl-16 pr-14 transition-all font-medium focus:outline-none focus:ring-4 ${isDark
                     ? 'bg-white/5 border-white/10 text-white placeholder-white/20 focus:ring-purple-500/20'
                     : 'bg-white/60 border-white/80 text-gray-900 placeholder-gray-400 focus:ring-[#8b5cf6]/10 shadow-sm'
                     }`}
                   required
                 />
+                <div className="absolute right-4 inset-y-0 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 hover:scale-110 active:scale-95 ${isDark ? 'hover:bg-white/10' : 'hover:bg-[#8b5cf6]/10'}`}
+                  >
+                    <motion.div
+                      key={showPassword ? 'eye-off' : 'eye'}
+                      initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.5, rotate: 45 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                    >
+                      {showPassword ? (
+                        <Eye className={`w-5 h-5 transition-colors ${isDark ? 'text-purple-400 group-focus-within/input:text-white' : 'text-gray-400 group-focus-within/input:text-[#8b5cf6]'}`} />
+                      ) : (
+                        <EyeOff className={`w-5 h-5 transition-colors ${isDark ? 'text-purple-400 group-focus-within/input:text-white' : 'text-gray-400 group-focus-within/input:text-[#8b5cf6]'}`} />
+                      )}
+                    </motion.div>
+                  </button>
+                </div>
               </div>
             </div>
 

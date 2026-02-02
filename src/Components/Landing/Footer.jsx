@@ -288,7 +288,7 @@ const Footer = () => {
                                     <Mail size={20} className="footer-glow-link group-hover:text-[#8b5cf6] transition-all duration-300" />
                                     <a
                                         href="mailto:admin@uwo24.com"
-                                        className="footer-glow-link font-bold transition-all group-hover:translate-x-1"
+                                        className="footer-glow-link font-bold transition-all group-hover:translate-x-1 normal-case"
                                     >
                                         admin@uwo24.com
                                     </a>

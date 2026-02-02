@@ -240,7 +240,7 @@ const Chat = () => {
               <img src="/AISA (2).svg" alt="AISA Logo" className="w-10 h-10 object-contain" />
               <div className="flex flex-col">
                 <h3 className={`text-xl font-black uppercase tracking-tighter leading-none transition-colors ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>
-                  {t('aisa')}
+                  {t('aisa')}<sup className="text-[10px] font-black ml-0.5">TM</sup>
                 </h3>
                 <span className={`text-[11px] font-bold ${isDark ? 'text-[#8B5CF6]' : 'text-[#8b5cf6]'} uppercase tracking-widest opacity-80`}>{t('onlineReady')}</span>
               </div>
@@ -266,7 +266,7 @@ const Chat = () => {
                 </div>
               </div>
               <h2 className={`text-4xl mb-4 tracking-tighter uppercase transition-colors ${isDark ? 'text-[#f1f5f9] font-black' : 'text-gray-900 font-black'}`}>
-                {t('initializeLogic')}<span className="text-[#8B5CF6]">.</span>
+                {t('initializeLogic')}
               </h2>
               <p className={`${isDark ? 'text-[#C7CBEA]' : 'text-gray-500'} font-medium max-w-sm leading-relaxed transition-colors`}>{t('chatGreeting')}</p>
             </div>

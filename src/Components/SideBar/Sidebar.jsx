@@ -381,7 +381,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               }`}>
               {t(user.name?.toUpperCase())?.charAt(0)}
             </div>
-            <span className={`relative z-10 transition-colors ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t(user.name?.toUpperCase())}</span>
+            <span className={`relative z-10 transition-colors normal-case ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t(user.name)}</span>
             {((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
           </button>
 
@@ -535,7 +535,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   </button>
 
                   <p className={`text-[10px] text-center font-black ${isDark ? 'text-[#6F76A8]' : 'text-slate-400'} uppercase tracking-widest mt-4`}>
-                    {t('directChannel')}: <a href="mailto:admin@uwo24.com" className={`${isDark ? 'text-[#8B5CF6]' : 'text-blue-600'} hover:underline`}>admin@uwo24.com</a>
+                    {t('directChannel')}: <a href="mailto:admin@uwo24.com" className={`${isDark ? 'text-[#8B5CF6]' : 'text-blue-600'} hover:underline normal-case`}>admin@uwo24.com</a>
                   </p>
                 </div>
               )}

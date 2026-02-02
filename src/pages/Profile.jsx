@@ -330,7 +330,7 @@ const Profile = () => {
                                 ) : (
                                     <>
                                         <h1 className={`text-3xl md:text-5xl lg:text-6xl font-black ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'} tracking-tighter leading-none transition-colors`}>{user.name}<span className="text-[#8B5CF6]">.</span></h1>
-                                        <p className={`${isDark ? 'text-[#cbd5e1]' : 'text-gray-500'} font-bold text-xl tracking-tight opacity-70 transition-colors uppercase`}>{user.email}</p>
+                                        <p className={`${isDark ? 'text-[#cbd5e1]' : 'text-gray-500'} font-bold text-lg md:text-xl tracking-tight opacity-70 transition-colors normal-case break-all`}>{user.email}</p>
                                     </>
                                 )}
                             </div>
@@ -346,16 +346,7 @@ const Profile = () => {
                             )}
                         </div>
 
-                        <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-8">
-                            <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${isDark ? 'bg-[#1a2235] border-white/5 text-[#cbd5e1]' : 'bg-white/40 border-white/60 text-gray-400'} px-4 py-2 rounded-xl border transition-all`}>
-                                <Clock size={12} className="text-[#8B5CF6]" />
-                                Dec 2025
-                            </div>
-                            <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${isDark ? 'bg-[#1a2235] border-white/5 text-[#cbd5e1]' : 'bg-white/40 border-white/60 text-gray-400'} px-4 py-2 rounded-xl border transition-all`}>
-                                <Shield size={12} className="text-[#8B5CF6]" />
-                                {t('shieldActive')}
-                            </div>
-                        </div>
+
                     </div>
 
 

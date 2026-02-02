@@ -107,7 +107,7 @@ const DashboardLayout = () => {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <span className="font-bold text-lg text-primary uppercase tracking-tighter">AI MALL</span>
+            <span className="font-bold text-lg text-primary uppercase tracking-tighter">AI MALL<sup className="text-[10px] font-black ml-0.5">TM</sup></span>
           </div>
 
           <Link

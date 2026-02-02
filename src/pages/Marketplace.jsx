@@ -431,7 +431,7 @@ const Marketplace = () => {
                     </div>
 
                     {/* Bottom Row: Filter Chips */}
-                    <div className="flex overflow-x-auto justify-center gap-3 no-scrollbar pb-2">
+                    <div className="flex overflow-x-auto justify-start md:justify-center gap-3 no-scrollbar pb-2 px-2">
                         {categories.map((cat) => (
                             <button
                                 key={cat.id}
