@@ -201,7 +201,7 @@ const Admin = () => {
                                 {item.label.includes('™') ? (
                                     <>
                                         {item.label.replace('™', '')}
-                                        <sup className="text-[9px] font-black ml-0.5 text-black dark:text-white">TM</sup>
+                                        <sup className="text-[9px] font-black ml-0.5 text-black dark:text-white relative -top-[0.5em]">TM</sup>
                                     </>
                                 ) : item.label}
                             </span>

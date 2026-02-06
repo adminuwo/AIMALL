@@ -102,14 +102,14 @@ const UserManagement = () => {
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div>
-                        <h2 className="text-lg md:text-2xl font-black text-gray-900 tracking-tighter mb-1 flex flex-col md:block gap-1 md:gap-0">
+                        <h2 className="text-lg md:text-2xl font-black text-gray-900 tracking-tighter mb-1 flex-wrap">
                             <span>
-                                {viewMode === 'ASERIES' ? <>A-SERIES<sup className="text-[10px] md:text-sm font-black ml-0.5">TM</sup></> : viewMode === 'AISA' ? <>AISA<sup className="text-[10px] md:text-sm font-black ml-0.5">TM</sup></> : <>AI-MALL<sup className="text-[10px] md:text-sm font-black ml-0.5">TM</sup></>}
+                                {viewMode === 'ASERIES' ? <>A-SERIES<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></> : viewMode === 'AISA' ? <>AISA<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></> : <>AI-MALL<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></>}
                             </span>
-                            <span className="md:ml-2">User Management</span>
+                            <span className="ml-2">User Management</span>
                         </h2>
                         <p className="text-gray-500 font-medium text-xs">
-                            {viewMode === 'ASERIES' ? 'Manage platform system users and admins' : viewMode === 'AISA' ? <>Manage AISA<sup className="text-[8px] font-black ml-0.5">TM</sup> platform specific users</> : 'Manage platform users, vendors, and roles'}
+                            {viewMode === 'ASERIES' ? 'Manage platform system users and admins' : viewMode === 'AISA' ? <>Manage AISA<sup className="text-[8px] font-bold ml-0.5 relative -top-[0.5em]">TM</sup> platform specific users</> : 'Manage platform users, vendors, and roles'}
                         </p>
                     </div>
 
@@ -122,7 +122,7 @@ const UserManagement = () => {
                                 }`}
                         >
                             <Layers className="w-4 h-4" />
-                            A SERIES<sup className="text-[10px] font-black -ml-1">TM</sup>
+                            <span>A SERIES<sup className="text-[7px] md:text-[0.6em] font-bold ml-1 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                         <button
                             onClick={() => setViewMode('AISA')}
@@ -132,7 +132,7 @@ const UserManagement = () => {
                                 }`}
                         >
                             <Bot className="w-4 h-4" />
-                            AISA<sup className="text-[10px] font-black -ml-1">TM</sup>
+                            <span>AISA<sup className="text-[7px] md:text-[0.6em] font-bold ml-1 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                         <button
                             onClick={() => setViewMode('AIMALL')}
@@ -142,7 +142,7 @@ const UserManagement = () => {
                                 }`}
                         >
                             <ShoppingBag className="w-4 h-4" />
-                            AI MALL<sup className="text-[10px] font-black -ml-1">TM</sup>
+                            <span>AI MALL<sup className="text-[7px] md:text-[0.6em] font-bold ml-1 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                     </div>
                 </div>

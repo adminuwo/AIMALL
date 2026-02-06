@@ -267,7 +267,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           >
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className={`text-xl font-black ${isDark ? 'text-[#E6E9F2]' : 'text-gray-900'} tracking-tighter uppercase leading-none transition-colors`}>{t('headerLogoText')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup></span>
+                <span className={`text-xl font-black ${isDark ? 'text-[#E6E9F2]' : 'text-gray-900'} tracking-tighter uppercase leading-none transition-colors`}>{t('headerLogoText')}<sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup></span>
               </div>
             </div>
           </Link>

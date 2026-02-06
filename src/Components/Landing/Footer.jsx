@@ -57,9 +57,9 @@ const Footer = () => {
                         <div className="space-y-2">
                             <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-16 h-16 object-contain" />
                             <p className={`text-sm leading-relaxed font-medium ${isDark ? 'footer-text-glow' : 'text-black'}`}>
-                                AI-MALL<sup className="text-xs font-black ml-0.5">TM</sup> — {t('footerTagline')}<br />
-                                {t('aiAppsCount')} | AI-MALL<sup className="text-xs font-black ml-0.5">TM</sup> | {t('partnerIntegrations')}<br />
-                                {t('poweredBy')}<sup className="text-xs font-black ml-0.5">TM</sup>
+                                AI-MALL<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup> — {t('footerTagline')}<br />
+                                {t('aiAppsCount')} | AI-MALL<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup> | {t('partnerIntegrations')}<br />
+                                {t('poweredBy')}<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup>
                             </p>
 
                             <div className="flex gap-3 pt-2">
@@ -163,7 +163,7 @@ const Footer = () => {
 
                     {/* Bottom */}
                     <div className={`pt-8 border-t text-sm font-bold text-center drop-shadow-[0_2px_8px_rgba(255,255,255,0.1)] ${isDark ? 'border-white/10 footer-text-glow' : 'border-white/30 text-black'}`}>
-                        {t('copyright')}<sup className="text-xs font-black ml-0.5">TM</sup>. {t('allRightsReserved')}<sup className="text-xs font-black ml-0.5">TM</sup>
+                        {t('copyright')}<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup>. {t('allRightsReserved')}<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup>
                     </div>
 
                 </div>

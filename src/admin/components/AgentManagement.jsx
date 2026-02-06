@@ -158,7 +158,12 @@ const AgentManagement = () => {
                 <div className="flex flex-col md:flex-row md:items-center gap-6">
                     <div>
                         <h1 className="text-2xl font-black text-gray-900 tracking-tighter mb-1">
-                            {viewMode === 'ASERIES' ? <>A-SERIES<sup className="text-xs font-black ml-0.5 relative -top-1">TM</sup></> : <>AI-MALL<sup className="text-xs font-black ml-0.5 relative -top-1">TM</sup></>} Agents
+                            {viewMode === 'ASERIES' ? (
+                                <>A-SERIES<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></>
+                            ) : (
+                                <>AI-MALL<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></>
+                            )}
+                            <span className="ml-2">Agents</span>
                         </h1>
                         <p className="text-gray-500 font-medium text-xs">
                             {viewMode === 'ASERIES' ? 'Manage your a series agent inventory and deployments' : 'Manage your AI agent inventory and deployments'}
@@ -174,7 +179,7 @@ const AgentManagement = () => {
                                 }`}
                         >
                             <Layers className="w-3.5 h-3.5" />
-                            A SERIES<sup className="text-[6px] font-black ml-0.5">TM</sup>
+                            <span>A SERIES<sup className="text-[7px] md:text-[0.6em] font-bold ml-0.5 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                         <button
                             onClick={() => setViewMode('AIMALL')}
@@ -184,7 +189,7 @@ const AgentManagement = () => {
                                 }`}
                         >
                             <ShoppingBag className="w-3.5 h-3.5" />
-                            AI MALL<sup className="text-[6px] font-black ml-0.5">TM</sup>
+                            <span>AI MALL<sup className="text-[7px] md:text-[0.6em] font-bold ml-0.5 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                     </div>
                 </div>

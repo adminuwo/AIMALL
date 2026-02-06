@@ -127,7 +127,7 @@ const Hero = () => {
                                 shadow-lg shadow-purple-500/50 transition-all duration-300
                                 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/70
                                 active:scale-95 outline-none">
-                                {t('aiMallButton')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup>
+                                {t('aiMallButton')}<sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup>
                             </button>
 
                             {/* AI Mall Card */}
@@ -138,14 +138,14 @@ const Hero = () => {
                                     border border-purple-300/40
                                     shadow-[0_0_25px_rgba(168,85,247,0.5)]
                                     backdrop-blur-md">
-                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">{t('aiMallCardTitle')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup></h4>
+                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">{t('aiMallCardTitle')}<sup className="text-[10px] md:text-[0.45em] font-black ml-1 relative -top-[0.5em] md:-top-[0.7em]">{t('trademark')}</sup></h4>
                                     <p className="text-xs sm:text-sm text-white leading-relaxed">
                                         {t('aiMallCardDesc')}
                                     </p>
                                     <button
                                         onClick={() => navigate('/dashboard/chat')}
                                         className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs sm:text-sm font-semibold transition-colors md:hidden">
-                                        {t('goToAIMall')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup> →
+                                        {t('goToAIMall')}<sup className="text-[10px] md:text-[0.45em] font-black ml-1 relative -top-[0.5em] md:-top-[0.7em]">{t('trademark')}</sup> →
                                     </button>
                                 </div>
                             </div>
@@ -175,7 +175,7 @@ const Hero = () => {
                                 shadow-lg shadow-blue-500/50 transition-all duration-300
                                 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/70
                                 active:scale-95 outline-none">
-                                {t('aSeriesButton')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup>
+                                {t('aSeriesButton')}<sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup>
                             </button>
 
                             {/* A Series Card */}
@@ -186,14 +186,14 @@ const Hero = () => {
                                     border border-blue-300/40
                                     shadow-[0_0_25px_rgba(59,130,246,0.5)]
                                     backdrop-blur-md">
-                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">{t('aSeriesCardTitle')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup></h4>
+                                    <h4 className="text-sm sm:text-lg font-semibold mb-1.5 sm:mb-2 text-white">{t('aSeriesCardTitle')}<sup className="text-[10px] md:text-[0.45em] font-black ml-1 relative -top-[0.5em] md:-top-[0.7em]">{t('trademark')}</sup></h4>
                                     <p className="text-xs sm:text-sm text-white leading-relaxed">
                                         {t('aSeriesCardDesc')}
                                     </p>
                                     <button
                                         onClick={() => window.location.href = "https://a-series-bgve.onrender.com"}
                                         className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 bg-white/20 hover:bg-white/30 rounded-lg text-xs sm:text-sm font-semibold transition-colors md:hidden">
-                                        {t('goToASeries')}<sup className="text-xs font-black ml-0.5">{t('trademark')}</sup> →
+                                        {t('goToASeries')}<sup className="text-[10px] md:text-[0.45em] font-black ml-1 relative -top-[0.5em] md:-top-[0.7em]">{t('trademark')}</sup> →
                                     </button>
                                 </div>
                             </div>

@@ -46,7 +46,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <Link to="/" className="flex items-center gap-4 relative z-10 hover:opacity-70 transition-opacity">
                         <div className="flex flex-col">
                             <div className="flex items-center gap-1.5">
-                                <span className="text-2xl font-black text-gray-900 tracking-tighter uppercase leading-none">AI MALL</span>
+                                <span className="text-2xl font-black text-gray-900 tracking-tighter uppercase leading-none">AI MALL<sup className="text-[10px] md:text-[0.45em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></span>
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse border-2 border-white" />
                             </div>
                         </div>

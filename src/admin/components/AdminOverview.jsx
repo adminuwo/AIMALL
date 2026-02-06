@@ -70,7 +70,9 @@ const AdminOverview = () => {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-black text-gray-900 tracking-tighter mb-0.5">Dashboard Overview</h1>
-                    <p className="text-gray-500 font-medium text-sm">Welcome back, AI-MALL<sup className="text-xs ml-0.5">TM</sup> Here’s what’s happening today.</p>
+                    <p className="text-gray-500 font-medium text-sm">
+                        Welcome back, AI-MALL<sup className="text-[10px] md:text-[x-small] font-bold ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup> <span className="ml-1">Here’s what’s happening today.</span>
+                    </p>
                 </div>
 
                 <div className="group w-full lg:w-80 flex items-center bg-white/40 backdrop-blur-md border border-white/60 rounded-[16px] px-3 transition-all focus-within:ring-4 focus-within:ring-[#8b5cf6]/10">

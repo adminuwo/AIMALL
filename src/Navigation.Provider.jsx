@@ -110,7 +110,7 @@ const DashboardLayout = () => {
               <Menu className="w-6 h-6" />
             </button>
             <div className="flex items-center">
-              <span className="font-bold text-lg text-primary uppercase tracking-tighter">{t('headerLogoText')}<sup className="text-[10px] font-black ml-0.5">{t('trademark')}</sup></span>
+              <span className="font-bold text-lg text-primary uppercase tracking-tighter">{t('headerLogoText')}<sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup></span>
             </div>
           </div>
 
