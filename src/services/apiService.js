@@ -57,6 +57,38 @@ apiClient.interceptors.response.use(
 );
 
 export const apiService = {
+  // --- AI Tools ---
+  async generateImage(prompt) {
+    try {
+      console.log("[Frontend] Generating image for prompt:", prompt);
+      const response = await apiClient.post('/image/generate', { prompt }, { timeout: 60000 });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to generate image:", error);
+      throw error;
+    }
+  },
+
+  async generateVideo(prompt, duration = 5, quality = 'medium') {
+    try {
+      console.log("[Frontend] Generating video for prompt:", prompt);
+      const response = await apiClient.post('/video/generate', { prompt, duration, quality }, { timeout: 120000 });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to generate video:", error);
+      throw error;
+    }
+  },
+
+  async synthesizeFile(fileData, mimeType, gender) {
+    try {
+      const response = await apiClient.post('/voice/synthesize-file', { fileData, mimeType, gender }, { responseType: 'arraybuffer' });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // --- Auth ---
   async login(credentials) {
     try {

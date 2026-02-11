@@ -1,61 +1,1422 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Trash2, Clock, Video, Mic } from 'lucide-react';
+import React, { useState, useRef, useEffect, Fragment } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Send, Bot, User, Sparkles, Plus, Monitor, ChevronDown, History, Paperclip, X, FileText, Image as ImageIcon, Cloud, HardDrive, Edit2, Download, Mic, Wand2, Eye, FileSpreadsheet, Presentation, File as FileIcon, MoreVertical, Trash2, Check, Camera, Video, Copy, ThumbsUp, ThumbsDown, Share, Search, Undo2, Menu as MenuIcon, Volume2, Pause, Headphones, MessageCircle, MessageSquare, ExternalLink, ZoomIn, ZoomOut, RotateCcw, Minus, Code } from 'lucide-react';
+import { renderAsync } from 'docx-preview';
+import * as XLSX from 'xlsx';
+import { Menu, Transition, Dialog } from '@headlessui/react';
 import { generateChatResponse } from '../services/geminiService';
 import { chatStorageService } from '../services/chatStorageService';
-import Loader from '../Components/Loader/Loader';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useRecoilValue } from 'recoil';
-import { themeState, chatHistoryState } from '../userStore/userData';
 import { useLanguage } from '../context/LanguageContext';
-import './Chat.css';
+import { useRecoilState } from 'recoil';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import Loader from '../Components/Loader/Loader';
+import toast from 'react-hot-toast';
+import LiveAI from '../Components/LiveAI';
+import { apiService } from '../services/apiService';
+
+import ImageEditor from '../Components/ImageEditor';
+import ModelSelector from '../Components/ModelSelector';
+import axios from 'axios';
+import { apis } from '../types';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import { detectMode, getModeName, getModeIcon, getModeColor, MODES } from '../utils/modeDetection';
+import { getUserData, sessionsData, toggleState } from '../userStore/userData';
+import { usePersonalization } from '../context/PersonalizationContext';
+
+
+const WELCOME_MESSAGE = "Hello! I’m AISA™, your Artificial Intelligence Super Assistant.";
+
+const FEEDBACK_PROMPTS = {
+  en: [
+    "Was this helpful?",
+    "How did I do?",
+    "Is this answer detailed enough?",
+    "Did I answer your question?",
+    "Need anything else?",
+    "Is this what you were looking for?",
+    "Happy to help!",
+    "Let me know if you need more info",
+    "Any other questions?",
+    "Hope this clears things up!"
+  ],
+  hi: [
+    "क्या यह मददगार था?",
+    "मैंने कैसा किया?",
+    "क्या यह जवाब पर्याप्त है?",
+    "क्या मैंने आपके सवाल का जवाब दिया?",
+    "कुछ और चाहिए?",
+    "क्या आप यही खोज रहे थे?",
+    "मदद करके खुशी हुई!",
+    "अगर और जानकारी चाहिए तो बताएं",
+    "कोई और सवाल?",
+    "उम्मीद है यह समझ आया!"
+  ]
+};
+
+const TOOL_PRICING = {
+  chat: {
+    models: [
+      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Free chat model' }
+    ]
+  },
+  image: {
+    models: [
+      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Basic image analysis' },
+      { id: 'gemini-pro', name: 'Gemini Pro Vision', price: 0.02, speed: 'Medium', description: 'Advanced image understanding' },
+      { id: 'gpt4-vision', name: 'GPT-4 Vision', price: 0.05, speed: 'Slow', description: 'Premium image analysis' }
+    ]
+  },
+  document: {
+    models: [
+      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Basic document analysis' },
+      { id: 'gemini-pro', name: 'Gemini Pro', price: 0.02, speed: 'Medium', description: 'Advanced document processing' },
+      { id: 'gpt4', name: 'GPT-4', price: 0.03, speed: 'Medium', description: 'Premium document analysis' }
+    ]
+  },
+  voice: {
+    models: [
+      { id: 'gemini-flash', name: 'Gemini Flash', price: 0, speed: 'Fast', description: 'Standard voice recognition' }
+    ]
+  }
+};
+
+
+const ImageViewer = ({ src, alt }) => {
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+  const [lastTouchDistance, setLastTouchDistance] = useState(null);
+  const imgRef = useRef(null);
+
+  const handleZoomIn = () => setScale(s => Math.min(s + 0.5, 5));
+  const handleZoomOut = () => setScale(s => Math.max(s - 0.5, 1));
+  const handleReset = () => { setScale(1); setPosition({ x: 0, y: 0 }); };
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const delta = e.deltaY > 0 ? -0.2 : 0.2;
+    setScale(s => Math.min(Math.max(1, s + delta), 5));
+  };
+
+  const handleMouseDown = (e) => {
+    if (scale > 1) {
+      setIsDragging(true);
+      setStartPos({ x: e.clientX - position.x, y: e.clientY - position.y });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging && scale > 1) {
+      e.preventDefault();
+      setPosition({
+        x: e.clientX - startPos.x,
+        y: e.clientY - startPos.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Touch Handlers for Mobile/iOS
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      // Pinch start
+      const dist = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      setLastTouchDistance(dist);
+    } else if (e.touches.length === 1 && scale > 1) {
+      // Drag start
+      setIsDragging(true);
+      setStartPos({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y
+      });
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && lastTouchDistance) {
+      // Pinch Zoom
+      const dist = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      const delta = dist / lastTouchDistance;
+      setScale(s => Math.min(Math.max(1, s * delta), 5));
+      setLastTouchDistance(dist);
+    } else if (e.touches.length === 1 && isDragging && scale > 1) {
+      // Pan
+      e.preventDefault(); // Prevent scroll
+      setPosition({
+        x: e.touches[0].clientX - startPos.x,
+        y: e.touches[0].clientY - startPos.y
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    setLastTouchDistance(null);
+  };
+
+  // Reset position if zoomed out to 1
+  useEffect(() => {
+    if (scale === 1) setPosition({ x: 0, y: 0 });
+  }, [scale]);
+
+  return (
+    <div className="relative w-full h-full flex flex-col overflow-hidden bg-black/90 select-none">
+      {/* Zoom Controls */}
+      <div
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-black/60 backdrop-blur-md rounded-full px-6 py-3 border border-white/10 shadow-xl"
+        onClick={(e) => e.stopPropagation()} // Prevent closing modal
+      >
+        <button onClick={handleZoomOut} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors"><Minus className="w-5 h-5" /></button>
+        <span className="text-white text-sm font-bold font-mono min-w-[3rem] text-center">{Math.round(scale * 100)}%</span>
+        <button onClick={handleZoomIn} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors"><Plus className="w-5 h-5" /></button>
+        <div className="w-px h-6 bg-white/20 mx-2"></div>
+        <button onClick={handleReset} className="p-2 hover:bg-white/10 rounded-full text-white transition-colors" title="Reset"><RotateCcw className="w-4 h-4" /></button>
+      </div>
+
+      <div
+        className="flex-1 w-full h-full flex items-center justify-center overflow-hidden touch-none"
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
+          }}
+          className="max-w-full max-h-full object-contain pointer-events-none"
+          draggable={false}
+        />
+      </div>
+    </div>
+  );
+};
 
 const Chat = () => {
-  const theme = useRecoilValue(themeState);
-  const chatHistoryStateValue = useRecoilValue(chatHistoryState);
-  const isChatHistoryEnabled = chatHistoryStateValue === 'ON';
-  const isDark = theme === 'Dark';
-  const { t } = useLanguage();
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { personalizations, getSystemPromptExtensions } = usePersonalization();
 
   const [messages, setMessages] = useState([]);
-  const [sessions, setSessions] = useState([]);
+  const [excelHTML, setExcelHTML] = useState(null);
+  const [textPreview, setTextPreview] = useState(null);
+  const [sessions, setSessions] = useRecoilState(sessionsData);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const messagesEndRef = useRef(null);
   const [currentSessionId, setCurrentSessionId] = useState(sessionId || 'new');
+  const [tglState, setTglState] = useRecoilState(toggleState);
+  const [typingMessageId, setTypingMessageId] = useState(null);
 
+  // File Upload State
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isEditingImage, setIsEditingImage] = useState(false);
+  const [isLiveMode, setIsLiveMode] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLimitReached, setIsLimitReached] = useState(false);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [activeAgent, setActiveAgent] = useState({ agentName: 'AISA', category: 'General' });
+  const [userAgents, setUserAgents] = useState([]);
+  const [toolModels, setToolModels] = useState({
+    chat: 'gemini-flash',
+    image: 'gemini-flash',
+    document: 'gemini-flash',
+    voice: 'gemini-flash'
+  });
+  const uploadInputRef = useRef(null);
+  const driveInputRef = useRef(null);
+  const photosInputRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Attachment Menu State
+  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false);
+  const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [listeningTime, setListeningTime] = useState(0);
+  const timerRef = useRef(null);
+  const attachBtnRef = useRef(null);
+  const menuRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
+  const [selectedToolType, setSelectedToolType] = useState(null);
+  const [currentMode, setCurrentMode] = useState('NORMAL_CHAT');
+  const [isDeepSearch, setIsDeepSearch] = useState(false);
+  const [isImageGeneration, setIsImageGeneration] = useState(false);
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isAudioConvertMode, setIsAudioConvertMode] = useState(false);
+  const [isDocumentConvert, setIsDocumentConvert] = useState(false);
+  const [isCodeWriter, setIsCodeWriter] = useState(false);
+  const abortControllerRef = useRef(null);
+  const voiceUsedRef = useRef(false); // Track if voice input was used
+  const inputRef = useRef(null); // Ref for textarea input
+  const transcriptRef = useRef(''); // Ref for speech transcript
+  const isManualStopRef = useRef(false); // Track manual stop to avoid recursive loops
+
+  const toolsBtnRef = useRef(null);
+  const toolsMenuRef = useRef(null);
+
+  // Close menu on click outside
   useEffect(() => {
-    if (!isChatHistoryEnabled) {
-      setSessions([]);
+    const handleClickOutside = (event) => {
+      // Close Attach Menu
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        attachBtnRef.current &&
+        !attachBtnRef.current.contains(event.target)
+      ) {
+        setIsAttachMenuOpen(false);
+      }
+
+      // Close Tools Menu
+      if (
+        toolsMenuRef.current &&
+        !toolsMenuRef.current.contains(event.target) &&
+        toolsBtnRef.current &&
+        !toolsBtnRef.current.contains(event.target)
+      ) {
+        setIsToolsMenuOpen(false);
+      }
+    };
+
+    if (isAttachMenuOpen || isToolsMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isAttachMenuOpen, isToolsMenuOpen]);
+
+  const processFile = (file) => {
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = [
+      'image/',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    ];
+
+    setSelectedFiles(prev => [...prev, file]);
+
+    // Generate Preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFilePreviews(prev => [...prev, {
+        url: reader.result,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        id: Math.random().toString(36).substr(2, 9)
+      }]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => processFile(file));
+    setIsAttachMenuOpen(false); // Close menu after selection
+
+    // [PROACTIVE FEATURE]: If this is a new chat (no messages), automatically trigger analysis
+    if (messages.length === 0 && !isLoading) {
+      setTimeout(() => {
+        handleSendMessage();
+      }, 1000); // 1s delay to ensure FileReader (in processFile) has finished
+    }
+  };
+
+  const handlePaste = (e) => {
+    // Handle files pasted from file system
+    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
+      e.preventDefault();
+      const files = Array.from(e.clipboardData.files);
+      files.forEach(file => processFile(file));
       return;
     }
+
+    // Handle pasted data items
+    if (e.clipboardData.items) {
+      const items = e.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file') {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            processFile(file);
+          }
+        }
+      }
+    }
+  };
+
+  const handleRemoveFile = (id) => {
+    if (id) {
+      // Find the file name to remove from selectedFiles
+      const previewToRemove = filePreviews.find(p => p.id === id);
+      if (previewToRemove) {
+        setSelectedFiles(prev => prev.filter(f => f.name !== previewToRemove.name));
+        setFilePreviews(prev => prev.filter(p => p.id !== id));
+      }
+    } else {
+      // Clear all
+      setSelectedFiles([]);
+      setFilePreviews([]);
+    }
+    if (uploadInputRef.current) uploadInputRef.current.value = '';
+    if (driveInputRef.current) driveInputRef.current.value = '';
+    if (photosInputRef.current) photosInputRef.current.value = '';
+  };
+
+  const handleAttachmentSelect = (type) => {
+    setIsAttachMenuOpen(false);
+    if (type === 'upload') {
+      uploadInputRef.current?.click();
+    } else if (type === 'photos') {
+      photosInputRef.current?.click();
+    } else if (type === 'drive') {
+      driveInputRef.current?.click();
+    } else if (type === 'doc-voice') {
+      document.getElementById('doc-voice-upload')?.click();
+    }
+  };
+
+  const handleDocToVoiceSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsAttachMenuOpen(false);
+
+    // 1. Show User Message immediately with the file
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Content = reader.result; // Full Data URL for display
+      const base64Data = base64Content.split(',')[1]; // Raw base64 for backend
+
+      // Add User Message
+      const userMsgId = Date.now().toString();
+      const userMsg = {
+        id: userMsgId,
+        role: 'user',
+        content: `Please convert this document to audio: **${file.name}**`,
+        timestamp: new Date(),
+        attachments: [{
+          url: base64Content,
+          name: file.name,
+          type: file.type
+        }]
+      };
+      setMessages(prev => [...prev, userMsg]);
+
+      // 2. Add Processing Message from AISA
+      const aiMsgId = (Date.now() + 1).toString();
+      const processingMsg = {
+        id: aiMsgId,
+        role: 'assistant',
+        content: `⚡ **EXTRACTING CONTENT...**\nReading text from **${file.name}**...`,
+        timestamp: new Date(),
+        isProcessing: true
+      };
+      setMessages(prev => [...prev, processingMsg]);
+      scrollToBottom();
+
+      // Update UI slightly after extraction
+      setTimeout(() => {
+        setMessages(prev => prev.map(msg => msg.id === aiMsgId && msg.isProcessing ? {
+          ...msg,
+          content: `🎧 **CONVERTING TO VOICE...**\nSynthesizing natural audio for **${file.name}**. This won't take long!`
+        } : msg));
+      }, 1500);
+      scrollToBottom();
+
+      // 3. Start Conversion - Added high timeout for long docs
+      try {
+        const response = await axios.post(apis.synthesizeFile, {
+          fileData: base64Data,
+          mimeType: file.type,
+          gender: 'FEMALE'
+        }, {
+          responseType: 'arraybuffer',
+          timeout: 0 // Wait as long as needed for large "jetna bhi long" files
+        });
+
+        // 4. Success - Update AI Message with Player and Download
+        const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const reader2 = new FileReader();
+        reader2.readAsDataURL(audioBlob);
+        reader2.onloadend = () => {
+          const mp3Base64 = reader2.result.split(',')[1];
+          const rawBytes = response.data.byteLength;
+          const charCount = response.headers['x-text-length'] || 0;
+          const formattedFileSize = rawBytes > 1024 * 1024
+            ? (rawBytes / (1024 * 1024)).toFixed(1) + ' MB'
+            : (rawBytes / 1024).toFixed(1) + ' KB';
+
+          setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
+            ...msg,
+            isProcessing: false,
+            content: `✅ I have successfully converted **${file.name}** into a full audio voice.`,
+            conversion: {
+              file: mp3Base64,
+              blobUrl: audioUrl,
+              fileName: `${file.name.split('.')[0]}_Audio.mp3`,
+              mimeType: 'audio/mpeg',
+              fileSize: formattedFileSize,
+              rawSize: rawBytes,
+              charCount: charCount
+            }
+          } : msg));
+
+          toast.success("Conversion complete! 🎶");
+          scrollToBottom();
+        };
+
+      } catch (err) {
+        console.error('[DocToVoice Error]:', err);
+        let errorMsg = "Extraction Failed";
+        let errorDetail = "If this is a scanned PDF (image only), I cannot read the text yet. Please ensure it's a searchable PDF or Word file.";
+
+        if (err.response?.data) {
+          try {
+            const errorData = err.response.data instanceof ArrayBuffer
+              ? JSON.parse(new TextDecoder().decode(err.response.data))
+              : err.response.data;
+
+            errorMsg = errorData.error || errorMsg;
+            errorDetail = errorData.details || errorDetail;
+          } catch (e) { }
+        }
+
+        setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
+          ...msg,
+          isProcessing: false,
+          content: `❌ **Conversion Failed**\n**${errorMsg}**\n${errorDetail}`
+        } : msg));
+
+        toast.error("Conversion failed");
+      }
+    };
+    reader.readAsDataURL(file);
+
+    e.target.value = ''; // Always reset so user can click/upload same file again
+  };
+
+  const manualFileToAudioConversion = async (file) => {
+    if (!file) return;
+
+    // 1. Show User Message immediately with the file
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Content = reader.result;
+      const base64Data = base64Content.split(',')[1];
+
+      const userMsgId = Date.now().toString();
+      const userMsg = {
+        id: userMsgId,
+        role: 'user',
+        content: `Convert this document to audio: **${file.name}**`,
+        timestamp: new Date(),
+        attachments: [{ url: base64Content, name: file.name, type: file.type }]
+      };
+      setMessages(prev => [...prev, userMsg]);
+
+      const aiMsgId = (Date.now() + 1).toString();
+      const processingMsg = {
+        id: aiMsgId,
+        role: 'assistant',
+        content: `⚡ **EXTRACTING CONTENT...**\nReading **${file.name}**...`,
+        timestamp: new Date(),
+        isProcessing: true
+      };
+      setMessages(prev => [...prev, processingMsg]);
+      scrollToBottom();
+
+      // Second stage update
+      setTimeout(() => {
+        setMessages(prev => prev.map(msg => msg.id === aiMsgId && msg.isProcessing ? {
+          ...msg,
+          content: `🎧 **CONVERTING TO VOICE...**\nAlmost there! Preparing your audio for **${file.name}**...`
+        } : msg));
+      }, 1200);
+
+      try {
+        const response = await axios.post(apis.synthesizeFile, {
+          fileData: base64Data,
+          mimeType: file.type,
+          gender: 'FEMALE'
+        }, { responseType: 'arraybuffer', timeout: 0 });
+
+        const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const reader2 = new FileReader();
+        reader2.readAsDataURL(audioBlob);
+        reader2.onloadend = () => {
+          const mp3Base64 = reader2.result.split(',')[1];
+          const rawBytes = response.data.byteLength;
+          const charCount = response.headers['x-text-length'] || 0;
+          const formattedSize = rawBytes > 1024 * 1024 ? (rawBytes / (1024 * 1024)).toFixed(1) + ' MB' : (rawBytes / 1024).toFixed(1) + ' KB';
+
+          setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
+            ...msg,
+            isProcessing: false,
+            content: `✅ Audio conversion complete for **${file.name}**.`,
+            conversion: {
+              file: mp3Base64,
+              blobUrl: audioUrl,
+              fileName: `${file.name.split('.')[0]}_Audio.mp3`,
+              mimeType: 'audio/mpeg',
+              fileSize: formattedSize,
+              rawSize: rawBytes,
+              charCount: charCount
+            }
+          } : msg));
+          toast.success("File converted successfully!");
+          scrollToBottom();
+        };
+      } catch (err) {
+        console.error('[ManualConversion Error]:', err);
+        const serverError = err.response?.data?.details || err.response?.data?.error || err.message;
+        setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
+          ...msg,
+          isProcessing: false,
+          content: `❌ **Conversion Failed**\n${serverError}`
+        } : msg));
+        toast.error("Conversion failed");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const manualTextToAudioConversion = async (text) => {
+    if (!text || !text.trim()) return;
+
+    const userMsg = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: `Convert this text to audio: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMsg]);
+
+    const aiMsgId = (Date.now() + 1).toString();
+    setMessages(prev => [...prev, {
+      id: aiMsgId,
+      role: 'assistant',
+      content: `🎧 **Generating voice for your text...**`,
+      timestamp: new Date(),
+      isProcessing: true
+    }]);
+    scrollToBottom();
+
+    try {
+      const response = await axios.post(apis.synthesizeFile, {
+        introText: text,
+        gender: 'FEMALE'
+      }, { responseType: 'arraybuffer', timeout: 0 });
+
+      const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const reader2 = new FileReader();
+      reader2.readAsDataURL(audioBlob);
+      reader2.onloadend = () => {
+        const mp3Base64 = reader2.result.split(',')[1];
+        const rawBytes = response.data.byteLength;
+        const charCount = response.headers['x-text-length'] || 0;
+        const formattedSize = rawBytes > 1024 * 1024 ? (rawBytes / (1024 * 1024)).toFixed(1) + ' MB' : (rawBytes / 1024).toFixed(1) + ' KB';
+
+        setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
+          ...msg,
+          isProcessing: false,
+          content: `✅ Your text has been converted to voice audio.`,
+          conversion: {
+            file: mp3Base64,
+            blobUrl: audioUrl,
+            fileName: `AISA_Voice_${Date.now()}.mp3`,
+            mimeType: 'audio/mpeg',
+            fileSize: formattedSize,
+            rawSize: rawBytes,
+            charCount: charCount
+          }
+        } : msg));
+        toast.success("Text converted successfully!");
+        scrollToBottom();
+      };
+    } catch (err) {
+      console.error('[ManualTextConversion Error]:', err);
+      const serverError = err.response?.data?.details || err.response?.data?.error || err.message;
+      setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
+        ...msg,
+        isProcessing: false,
+        content: `❌ **Conversion Failed**\n${serverError}`
+      } : msg));
+      toast.error("Conversion failed");
+    }
+  };
+
+  const handleGenerateVideo = async () => {
+    try {
+      if (!inputRef.current?.value.trim() && selectedFiles.length === 0) {
+        // toast.error('Please enter a prompt or select a file');
+        // Let it slide if it's voice input (handled elsewhere)
+        if (!voiceUsedRef.current) return;
+      }
+
+      const prompt = inputRef.current?.value || "";
+      // const filesToSend = [...selectedFiles]; // Snapshot // This variable is not used
+
+      // Voice Reader Mode Logic
+      if (isVoiceMode) {
+        // 1. Add User Message to UI
+        const userMsgId = Date.now().toString();
+        const newUserMsg = {
+          id: userMsgId,
+          role: 'user', // Ensure role user
+          content: prompt, // Use content
+          timestamp: new Date(),
+          attachments: filePreviews.map(fp => ({
+            url: fp.url,
+            name: fp.name,
+            type: fp.type
+          }))
+        };
+        setMessages(prev => [...prev, newUserMsg]);
+
+        // Clear Inputs
+        setInputValue('');
+        setSelectedFiles([]);
+        setFilePreviews([]);
+        if (inputRef.current) inputRef.current.style.height = 'auto';
+
+        // 2. Trigger Voice Reading Directly
+        // We can use speakResponse, but we need to trick it into thinking it's an AI response?
+        // Or just call speakResponse with the user content? 
+        // SpeakResponse reads content using a specific message ID for state tracking.
+
+        setIsLoading(true);
+
+        // Show a "Reading..." AI bubble
+        const aiMsgId = (Date.now() + 1).toString();
+        const readingMsg = {
+          id: aiMsgId,
+          role: 'assistant', // Ensure role assistant
+          content: "🎧 Reading content aloud...", // Use content
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, readingMsg]);
+
+        setTimeout(() => {
+          speakResponse(prompt, 'en-US', aiMsgId, newUserMsg.attachments);
+          setIsLoading(false);
+        }, 500);
+
+        return; // STOP HERE (Do not call AI API)
+      }
+
+      setIsLoading(true);
+      // isSendingRef.current = true; // Mark as sending // This variable is not defined in the provided context
+
+      // Show a message that video generation is in progress
+      const tempId = Date.now().toString();
+      const newMessage = {
+        id: tempId,
+        role: 'assistant',
+        content: `🎬 Generating video from prompt: "${prompt}"\n\nPlease wait, this may take a moment...`, // Use content
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      if (inputRef.current) inputRef.current.value = '';
+
+      try {
+        // Use apiService
+        const data = await apiService.generateVideo(prompt);
+
+        if (data.videoUrl) {
+          // Add the generated video to the message
+          const videoMessage = {
+            id: tempId, // Keep same ID so we replace the correct one (or just update)
+            role: 'assistant',
+            content: `🎥 Video generated successfully!`, // Use content
+            videoUrl: data.videoUrl,
+            timestamp: new Date(),
+          };
+
+          setMessages(prev => prev.map(msg => msg.id === tempId ? videoMessage : msg));
+
+          toast.success('Video generated successfully!');
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.message || 'Failed to generate video';
+        setMessages(prev => prev.map(msg => msg.id === tempId ? { ...msg, content: `❌ ${errorMsg}` } : msg)); // Use content
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Video generation error:', error);
+      toast.error('Error initiating video generation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGenerateImage = async (overridePrompt) => {
+    try {
+      if (!inputRef.current?.value.trim() && !overridePrompt) {
+        toast.error('Please enter a prompt for image generation');
+        return;
+      }
+
+      const prompt = overridePrompt || inputRef.current.value;
+      setIsLoading(true);
+
+      // Show a message that image generation is in progress
+      const tempId = Date.now().toString();
+      const newMessage = {
+        id: tempId,
+        role: 'assistant',
+        content: `🎨 Generating image from prompt: "${prompt}"\n\nPlease wait, this may take a moment...`, // Use content
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      if (inputRef.current) inputRef.current.value = '';
+
+      try {
+        // Use apiService
+        const data = await apiService.generateImage(prompt);
+
+        if (data && (data.imageUrl || data.data)) {
+          const finalUrl = data.imageUrl || data.data; // Handle different response structures
+          const imageMessage = {
+            id: tempId, // Keep same ID
+            role: 'assistant',
+            content: `🖼️ Image generated successfully!`, // Use content
+            imageUrl: finalUrl,
+            timestamp: new Date(),
+          };
+
+          setMessages(prev => prev.map(msg => msg.id === tempId ? imageMessage : msg));
+
+          toast.success('Image generated successfully!');
+        }
+      } catch (error) {
+        console.error("Image Gen Error Details:", error);
+        const errorMsg = error.response?.data?.message || error.message || 'Failed to generate image';
+        setMessages(prev => prev.map(msg => msg.id === tempId ? { ...msg, content: `❌ ${errorMsg}` } : msg)); // Use content
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Image generation error:', error);
+      toast.error('Error initiating image generation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeepSearch = async () => {
+    try {
+      if (!inputRef.current?.value.trim()) {
+        toast.error('Please enter a topic for deep search');
+        return;
+      }
+
+      const query = inputRef.current.value;
+      setIsLoading(true);
+
+      // Show a message that deep search is in progress
+      const newMessage = {
+        id: Date.now().toString(),
+        type: 'ai',
+        text: `🔍 Performing deep search for: "${query}"\n\nSearching the web and analyzing results... This may take a moment...`,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      inputRef.current.value = '';
+
+      try {
+        // Send message with deep search context
+        const responseData = await generateChatResponse(
+          messages,
+          query,
+          "DEEP SEARCH MODE ENABLED: Analyze the web search results comprehensively.",
+          [],
+          currentLang
+        );
+
+        if (responseData && responseData.reply) {
+          // Add the deep search result
+          const searchMessage = {
+            id: Date.now().toString(),
+            type: 'ai',
+            text: responseData.reply,
+            content: responseData.reply,
+            timestamp: new Date(),
+          };
+
+          setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = searchMessage;
+            return updated;
+          });
+
+          toast.success('Deep search completed!');
+        }
+      } catch (error) {
+        const errorMsg = error.message || 'Failed to perform deep search';
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1].text = `❌ ${errorMsg}`;
+          return updated;
+        });
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Deep search error:', error);
+      toast.error('Error initiating deep search');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleModelSelect = (modelId) => {
+    if (selectedToolType) {
+      setToolModels(prev => ({
+        ...prev,
+        [selectedToolType]: modelId
+      }));
+      const selectedModel = TOOL_PRICING[selectedToolType].models.find(m => m.id === modelId);
+      toast.success(`Switched to ${selectedModel?.name}`);
+      setIsModelSelectorOpen(false);
+    }
+  };
+
+  // Voice Input Handler
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      toast.error('Voice input not supported in this browser');
+      return;
+    }
+
+    if (isListening) {
+      isManualStopRef.current = true;
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    // Start New Listening session
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    isManualStopRef.current = false;
+    transcriptRef.current = '';
+
+    const langMap = {
+      'Hindi': 'hi-IN',
+      'English': 'en-US',
+      'Spanish': 'es-ES',
+      'French': 'fr-FR',
+      'German': 'de-DE',
+      'Japanese': 'ja-JP'
+    };
+    recognition.lang = langMap[currentLang] || 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      setInputValue(transcript);
+      transcriptRef.current = transcript;
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+
+      const text = transcriptRef.current.trim();
+      if (!isManualStopRef.current && text) {
+        voiceUsedRef.current = true;
+        handleSendMessage(null, text);
+      }
+      isManualStopRef.current = false;
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech error:', event.error);
+      setIsListening(false);
+      isManualStopRef.current = true;
+      if (event.error === 'not-allowed') toast.error('Microphone access denied');
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Ensure Chat Mic stops when Live Mode starts
+  useEffect(() => {
+    if (isLiveMode && isListening && recognitionRef.current) {
+      console.log("[Chat] Stopping Mic for Live Mode");
+      isManualStopRef.current = true;
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  }, [isLiveMode, isListening]);
+
+  // Helper to clean markdown for TTS
+  const [speakingMessageId, setSpeakingMessageId] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const audioRef = useRef(null);
+  const audioCacheRef = useRef({});
+
+  // Helper to clean markdown for TTS
+  const cleanTextForTTS = (text) => {
+    if (!text) return "";
+    // Remove emojis using regex range for various emoji blocks
+    return text
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1F018}-\u{1F0F5}\u{1F200}-\u{1F270}]/gu, '')
+      // Remove headers (keep text): ### Title -> Title
+      .replace(/^#+\s+/gm, '')
+      // Remove bold: **text** -> text
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      // Remove italic: *text* -> text
+      .replace(/\*(.*?)\*/g, '$1')
+      // Remove underline: __text__ -> text
+      .replace(/__(.*?)__/g, '$1')
+      // Remove strikethrough: ~~text~~ -> text
+      .replace(/~~(.*?)~~/g, '$1')
+      // Remove links: [text](url) -> text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove images: ![alt](url) -> empty
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
+      // Remove code blocks (replace with brief pause/text to avoid reading syntax)
+      .replace(/`{3}[\s\S]*?`{3}/g, ' Code snippet. ')
+      // Remove inline code ticks: `text` -> text
+      .replace(/`(.+?)`/g, '$1')
+      // Remove list bullets: - text -> text
+      .replace(/^\s*[-*+]\s+/gm, '')
+      // Remove blockquotes: > text -> text
+      .replace(/^\s*>\s+/gm, '')
+      // Replace Trademark with 'tm' so it's handled by next step
+      .replace(/™|&trade;/g, ' tm ')
+      .replace(/©/g, ' ')
+      // Hinglish Normalization for natural Hindi pronunciation
+      // Ensure 'tm' is spoken as 'tum' clearly (NOT HIDDEN)
+      .replace(/\btm\b/gi, 'tum ')
+      .replace(/\bkkrh\b/gi, 'kya kar rahe ho ')
+      .replace(/\bclg\b/gi, 'college ')
+      .replace(/\bplz\b/gi, 'please ')
+      // Remove specific symbols as requested: , . ? ; " \ * / + - : @ [ ] ( ) | _
+      .replace(/[,\.\?;\"\\\*\/\+\-:@\[\]\(\)\|\_]/g, ' ')
+      // Remove quotes/dashes just in case regex above missed something or for extra safety
+      .replace(/["']/g, '')
+      // Collapse whitespace
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  // Voice Queue Ref
+  const speechQueueRef = useRef([]);
+  const isSpeakingRef = useRef(false);
+  const currentSpeechResolverRef = useRef(null);
+
+  // Internal function to execute speech
+  const executeSpeak = async (text, language, msgId, attachments = []) => {
+    return new Promise(async (resolve) => {
+      // Store resolve to allow external cancellation
+      currentSpeechResolverRef.current = resolve;
+
+      // Reset State Logic used to be here, now handled by queue manager
+
+      try {
+        let audioBlob = null;
+        let targetLang = 'en-US';
+
+        const readableAttachment = attachments && attachments.length > 0
+          ? attachments.find(a =>
+          (a.type && (
+            a.type.includes('pdf') ||
+            a.type.includes('word') ||
+            a.type.includes('document') ||
+            a.type.includes('text') ||
+            a.type.startsWith('image/')
+          ))
+          ) : null;
+
+        // Check Cache
+        if (msgId && audioCacheRef.current[msgId]) {
+          console.log(`[VOICE] Using cached audio for: ${msgId}`);
+          audioBlob = audioCacheRef.current[msgId];
+        } else {
+          // Not cached, fetch
+          if (readableAttachment) {
+            toast.loading("Processing file & text...", { id: 'voice-loading' });
+            console.log(`[VOICE] Reading attachment: ${readableAttachment.name}`);
+
+            const fileRes = await fetch(readableAttachment.url);
+            const fileBlob = await fileRes.blob();
+
+            const base64Data = await new Promise((res) => {
+              const reader = new FileReader();
+              reader.onloadend = () => res(reader.result.split(',')[1]);
+              reader.readAsDataURL(fileBlob);
+            });
+
+            const headerText = text ? cleanTextForTTS(text) : "";
+
+            const response = await axios.post(apis.synthesizeFile, {
+              fileData: base64Data,
+              mimeType: readableAttachment.type || 'application/pdf',
+              languageCode: null,
+              gender: 'FEMALE',
+              introText: headerText
+            }, {
+              responseType: 'arraybuffer'
+            });
+
+            audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+            toast.dismiss('voice-loading');
+
+          } else {
+            if (!text) {
+              resolve();
+              return;
+            }
+
+            const cleanText = cleanTextForTTS(text);
+            if (!cleanText) {
+              resolve();
+              return;
+            }
+
+            const langMap = {
+              'Hindi': 'hi-IN',
+              'English': 'en-US',
+              'Hinglish': 'hi-IN'
+            };
+            targetLang = /[\u0900-\u097F]/.test(cleanText) ? 'hi-IN' : (langMap[language] || 'en-US');
+
+            // Show loading for normal TTS too
+            toast.loading("Generating voice...", { id: 'voice-loading' });
+
+            const response = await axios.post(apis.synthesizeVoice, {
+              text: cleanText,
+              languageCode: targetLang,
+              gender: 'FEMALE',
+              tone: 'conversational'
+            }, {
+              responseType: 'arraybuffer'
+            });
+
+            toast.dismiss('voice-loading');
+            audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+          }
+
+          // Save to Cache
+          if (msgId && audioBlob) {
+            audioCacheRef.current[msgId] = audioBlob;
+          }
+        }
+
+        // Check if user stopped/switched while we were fetching
+        if (currentSpeechResolverRef.current && currentSpeechResolverRef.current !== resolve) {
+          console.log('[VOICE] Aborted playback - new task started');
+          resolve();
+          return;
+        }
+
+        // DOUBLE CHECK: Stop any existing audio before playing new one
+        if (window.currentAudio) {
+          window.currentAudio.pause();
+          window.currentAudio = null;
+        }
+
+        const url = window.URL.createObjectURL(audioBlob);
+        const audio = new Audio(url);
+
+        window.currentAudio = audio;
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          window.URL.revokeObjectURL(url);
+          if (window.currentAudio === audio) window.currentAudio = null;
+          if (audioRef.current === audio) audioRef.current = null;
+          resolve();
+        };
+
+        audio.onerror = (e) => {
+          console.error(`[VOICE] Audio playback error:`, e);
+          if (!readableAttachment) fallbackSpeak(cleanTextForTTS(text), targetLang);
+          resolve();
+        };
+
+        await audio.play();
+
+      } catch (err) {
+        console.error('[VOICE] Synthesis failed:', err);
+        toast.dismiss('voice-loading');
+        // fallback logic...
+        if (!attachments || attachments.length === 0) {
+          // simple fallback
+          // fallbackSpeak(...)
+        }
+        resolve();
+      }
+    });
+  };
+
+  const processSpeechQueue = async () => {
+    if (isSpeakingRef.current || speechQueueRef.current.length === 0) return;
+
+    isSpeakingRef.current = true;
+    const task = speechQueueRef.current[0];
+
+    setSpeakingMessageId(task.msgId);
+    setIsPaused(false);
+
+    try {
+      await executeSpeak(task.text, task.language, task.msgId, task.attachments);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // Completed (or stopped)
+      if (speechQueueRef.current.length > 0 && speechQueueRef.current[0] === task) {
+        speechQueueRef.current.shift(); // Remove finished
+      }
+      isSpeakingRef.current = false;
+      currentSpeechResolverRef.current = null;
+
+      if (speechQueueRef.current.length > 0) {
+        processSpeechQueue();
+      } else {
+        setSpeakingMessageId(null);
+      }
+    }
+  };
+
+  const stopCurrentSpeech = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    if (window.currentAudio) {
+      window.currentAudio.pause();
+      window.currentAudio = null;
+    }
+    window.speechSynthesis.cancel();
+
+    // Resolve any pending promise
+    if (currentSpeechResolverRef.current) {
+      currentSpeechResolverRef.current();
+      currentSpeechResolverRef.current = null;
+    }
+  };
+
+  // Voice Output - Speak AI Response
+  const speakResponse = async (text, language, msgId, attachments = [], force = false) => {
+    // 1. Handle Toggle on the SAME message (Manual Click)
+    // 1. Handle Toggle on the SAME message (Manual Click)
+    if (force && speakingMessageId === msgId) {
+      const activeAudio = audioRef.current || window.currentAudio;
+      if (activeAudio) {
+        if (!activeAudio.paused) {
+          console.log(`[VOICE] Pausing message: ${msgId}`);
+          activeAudio.pause();
+          setIsPaused(true);
+          return;
+        } else {
+          console.log(`[VOICE] Resuming message: ${msgId}`);
+          await activeAudio.play();
+          setIsPaused(false);
+          return;
+        }
+      }
+    }
+
+    // 2. Force Mode (Manual Click on DIFFERENT message)
+    if (force) {
+      console.log(`[VOICE] Force playing new message: ${msgId}`);
+      // Stop everything immediately
+      stopCurrentSpeech();
+      isSpeakingRef.current = false;
+
+      // Clear queue
+      speechQueueRef.current = [];
+
+      // Add new task
+      speechQueueRef.current.push({ text, language, msgId, attachments });
+
+      // Start processing immediately
+      processSpeechQueue();
+      return;
+    }
+
+    // 3. Normal Enqueue (Auto-play flow)
+    speechQueueRef.current.push({ text, language, msgId, attachments });
+    if (!isSpeakingRef.current) {
+      processSpeechQueue();
+    }
+  };
+
+  const fallbackSpeak = (text, lang) => {
+    console.log(`[VOICE] Using browser fallback for: ${lang}`);
+    if (!window.speechSynthesis) {
+      console.error('[VOICE] SpeechSynthesis not supported in this browser.');
+      return;
+    }
+
+    // Cancel any existing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+
+    // Find a better voice if possible
+    const voices = window.speechSynthesis.getVoices();
+    const matchedVoice = voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+    if (matchedVoice) {
+      utterance.voice = matchedVoice;
+      console.log(`[VOICE] Browser fallback using voice: ${matchedVoice.name}`);
+    }
+
+    utterance.onstart = () => console.log('[VOICE] Browser speech started.');
+    utterance.onend = () => console.log('[VOICE] Browser speech ended.');
+    utterance.onerror = (e) => console.error('[VOICE] Browser speech error:', e);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+
+  useEffect(() => {
     const loadSessions = async () => {
       const data = await chatStorageService.getSessions();
       setSessions(data);
+      console.log(`[DEBUG] Loaded ${data?.length || 0} sessions into history drawer`);
+
+      // Fetch User Subscribed Agents
+      try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user?.id || user?._id;
+        if (userId) {
+          try {
+            const token = getUserData()?.token || localStorage.getItem("token");
+            const res = await axios.post(apis.getUserAgents, { userId }, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const agents = res.data?.agents || [];
+            // Add default AISA agent if not present
+            const processedAgents = [{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA_BRAIN_LOGO.png' }, ...agents];
+            setUserAgents(processedAgents);
+          } catch (agentErr) {
+            // Silently use defaults if fetch fails (no console warning)
+            setUserAgents([{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA_BRAIN_LOGO.png' }]);
+          }
+        } else {
+          // No user logged in, use default
+          setUserAgents([{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA_BRAIN_LOGO.png' }]);
+        }
+      } catch (err) {
+        // Silently handle errors
+        setUserAgents([{ agentName: 'AISA', category: 'General', avatar: '/AGENTS_IMG/AISA_BRAIN_LOGO.png' }]);
+      }
     };
     loadSessions();
-  }, [messages, isChatHistoryEnabled]);
+  }, [messages, setSessions]);
+
+  const isNavigatingRef = useRef(false);
 
   useEffect(() => {
     const initChat = async () => {
-      if (sessionId && sessionId !== 'new' && isChatHistoryEnabled) {
+      // If we just navigated from 'new' to a real ID in handleSendMessage,
+      // don't clear the messages we already have in state.
+      if (isNavigatingRef.current) {
+        isNavigatingRef.current = false;
+        return;
+      }
+
+      if (sessionId && sessionId !== 'new') {
         setCurrentSessionId(sessionId);
+        console.log(`[DEBUG] Initializing chat for session: ${sessionId}`);
         const history = await chatStorageService.getHistory(sessionId);
-        setMessages(history);
+        console.log(`[DEBUG] Received history:`, history);
+        if (history && history.length > 0) {
+          console.log(`[DEBUG] First message role: ${history[0].role}, content preview: ${history[0].content?.substring(0, 20)}`);
+        }
+        setMessages(history || []);
       } else {
         setCurrentSessionId('new');
         setMessages([]);
       }
+
       setShowHistory(false);
     };
     initChat();
-  }, [sessionId, isChatHistoryEnabled]);
+  }, [sessionId]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const chatContainerRef = useRef(null);
+  const shouldAutoScrollRef = useRef(true);
+
+  const handleScroll = () => {
+    if (chatContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+      // Tighter threshold (50px) - if user scrolls up slightly, auto-scroll stops
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 50;
+      shouldAutoScrollRef.current = isNearBottom;
+    }
+  };
+
+  const scrollToBottom = (force = false, behavior = 'auto') => {
+    if ((force || shouldAutoScrollRef.current) && chatContainerRef.current) {
+      const { scrollHeight, clientHeight } = chatContainerRef.current;
+      const maxScrollTop = scrollHeight - clientHeight;
+      if (behavior === 'smooth') {
+        chatContainerRef.current.scrollTo({ top: maxScrollTop, behavior: 'smooth' });
+      } else {
+        chatContainerRef.current.scrollTop = maxScrollTop;
+      }
+    }
   };
 
   useEffect(() => {
@@ -63,62 +1424,513 @@ const Chat = () => {
   }, [messages, isLoading]);
 
   const handleNewChat = async () => {
-    const newId = await chatStorageService.createSession();
-    navigate(`/dashboard/chat/${newId}`);
+    navigate('/dashboard/chat/new');
     setShowHistory(false);
   };
 
-  const handleSendMessage = async (e) => {
+  const { language: currentLang, t } = useLanguage();
+
+  const handleDriveClick = () => {
+    setIsAttachMenuOpen(false);
+    // Simulating Drive Integration via Link
+    const link = prompt("Paste your Google Drive File Link:");
+    if (link) {
+      setFilePreviews(prev => [...prev, {
+        url: link,
+        name: "Google Drive File",
+        type: "application/vnd.google-apps.file",
+        size: 0,
+        isLink: true,
+        id: Math.random().toString(36).substr(2, 9)
+      }]);
+      setSelectedFiles(prev => [...prev, { name: "Google Drive File", type: "link" }]);
+    }
+  };
+
+  const isSendingRef = useRef(false);
+
+  const handleSendMessage = async (e, overrideContent) => {
     if (e) e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
+
+    // Prevent duplicate sends (from voice + form race condition)
+    if (isSendingRef.current) return;
+
+    if (isAudioConvertMode && !inputValue.trim() && selectedFiles.length === 0) {
+      toast.error('Please enter text or upload a file to convert to audio');
+      return;
+    }
+
+    if (isDocumentConvert && selectedFiles.length === 0) {
+      toast.error('Please upload a PDF or DOCX file to convert');
+      return;
+    }
+
+    // Special case for Audio Convert Mode: Handle files directly if present
+    if (isAudioConvertMode && selectedFiles.length > 0) {
+      const fileToConvert = selectedFiles[0]; // Take the first one for simplicity
+
+      // Simulate click on the hidden doc-voice-upload to reuse its logic
+      // But we need to pass the file. Let's instead call a manual conversion function.
+      manualFileToAudioConversion(fileToConvert);
+      setSelectedFiles([]);
+      setFilePreviews([]);
+      return;
+    }
+
+    // Special case for Audio Convert Mode: Handle text conversion
+    if (isAudioConvertMode && inputValue.trim()) {
+      manualTextToAudioConversion(inputValue);
+      setInputValue('');
+      return;
+    }
+
+    // Use overrideContent if provided (for instant voice sending), otherwise fallback to state
+    const contentToSend = typeof overrideContent === 'string' ? overrideContent : inputValue.trim();
+
+    if ((!contentToSend && filePreviews.length === 0) || isLoading) return;
+
+    isSendingRef.current = true;
+    setInputValue(''); // Clear immediately to prevent stale reads
+    transcriptRef.current = '';
 
     let activeSessionId = currentSessionId;
     let isFirstMessage = false;
 
-    if (activeSessionId === 'new' && isChatHistoryEnabled) {
-      activeSessionId = await chatStorageService.createSession();
-      isFirstMessage = true;
-    } else if (activeSessionId === 'new') {
-      activeSessionId = 'temp-' + Date.now();
+    // Stop listening if send is clicked (or auto-sent)
+    if (isListening && recognitionRef.current) {
+      isManualStopRef.current = true; // Guard against recursive onend
+      recognitionRef.current.stop();
+      setIsListening(false);
     }
 
-    const userMsg = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputValue,
-      timestamp: Date.now(),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInputValue('');
-    setIsLoading(true);
-
-    const title = isFirstMessage ? userMsg.content.slice(0, 30) + '...' : undefined;
-
-    if (isFirstMessage && isChatHistoryEnabled) {
-      navigate(`/dashboard/chat/${activeSessionId}`, { replace: true });
-      setCurrentSessionId(activeSessionId);
+    // Handle Image Generation Mode
+    if (isImageGeneration) {
+      handleGenerateImage(contentToSend); // Pass content directly if needed, or handleGenerateImage uses ref/state
+      isSendingRef.current = false; // Reset sending ref since handleGenerateImage might handle it differently or we want to allow next send
+      return;
     }
 
-    // Pass the current messages PLUS the new user message to the AI
-    const aiResponseText = await generateChatResponse(
-      isChatHistoryEnabled ? [...messages, userMsg] : [],
-      userMsg.content,
-      isChatHistoryEnabled ? activeSessionId : 'ephemeral',
-      isChatHistoryEnabled ? title : undefined
-    );
+    // Handle Voice Reader Mode - Just read, no AI response
+    if (isVoiceMode) {
+      try {
+        // 1. Add User Message to UI
+        const userMsgId = Date.now().toString();
+        const newUserMsg = {
+          id: userMsgId,
+          role: 'user',
+          content: contentToSend,
+          timestamp: new Date(),
+          attachments: filePreviews.map(fp => ({
+            url: fp.url,
+            name: fp.name,
+            type: fp.type
+          }))
+        };
+        setMessages(prev => [...prev, newUserMsg]);
 
-    const modelMsg = {
-      id: (Date.now() + 1).toString(),
-      role: 'model',
-      content: aiResponseText,
-      timestamp: Date.now(),
-    };
+        // 2. Clear inputs
+        setInputValue('');
+        handleRemoveFile();
+        if (inputRef.current) inputRef.current.style.height = 'auto';
 
-    setMessages((prev) => [...prev, modelMsg]);
-    setIsLoading(false);
-    // No need to call chatStorageService.saveMessage here anymore, 
-    // as the backend handles it inside generateChatResponse (apis.chatAgent)
+        // 3. Trigger voice reading directly (no AI response)
+        setTimeout(() => {
+          console.log('[Voice Mode] Reading content with attachments:', newUserMsg.attachments);
+          speakResponse(contentToSend, 'en-US', userMsgId, newUserMsg.attachments);
+        }, 300);
+
+        isSendingRef.current = false;
+        return; // STOP - Don't call AI API
+      } catch (err) {
+        console.error('[Voice Mode Error]:', err);
+        toast.error('Failed to read content');
+        isSendingRef.current = false;
+        return;
+      }
+    }
+
+
+    try {
+      if (activeSessionId === 'new') {
+        activeSessionId = await chatStorageService.createSession();
+        isFirstMessage = true;
+      }
+
+      const userMsg = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: contentToSend || (filePreviews.length > 0 ? (isDocumentConvert ? "Convert this document" : "Analyze these files") : ""),
+        timestamp: Date.now(),
+        attachments: filePreviews.map(p => ({
+          url: p.url,
+          name: p.name,
+          type: p.type.startsWith('image/') ? 'image' :
+            p.type.includes('pdf') ? 'pdf' :
+              p.type.includes('word') || p.type.includes('document') ? 'docx' :
+                p.type.includes('excel') || p.type.includes('spreadsheet') ? 'xlsx' :
+                  p.type.includes('powerpoint') || p.type.includes('presentation') ? 'pptx' : 'file'
+        })),
+        agentName: activeAgent.agentName || activeAgent.name,
+        agentCategory: activeAgent.category
+      };
+
+      const updatedMessages = [...messages, userMsg];
+      setMessages(updatedMessages);
+      scrollToBottom(true, 'smooth'); // Force smooth scroll for user message
+      setInputValue('');
+
+      // Capture deep search state before resetting
+      const deepSearchActive = isDeepSearch;
+      if (isDeepSearch) setIsDeepSearch(false);
+      const documentConvertActive = isDocumentConvert;
+      if (isDocumentConvert) setIsDocumentConvert(false);
+
+      // Detect mode for UI indicator
+      const detectedMode = deepSearchActive ? MODES.DEEP_SEARCH : (documentConvertActive ? MODES.FILE_CONVERSION : detectMode(contentToSend, userMsg.attachments));
+      setCurrentMode(detectedMode);
+
+      // Update user message with the detected mode
+      userMsg.mode = detectedMode;
+
+      // Determine loading intent for UI feedback
+      const lowerContent = (userMsg.content || "").toLowerCase();
+      if (
+        (lowerContent.includes('image') || lowerContent.includes('photo') || lowerContent.includes('pic') || lowerContent.includes('draw')) &&
+        (lowerContent.includes('generate') || lowerContent.includes('create') || lowerContent.includes('make') || lowerContent.includes('show'))
+      ) {
+        setLoadingText("Generating Image... 🎨");
+      } else if (lowerContent.includes('video')) {
+        setLoadingText("Generating Video... 🎥");
+      } else if (documentConvertActive) {
+        setLoadingText("Converting Document... 🔄");
+      } else {
+        setLoadingText("Thinking...");
+      }
+
+      handleRemoveFile(); // Clear file after sending
+      setIsLoading(true);
+
+      try {
+        const title = isFirstMessage ? (userMsg.content ? userMsg.content.slice(0, 30) : 'File Attachment') + '...' : undefined;
+        await chatStorageService.saveMessage(activeSessionId, userMsg, title);
+
+        if (isFirstMessage) {
+          isNavigatingRef.current = true;
+          setCurrentSessionId(activeSessionId);
+          navigate(`/dashboard/chat/${activeSessionId}`, { replace: true });
+        }
+
+        // Send to AI for response
+        const caps = getAgentCapabilities(activeAgent.agentName, activeAgent.category);
+
+        // Create abort controller for this request
+        abortControllerRef.current = new AbortController();
+
+        // ---------------------------------------------------------
+        //  CONSTRUCT SYSTEM INSTRUCTION BASED ON PROFILE SETTINGS
+        // ---------------------------------------------------------
+        const pGeneral = personalizations?.general || {};
+        const pStyle = personalizations?.personalization || {};
+        const pParental = personalizations?.parentalControls || {};
+
+        let PERSONA_INSTRUCTION = "";
+
+        // 1. STYLE & FONT (Font is UI only, but we can hint at TONE)
+        if (pStyle.fontStyle && pStyle.fontStyle !== 'Default') {
+          // No direct AI instruction needed for font family, but we can adjust tone if needed
+        }
+
+        // 2. CHARACTERISTICS
+        if (pStyle.enthusiasm) PERSONA_INSTRUCTION += `- Enthusiasm Level: ${pStyle.enthusiasm}\n`;
+        if (pStyle.formality) PERSONA_INSTRUCTION += `- Formality Level: ${pStyle.formality}\n`;
+        if (pStyle.creativity) PERSONA_INSTRUCTION += `- Creativity Level: ${pStyle.creativity}\n`;
+
+        // 3. FORMATTING
+        if (pStyle.structuredResponses) PERSONA_INSTRUCTION += "- FORMAT: Use clear Headers, Sections, and structured layouts.\n";
+        if (pStyle.bulletPoints) PERSONA_INSTRUCTION += "- FORMAT: Prioritize Bullet Points and Lists over paragraphs.\n";
+
+        // 4. EMOJI USAGE
+        if (pStyle.emojiUsage) {
+          if (pStyle.emojiUsage === 'None') PERSONA_INSTRUCTION += "- EMOJIS: Do NOT use any emojis or icons.\n";
+          else if (pStyle.emojiUsage === 'Minimal') PERSONA_INSTRUCTION += "- EMOJIS: Use very few emojis, only where absolutely necessary.\n";
+          else if (pStyle.emojiUsage === 'Moderate') PERSONA_INSTRUCTION += "- EMOJIS: Use a moderate amount of relevant emojis.\n";
+          else if (pStyle.emojiUsage === 'Expressive') PERSONA_INSTRUCTION += "- EMOJIS: Use emojis frequently to be engaging and expressive.\n";
+        }
+
+        // 5. CUSTOM INSTRUCTIONS override
+        if (pStyle.customInstructions) {
+          PERSONA_INSTRUCTION += `\n### USER CUSTOM INSTRUCTIONS (HIGHEST PRIORITY):\n${pStyle.customInstructions}\n`;
+        }
+
+        // 6. PARENTAL / SAFETY
+        if (pParental.contentFilter) {
+          PERSONA_INSTRUCTION += `\n### SAFETY MODE: STRICT\n- Absolutely NO mature, violent, or explicit content.\n- If user asks for such, politley decline.\n`;
+        }
+        if (pParental.ageCategory === 'Child') {
+          PERSONA_INSTRUCTION += `- SIMPLIFY language for a Child.\n- Be encouraging and safe.\n`;
+        }
+
+        // 7. LANGUAGE
+        // We already have language detection, but let's reinforce if set strictly
+        if (pGeneral.language && pGeneral.language !== 'Auto-Detect') {
+          PERSONA_INSTRUCTION += `\n### REQUIRED LANGUAGE:\n- Respond ONLY in ${pGeneral.language}.\n`;
+        }
+
+        // 8. TEXT SIZE / ACCESSIBILITY (Frontend only mostly, but hint AI)
+        if (pStyle.fontSize === 'Large' || pStyle.fontSize === 'Extra Large' || pGeneral.highContrast) {
+          PERSONA_INSTRUCTION += `- FORMAT: Use shorter sentences and very clear structure for readability.\n`;
+        }
+
+        const SYSTEM_INSTRUCTION = `
+You are ${activeAgent.agentName || 'AISA'}, an advanced AI assistant powered by A-Series.
+${activeAgent.category ? `Your specialization is in ${activeAgent.category}.` : ''}
+
+${PERSONA_INSTRUCTION}
+
+### CRITICAL LANGUAGE RULE:
+**ALWAYS respond in the SAME LANGUAGE as the user's message.** (Unless overridden by settings)
+- If user writes in HINDI (Devanagari or Romanized), respond in HINDI.
+- If user writes in ENGLISH, respond in ENGLISH.
+- If user mixes languages, prioritize the dominant language.
+
+### RESPONSE BEHAVIOR:
+- Answer the user's question directly without greeting messages
+- Do NOT say "Hello... welcome to AISA" or similar greetings
+- Focus ONLY on providing the answer to what user asked
+- Be helpful, clear, and concise
+
+### STREAMING BEHAVIOR:
+- Generate responses in smooth, continuous stream
+- Use short paragraphs for readability
+- If interrupted, stop immediately without completing sentence
+- Do NOT add summaries or closing lines after interruption
+- Resume ONLY if user explicitly asks again
+
+### MULTI-FILE ANALYSIS MANDATE (STRICT 1:1 RULE):
+You have received exactly ${filePreviews.length} file(s).
+You MUST provide exactly ${filePreviews.length} distinct analysis blocks.
+
+CRITICAL RULES:
+1.  **NO MERGING**: Do NOT combine files into a single "Chapter" or "Section".
+2.  **NO SKIPPING**: If 2 files are uploaded, you MUST output 2 analysis blocks.
+3.  **SEPARATE ENTITIES**: Treat each file as a completely independent document requiring its own full answer.
+4.  **DELIMITER MANDATORY**: Use the delimiter below to separate EACH file's answer.
+
+REQUIRED OUTPUT FORMAT:
+[Optional brief greeting]
+
+---SPLIT_RESPONSE---
+**Analysis of: {Filename 1}**
+[Full detailed answer/analysis for File 1]
+
+---SPLIT_RESPONSE---
+**Analysis of: {Filename 2}**
+[Full detailed answer/analysis for File 2]
+
+(Repeat strictly for ALL ${filePreviews.length} files)
+
+### RESPONSE FORMATTING RULES (STRICT):
+1.  **Structure**: ALWAYS use **Bold Headings** and **Bullet Points**. Avoid long paragraphs.
+2.  **Point-wise Answers**: Break down complex topics into simple points.
+3.  **Highlights**: Bold key terms and important concepts.
+4.  **Summary**: Include a "One-line summary" or "Simple definition" at the start or end where appropriate.
+5.  **Emojis**: Use relevant emojis.
+
+### FINANCIAL & INVOICE ANALYSIS RULES (MANDATORY):
+When summarizing or extracting data from Invoices, Receipts, or Financial Documents:
+1. **CRITICAL**: You MUST **bold** ALL monetary amounts (e.g., **INR 1,41,954.00**, **$500.00**).
+2. **CRITICAL**: You MUST **bold** ALL Entity/Person Names (e.g., **PRAHALAD AHUJA HUF**, **Amazon Inc**).
+3. **CRITICAL**: You MUST **bold** ALL Dates, Invoice Numbers, and distinct identifiers (GSTIN/PAN).
+4. **Format**: Present extracted data in a clean **Bullet List** or **Table** for immediate readability.
+
+${caps.canUploadImages ? `IMAGE ANALYSIS CAPABILITIES:
+- You have the ability to see and analyze images provided by the user.` : ''}
+
+${caps.canUploadDocs ? `DOCUMENT ANALYSIS CAPABILITIES:
+- You can process and extract text from PDF, Word (Docx), and Excel files provided as attachments.` : ''}
+
+${activeAgent.instructions ? `SPECIFIC AGENT INSTRUCTIONS:
+${activeAgent.instructions}` : ''}
+
+${deepSearchActive ? `### DEEP SEARCH MODE ENABLED (CRITICAL):
+- The user has requested an EXHAUSTIVE DEEP SEARCH.
+- Your response MUST be extremely long, detailed, and comprehensive.
+- Provide in-depth analysis, historical context, current trends, and future implications where applicable.
+- YOU MUST perform extensive web searching to gather every relevant detail.
+- Do NOT be brief. Expand on every point. Use multiple sections and subsections.
+- Clearly structure your findings with professional formatting and cite sources if possible.` : ''}
+
+${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
+- The user wants to convert the uploaded document.
+- Identify the source file format (PDF/DOCX) and the requested target format.
+- IF the user does NOT specify a target format:
+  - If source is PDF, suggest converting to DOCX.
+  - If source is DOCX, suggest converting to PDF.
+- YOU MUST provide the conversion parameters in the following JSON format:
+\`\`\`json
+{
+  "action": "file_conversion",
+  "source_format": "pdf",
+  "target_format": "docx",
+  "file_name": "original_filename.pdf"
+}
+\`\`\`
+- Keep the response text brief, explaining what you are doing.` : ''}
+`;
+        // Check for greeting to send the specific welcome message
+        const lowerInput = (contentToSend || "").toLowerCase().trim();
+        const isGreeting = ['hi', 'hello', 'hey', 'namaste', 'नमस्ते', 'greetings', 'hi aisa', 'hello aisa'].includes(lowerInput);
+
+        let aiResponseData;
+
+        if (isGreeting) {
+          // Respond with the welcome message for greetings
+          aiResponseData = {
+            reply: WELCOME_MESSAGE,
+            language: currentLang
+          };
+        } else {
+          // Default AI message sending
+          aiResponseData = await generateChatResponse(
+            messages,
+            userMsg.content,
+            SYSTEM_INSTRUCTION + getSystemPromptExtensions(),
+            userMsg.attachments,
+            currentLang,
+            abortControllerRef.current.signal,
+            detectedMode
+          );
+        }
+
+        if (aiResponseData && aiResponseData.error === "LIMIT_REACHED") {
+          setIsLimitReached(true);
+          setIsLoading(false);
+          isSendingRef.current = false;
+          return;
+        }
+
+        // Handle response - could be string (old format) or object (new format with conversion)
+        let aiResponseText = '';
+        let conversionData = null;
+        let aiVideoUrl = null;
+        let aiImageUrl = null;
+
+        if (typeof aiResponseData === 'string') {
+          aiResponseText = aiResponseData;
+        } else if (aiResponseData && typeof aiResponseData === 'object') {
+          aiResponseText = aiResponseData.reply || "No response generated. (Object received without reply)";
+          conversionData = aiResponseData.conversion || null;
+          // Extract media URLs if present
+          aiVideoUrl = aiResponseData.videoUrl || null;
+          aiImageUrl = aiResponseData.imageUrl || null;
+        } else {
+          aiResponseText = "Sorry, I encountered an issue while generating a response. Please try again.";
+        }
+
+        if (aiResponseText === "dbDemoModeMessage") {
+          aiResponseText = t('dbDemoModeMessage');
+        }
+
+        // Check for multiple file analysis headers to split into separate cards
+        const delimiter = '---SPLIT_RESPONSE---';
+        let responseParts = [];
+
+        if (aiResponseText && aiResponseText.includes(delimiter)) {
+          const rawParts = aiResponseText.split(delimiter).filter(p => p && p.trim().length > 0);
+          responseParts = rawParts.length > 0 ? rawParts.map(part => part.trim()) : [aiResponseText];
+        } else {
+          responseParts = [aiResponseText || "No response generated."];
+        }
+
+        // Process response parts and add to messages
+        for (let i = 0; i < responseParts.length; i++) {
+          const partContent = responseParts[i];
+          if (!partContent) continue;
+
+          const msgId = (Date.now() + 1 + i).toString();
+          const modelMsg = {
+            id: msgId,
+            role: 'model',
+            content: '', // Start empty for typewriter effect
+            timestamp: Date.now() + i * 100,
+          };
+
+          // Add the empty message structure to UI
+          setMessages((prev) => [...prev, modelMsg]);
+          setTypingMessageId(msgId); // Mark this message as typing
+
+          // Typewriter effect simulation
+          const words = partContent.split(' ');
+          let displayedContent = '';
+
+          // Decide speed based on length (shorter = slower, longer = faster)
+          const delay = words.length > 200 ? 10 : (words.length > 50 ? 20 : 35);
+
+          for (let j = 0; j < words.length; j++) {
+            // Check if generation was stopped by user
+            if (!isSendingRef.current) break;
+
+            displayedContent += (j === 0 ? '' : ' ') + words[j];
+
+            // Update UI with the current chunk
+            setMessages((prev) =>
+              prev.map(m => m.id === msgId ? { ...m, content: displayedContent } : m)
+            );
+
+            // Wait before next word
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+
+          if (!isSendingRef.current) {
+            setTypingMessageId(null);
+            return; // Exit function if stopped
+          }
+
+          setTypingMessageId(null); // Clear typing status
+
+          // Add conversion data and media if available
+          const finalModelMsg = { ...modelMsg, content: partContent };
+          if (i === 0) {
+            if (conversionData) finalModelMsg.conversion = conversionData;
+            if (aiVideoUrl) finalModelMsg.videoUrl = aiVideoUrl;
+            if (aiImageUrl) finalModelMsg.imageUrl = aiImageUrl;
+          }
+
+          // After typing is complete, save the full message to history
+          await chatStorageService.saveMessage(activeSessionId, finalModelMsg);
+
+          // CRITICAL: Update the state with the final message including conversion data
+          setMessages((prev) =>
+            prev.map(m => m.id === msgId ? finalModelMsg : m)
+          );
+          scrollToBottom();
+
+          // Speak the AI response if user used voice input
+          if (i === 0 && voiceUsedRef.current) {
+            const detectedLang = aiResponseData?.language || currentLang;
+            speakResponse(partContent, detectedLang);
+            voiceUsedRef.current = false; // Reset flag
+          }
+        }
+      } catch (innerError) {
+        console.error("Storage/API Error:", innerError);
+        // Even if saving failed, we still have the local state
+      }
+    } catch (error) {
+      // Handle abort errors silently (user stopped generation)
+      if (error.name === 'AbortError' || error.name === 'CanceledError') {
+        console.log('Generation stopped by user');
+        // Keep partial response, don't show error
+        return;
+      }
+
+      console.error("Chat Error:", error);
+      toast.error(`Error: ${error.message || "Failed to send message"}`);
+    } finally {
+      setIsLoading(false);
+      isSendingRef.current = false;
+      abortControllerRef.current = null; // Clean up abort controller
+    }
   };
 
   const handleDeleteSession = async (e, id) => {
@@ -130,6 +1942,22 @@ const Chat = () => {
       if (currentSessionId === id) {
         navigate('/dashboard/chat/new');
       }
+      toast.success("Chat deleted");
+    }
+  };
+
+  const handleRenameSession = async (e, session) => {
+    e.stopPropagation();
+    const newTitle = prompt("Enter new title for this chat:", session.title || "");
+    if (newTitle && newTitle.trim() !== "" && newTitle !== session.title) {
+      const success = await chatStorageService.updateSessionTitle(session.sessionId, newTitle.trim());
+      if (success) {
+        const data = await chatStorageService.getSessions();
+        setSessions(data);
+        toast.success("Chat renamed");
+      } else {
+        toast.error("Failed to rename chat");
+      }
     }
   };
 
@@ -140,223 +1968,2428 @@ const Chat = () => {
     }
   };
 
-  return (
-    <div className={`flex h-full w-full bg-transparent relative overflow-hidden transition-colors duration-700 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+  const getAgentCapabilities = (agentName, category) => {
+    const name = (agentName || '').toLowerCase();
+    const cat = (category || '').toLowerCase();
 
-      {/* Mobile History Backdrop */}
+    // Default: Everything enabled for AISA
+    if (name === 'aisa' || !name) {
+      return {
+        canUploadImages: true,
+        canUploadDocs: true,
+        canVoice: true,
+        canVideo: true,
+        canCamera: true
+      };
+    }
+
+    const caps = {
+      canUploadImages: true,
+      canUploadDocs: true,
+      canVoice: true,
+      canVideo: true,
+      canCamera: true
+    };
+
+    // Specific logic per category/name
+    if (cat.includes('hr') || cat.includes('finance') || name.includes('doc') || name.includes('legal')) {
+      caps.canVideo = false;
+      caps.canCamera = false;
+      caps.canUploadImages = false;
+    } else if (cat.includes('design') || cat.includes('creative') || name.includes('photo')) {
+      caps.canVoice = false;
+      caps.canVideo = false;
+      caps.canUploadDocs = false;
+    } else if (name.includes('voice') || name.includes('call') || name.includes('bot')) {
+      caps.canUploadImages = false;
+      caps.canUploadDocs = false;
+      caps.canCamera = false;
+      caps.canVideo = false;
+    } else if (cat.includes('medical') || cat.includes('health')) {
+      caps.canVideo = false;
+      caps.canUploadImages = true;
+    }
+
+    return caps;
+  };
+
+  const handleDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename || 'download.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback to direct link if fetch fails
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.click();
+    }
+  };
+
+  const handleImageAction = (action) => {
+    if (selectedFiles.length === 0) return;
+
+    let command = '';
+    switch (action) {
+      case 'remove-bg':
+        command = 'Remove the background and clean up this image.';
+        break;
+      case 'remix':
+        command = 'Create a stunning new image based on this attachment. Here are the details: ';
+        break;
+      case 'enhance':
+        command = 'Analyze the attached image and generate a higher quality version of it.';
+        break;
+      default:
+        break;
+    }
+    setInputValue(command);
+
+    if (action === 'remix') {
+      inputRef.current?.focus();
+      toast.success("Describe your changes and hit send!");
+    } else {
+      toast.success(`${action.replace('-', ' ')} processing...`);
+      setLoadingText(`Processing ${action.replace('-', ' ')}... 🖼️`);
+      setTimeout(() => handleSendMessage(), 100);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editContent, setEditContent] = useState("");
+
+  // Feedback State
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackMsgId, setFeedbackMsgId] = useState(null);
+  const [feedbackCategory, setFeedbackCategory] = useState([]);
+  const [activeMessageId, setActiveMessageId] = useState(null);
+  const [feedbackDetails, setFeedbackDetails] = useState("");
+  const [pdfLoadingId, setPdfLoadingId] = useState(null);
+  const [loadingText, setLoadingText] = useState("Thinking..."); // New state for loading status text
+  const [messageFeedback, setMessageFeedback] = useState({}); // { [msgId]: { type: 'up' | 'down', categories: [], details: '' } }
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  const toggleFeedback = (msgId, feedbackData) => {
+    setMessageFeedback(prev => {
+      // If it's the same type and no extra data (categories), toggle it off
+      if (prev[msgId]?.type === feedbackData.type && (!feedbackData.categories || feedbackData.categories.length === 0)) {
+        const { [msgId]: _, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [msgId]: feedbackData
+      };
+    });
+  };
+
+  const handlePdfAction = async (action, msg) => {
+    // If this message has a converted file, use it directly instead of rendering the chat bubble
+    if (msg.conversion && msg.conversion.file && msg.conversion.mimeType === 'application/pdf') {
+      const shareToastId = toast.loading(`${action === 'share' ? 'Sharing' : 'Preparing'} PDF...`);
+      try {
+        const byteCharacters = atob(msg.conversion.file);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const filename = msg.conversion.fileName || 'converted.pdf';
+
+        if (action === 'download') {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          toast.success("Converted PDF Downloaded", { id: shareToastId });
+        } else if (action === 'open') {
+          window.open(url, '_blank');
+          toast.dismiss(shareToastId);
+        } else if (action === 'share') {
+          const file = new window.File([blob], filename, { type: 'application/pdf' });
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: 'AISA Document',
+                text: 'Check out this document generated by AISA AI.'
+              });
+              toast.success("Shared successfully!", { id: shareToastId });
+            } catch (shareErr) {
+              if (shareErr.name !== 'AbortError') {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                toast.success("Sharing not supported, downloaded instead", { id: shareToastId });
+              } else {
+                toast.dismiss(shareToastId);
+              }
+            }
+          } else {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            toast.success("Native share not supported, downloaded instead", { id: shareToastId });
+          }
+        }
+        return; // Exit after handling conversion file
+      } catch (err) {
+        toast.error("Failed to process PDF", { id: shareToastId });
+        console.error("Error handling conversion file PDF action:", err);
+      }
+    }
+
+    const processToastId = toast.loading(`${action === 'share' ? 'Sharing' : 'Generating'} PDF Document...`);
+    setPdfLoadingId(msg.id);
+    try {
+      const element = document.getElementById(`msg-text-${msg.id}`);
+      if (!element) {
+        toast.error("Content not found");
+        return;
+      }
+
+      // Temporarily modify styles for better print capture (e.g. forced light mode)
+      let canvas;
+      try {
+        canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          logging: true, // Enable logging for debugging
+          backgroundColor: '#ffffff',
+          onclone: (clonedDoc) => {
+            const clonedEl = clonedDoc.getElementById(`msg-text-${msg.id}`);
+            if (clonedEl) {
+              clonedEl.style.padding = '40px';
+              clonedEl.style.color = '#000000';
+              clonedEl.style.backgroundColor = '#ffffff';
+              clonedEl.style.width = '700px';
+
+              // Ensure all text is black for clarity in PDF
+              const all = clonedEl.querySelectorAll('*');
+              Array.from(all).forEach(el => {
+                el.style.color = '#000000';
+                if (el.tagName === 'A') el.style.color = '#0000ff';
+              });
+            }
+          }
+        });
+      } catch (genError) {
+        console.error("PDF html2canvas error:", genError);
+        toast.error(`Canvas Error: ${genError.message}`, { id: processToastId });
+        setPdfLoadingId(null);
+        return;
+      }
+
+      if (!canvas) {
+        toast.error("Failed to capture content", { id: processToastId });
+        setPdfLoadingId(null);
+        return;
+      }
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const margin = 15; // 15mm margin
+      const pdfWidth = pdf.internal.pageSize.getWidth() - (margin * 2);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const contentHeightPerPage = pageHeight - (margin * 2);
+
+      let heightLeft = pdfHeight;
+      let position = margin;
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', margin, position, pdfWidth, pdfHeight);
+      heightLeft -= contentHeightPerPage;
+
+      // Add subsequent pages if content overflows
+      while (heightLeft > 0) {
+        position = margin - (pdfHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', margin, position, pdfWidth, pdfHeight);
+        heightLeft -= contentHeightPerPage;
+      }
+
+      const filename = `aisa-response-${msg.id}.pdf`;
+
+      if (action === 'download') {
+        pdf.save(filename);
+        toast.success("PDF Downloaded", { id: processToastId });
+      } else if (action === 'open') {
+        const blobUrl = pdf.output('bloburl');
+        window.open(blobUrl, '_blank');
+        toast.dismiss(processToastId);
+      } else if (action === 'share') {
+        const blob = pdf.output('blob');
+        const file = new window.File([blob], filename, { type: 'application/pdf' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'AI Response',
+              text: 'Here is the response from A-Series AI.'
+            });
+            toast.success("Shared successfully!", { id: processToastId });
+          } catch (shareErr) {
+            if (shareErr.name !== 'AbortError') {
+              pdf.save(filename);
+              toast.success("Sharing failed, downloaded instead", { id: processToastId });
+            } else {
+              toast.dismiss(processToastId);
+            }
+          }
+        } else {
+          pdf.save(filename);
+          toast.success("Native share not supported, downloaded instead.", { id: processToastId });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate PDF", { id: processToastId });
+    } finally {
+      setPdfLoadingId(null);
+    }
+  };
+
+  // Auto-resize chat input textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'; // Reset height to recount
+      inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+    }
+  }, [inputValue]);
+
+  const handleThumbsDown = (msgId) => {
+    setFeedbackMsgId(msgId);
+    setFeedbackOpen(true);
+    setFeedbackCategory([]);
+    setFeedbackDetails("");
+  };
+
+  const handleThumbsUp = async (msgId) => {
+    try {
+      toggleFeedback(msgId, { type: 'up' });
+      await axios.post(apis.feedback, {
+        sessionId: sessionId || 'unknown',
+        messageId: msgId,
+        type: 'thumbs_up'
+      });
+      toast.success("Thanks for the positive feedback!", {
+        icon: '👍',
+      });
+    } catch (error) {
+      console.error("Feedback error:", error);
+      toast.error("Failed to submit feedback");
+      // Revert local state on error
+      toggleFeedback(msgId, { type: 'up' });
+    }
+  };
+
+  const handleShare = async (content) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'AI Assistant Response',
+          text: content,
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    } else {
+      handleCopyMessage(content);
+      toast("Content copied to clipboard", { icon: '📋' });
+    }
+  };
+
+  const submitFeedback = async () => {
+    if (isSubmittingFeedback) return;
+    try {
+      setIsSubmittingFeedback(true);
+      const msgId = feedbackMsgId;
+      const feedbackData = {
+        type: 'down',
+        categories: [...feedbackCategory],
+        details: feedbackDetails
+      };
+
+      await axios.post(apis.feedback, {
+        sessionId: sessionId || 'unknown',
+        messageId: msgId,
+        type: 'thumbs_down',
+        categories: feedbackData.categories,
+        details: feedbackData.details
+      });
+
+      toggleFeedback(msgId, feedbackData);
+      toast.success("Feedback submitted. Thank you!");
+      setFeedbackOpen(false);
+    } catch (error) {
+      console.error("Feedback error:", error);
+      toast.error("Failed to submit feedback");
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
+  const toggleFeedbackCategory = (cat) => {
+    setFeedbackCategory(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const handleCopyMessage = (content) => {
+    navigator.clipboard.writeText(content);
+    toast.success("Copied to clipboard!");
+  };
+
+  const handleMessageDelete = async (messageId) => {
+    if (!confirm("Delete this message?")) return;
+
+    // Find the message index
+    const msgIndex = messages.findIndex(m => m.id === messageId);
+    if (msgIndex === -1) return;
+
+    const msgsToDelete = [messageId];
+
+    // Check if the NEXT message is an AI response (model), if so, delete it too
+    // We only auto-delete the immediate next AI response associated with this user query
+    if (msgIndex + 1 < messages.length) {
+      const nextMsg = messages[msgIndex + 1];
+      if (nextMsg.role === 'model') {
+        msgsToDelete.push(nextMsg.id);
+      }
+    }
+
+    // Optimistic update
+    setMessages(prev => prev.filter(m => !msgsToDelete.includes(m.id)));
+
+    // Delete from storage
+    for (const id of msgsToDelete) {
+      await chatStorageService.deleteMessage(sessionId, id);
+    }
+  };
+
+  const startEditing = (msg) => {
+    setEditingMessageId(msg.id);
+    setEditContent(msg.content || msg.text || "");
+  };
+
+  const saveEdit = async (msg) => {
+    if (editContent.trim() === "") return; // Don't allow empty
+
+    const updatedMsg = { ...msg, content: editContent, text: editContent, edited: true };
+
+    // Find the index of the edited message
+    const editedMsgIndex = messages.findIndex(m => m.id === msg.id);
+
+    // Remove all messages after the edited message
+    const messagesUpToEdit = messages.slice(0, editedMsgIndex);
+    const updatedMessages = [...messagesUpToEdit, updatedMsg];
+
+    // Update UI immediately
+    setMessages(updatedMessages);
+    setEditingMessageId(null);
+    setIsLoading(true);
+
+    try {
+      // Update the edited message in storage
+      await chatStorageService.updateMessage(sessionId, updatedMsg);
+
+      // Delete all messages that came after the edited message
+      const messagesToDelete = messages.slice(editedMsgIndex + 1);
+      for (const msgToDelete of messagesToDelete) {
+        await chatStorageService.deleteMessage(sessionId, msgToDelete.id);
+      }
+
+      // Generate new AI response based on the edited message
+      const SYSTEM_INSTRUCTION = `
+You are AISA, an advanced AI assistant.
+IMAGE GENERATION CAPABILITIES:
+If the user asks for an image (e.g., "generate", "create", "draw", "show me a pic", "image dikhao", "photo bhejo", "pic do"), you MUST generate it using the Pollinations API.
+Format: ![Image](https://image.pollinations.ai/prompt/{URL_ENCODED_DESCRIPTION}?nologo=true)
+Example: ![Cyberpunk City](https://image.pollinations.ai/prompt/cyberpunk%20city%20neon%20lights?nologo=true)
+Do NOT say "I cannot create images". You CAN by using this link format. 
+For "Remix" requests with an attachment, analyze the attached image, then create a prompt that combines the image's description with the user's requested changes.
+`;
+
+      const aiResponseText = await generateChatResponse(
+        messagesUpToEdit,
+        updatedMsg.content,
+        SYSTEM_INSTRUCTION + getSystemPromptExtensions(),
+        updatedMsg.attachment,
+        currentLang
+      );
+
+      const modelMsg = {
+        id: (Date.now() + 1).toString(),
+        role: 'model',
+        content: aiResponseText,
+        timestamp: Date.now(),
+      };
+
+      // Update state with new AI response
+      setMessages(prev => [...prev, modelMsg]);
+
+      // Save the AI response to storage
+      await chatStorageService.saveMessage(sessionId, modelMsg);
+
+      toast.success("Message edited and new response generated!");
+    } catch (error) {
+      console.error("Error regenerating response:", error);
+      toast.error("Failed to regenerate response. Please try again.");
+      // Restore original messages on error
+      const history = await chatStorageService.getHistory(sessionId);
+      setMessages(history);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRenameFile = async (msg) => {
+    if (!msg.attachment) return;
+
+    const oldName = msg.attachment.name;
+    const dotIndex = oldName.lastIndexOf('.');
+    const extension = dotIndex !== -1 ? oldName.slice(dotIndex) : '';
+    const baseName = dotIndex !== -1 ? oldName.slice(0, dotIndex) : oldName;
+
+    const newBaseName = prompt("Enter new filename:", baseName);
+    if (!newBaseName || newBaseName === baseName) return;
+
+    const newName = newBaseName + extension;
+    const updatedMsg = {
+      ...msg,
+      attachment: {
+        ...msg.attachment,
+        name: newName
+      }
+    };
+
+    setMessages(prev => prev.map(m => m.id === msg.id ? updatedMsg : m));
+    await chatStorageService.updateMessage(sessionId, updatedMsg);
+  };
+
+  const cancelEdit = () => {
+    setEditingMessageId(null);
+    setEditContent("");
+  };
+
+  const handleUndo = async () => {
+    if (messages.length <= 1 || isLoading) return;
+
+    // Last message might be AI, second to last is User
+    const lastMsg = messages[messages.length - 1];
+    const secondLastMsg = messages[messages.length - 2];
+
+    const idsToDelete = [];
+    let contentToRestore = "";
+
+    if (lastMsg.role === 'model' && secondLastMsg.role === 'user') {
+      idsToDelete.push(lastMsg.id, secondLastMsg.id);
+      contentToRestore = secondLastMsg.content || secondLastMsg.text || "";
+    } else if (lastMsg.role === 'user') {
+      idsToDelete.push(lastMsg.id);
+      contentToRestore = lastMsg.content || lastMsg.text || "";
+    } else {
+      idsToDelete.push(lastMsg.id);
+    }
+
+    // Restore content to input field
+    if (contentToRestore) {
+      setInputValue(contentToRestore);
+      // Small delay to ensure state update before focusing
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          // Set cursor at the end
+          inputRef.current.selectionStart = contentToRestore.length;
+          inputRef.current.selectionEnd = contentToRestore.length;
+        }
+      }, 50);
+    }
+
+    // Optimistic Update
+    setMessages(prev => prev.filter(m => !idsToDelete.includes(m.id)));
+
+    // Delete from storage
+    try {
+      for (const id of idsToDelete) {
+        if (id) {
+          await chatStorageService.deleteMessage(currentSessionId, id);
+        }
+      }
+      toast.success("Message restored to input", { icon: '↩️' });
+    } catch (error) {
+      console.error("Undo error:", error);
+    }
+  };
+
+  const [viewingDoc, setViewingDoc] = useState(null);
+  const docContainerRef = useRef(null);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') setViewingDoc(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  // Process Word documents
+  useEffect(() => {
+    if (viewingDoc && viewingDoc.name.match(/\.(docx|doc)$/i) && docContainerRef.current) {
+      // Clear previous content
+      docContainerRef.current.innerHTML = '';
+
+      fetch(viewingDoc.url)
+        .then(res => res.blob())
+        .then(blob => {
+          renderAsync(blob, docContainerRef.current, undefined, {
+            inWrapper: true,
+            ignoreWidth: false,
+            className: "docx-viewer"
+          }).catch(err => {
+            console.error("Docx Preview Error:", err);
+            docContainerRef.current.innerHTML = '<div class="text-center p-10 text-subtext">Preview not available.<br/>Please download to view.</div>';
+          });
+        });
+    }
+  }, [viewingDoc]);
+
+  // Process Excel documents
+  useEffect(() => {
+    if (viewingDoc && viewingDoc.name.match(/\.(xls|xlsx|csv)$/i)) {
+      setExcelHTML(null); // Reset
+      fetch(viewingDoc.url)
+        .then(res => res.arrayBuffer())
+        .then(ab => {
+          const wb = XLSX.read(ab, { type: 'array' });
+          const firstSheetName = wb.SheetNames[0];
+          const ws = wb.Sheets[firstSheetName];
+          const html = XLSX.utils.sheet_to_html(ws, { id: "excel-preview", editable: false });
+          setExcelHTML(html);
+        })
+        .catch(err => {
+          console.error("Excel Preview Error:", err);
+          setExcelHTML('<div class="text-center p-10 text-red-500">Failed to load Excel preview.</div>');
+        });
+    }
+  }, [viewingDoc]);
+
+  // Process Text/Code documents
+  useEffect(() => {
+    // Check if handled by other specific viewers
+    const isSpecial = viewingDoc?.name.match(/\.(docx|doc|xls|xlsx|csv|pdf|mp4|webm|ogg|mov|mp3|wav|m4a|jpg|jpeg|png|gif|webp|bmp|svg)$/i) || viewingDoc?.url.startsWith('data:image/');
+
+    if (viewingDoc && !isSpecial) {
+      setTextPreview(null);
+      fetch(viewingDoc.url)
+        .then(res => res.text())
+        .then(text => {
+          if (text.length > 5000000) {
+            setTextPreview(text.substring(0, 5000000) + "\n\n... (File truncated due to size)");
+          } else {
+            setTextPreview(text);
+          }
+        })
+        .catch(err => {
+          console.error("Text Preview Error:", err);
+          setTextPreview("Failed to load text content.");
+        });
+    }
+  }, [viewingDoc]);
+
+  return (
+    <div className="flex w-full bg-transparent relative overflow-hidden aisa-scalable-text overscroll-none h-[100dvh] fixed inset-0 lg:static lg:h-full no-scrollbar select-none">
+
+      {/* Chat History Sidebar */}
       <AnimatePresence>
         {showHistory && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowHistory(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-opacity"
+            />
+
+            {/* Sidebar Content */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute inset-y-0 left-0 w-[280px] sm:w-[320px] bg-white/40 dark:bg-gray-800/90 backdrop-blur-3xl border-r border-white/60 dark:border-white/10 z-[300] flex flex-col shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className="h-14 px-4 border-b border-white/10 flex items-center justify-between bg-white/20 dark:bg-white/5 backdrop-blur-md sticky top-0 z-10">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <History className="w-4 h-4 text-primary" />
+                  </div>
+                  <h2 className="text-sm font-black uppercase tracking-widest text-black/80 dark:text-white/90">History</h2>
+                </div>
+                <button
+                  onClick={() => setShowHistory(false)}
+                  className="p-1.5 hover:bg-black/5 rounded-full text-subtext transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* New Chat Button */}
+              <div className="p-4 bg-transparent">
+                <button
+                  onClick={handleNewChat}
+                  className="w-full py-3.5 bg-purple-600 text-white rounded-[20px] flex items-center justify-center gap-2.5 font-black text-xs uppercase tracking-widest transition-all hover:scale-[1.05] active:scale-[0.95] shadow-[0_0_20px_rgba(147,51,234,0.4)] ring-2 ring-purple-400/30 hover:ring-purple-400/50"
+                >
+                  <Plus size={16} strokeWidth={3} />
+                  <span>Start New Chat</span>
+                </button>
+              </div>
+
+              {/* Sessions List */}
+              <div className="flex-1 overflow-y-auto px-2 pb-6 space-y-1.5 custom-scrollbar bg-transparent">
+                {sessions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
+                    <div className="w-16 h-16 bg-black/[0.02] rounded-full flex items-center justify-center mb-4">
+                      <MessageCircle className="w-6 h-6 text-black/20" />
+                    </div>
+                    <h3 className="text-sm font-bold text-black/60 mb-1">No History Yet</h3>
+                    <p className="text-[11px] text-black/40 font-medium leading-relaxed">Your future conversations with AISA will appear here for easy access.</p>
+                  </div>
+                ) : (
+                  sessions.map((session) => (
+                    <div
+                      key={session.sessionId}
+                      onClick={() => {
+                        navigate(`/dashboard/chat/${session.sessionId}`);
+                        setShowHistory(false);
+                      }}
+                      className={`group relative p-3.5 rounded-[1.25rem] cursor-pointer transition-all duration-300 border ${sessionId === session.sessionId
+                        ? 'bg-primary/5 border-primary/10 shadow-sm'
+                        : 'hover:bg-black/[0.02] border-transparent hover:border-black/[0.03]'
+                        }`}
+                    >
+                      <div className="flex items-center gap-3.5 pr-8">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all ${sessionId === session.sessionId ? 'bg-primary text-white shadow-md shadow-primary/20' : 'bg-black/[0.03] dark:bg-white/5 text-black/40 dark:text-white/50 group-hover:bg-primary/10 group-hover:text-primary group-hover:rotate-6'
+                          }`}>
+                          <MessageSquare size={16} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-sm font-bold truncate leading-tight ${sessionId === session.sessionId ? 'text-primary' : 'text-black/80 dark:text-white/90'
+                            }`}>
+                            {session.title || 'Untitled Conversation'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] text-black/30 dark:text-white/30 font-black uppercase tracking-tighter">
+                              {new Date(session.lastModified || session.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                            </span>
+                            {sessionId === session.sessionId && (
+                              <>
+                                <span className="w-1 h-1 rounded-full bg-primary/30" />
+                                <span className="text-[9px] text-primary/60 font-black uppercase tracking-widest">Active</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => handleRenameSession(e, session)}
+                          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg text-subtext hover:text-primary transition-colors"
+                          title="Rename Chat"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteSession(e, session.sessionId)}
+                          className="p-1.5 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg text-red-400 hover:text-red-600 transition-colors"
+                          title="Delete Chat"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Footer info */}
+              <div className="p-4 border-t border-black/[0.03] bg-black/[0.01]">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                  <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.2em]">Synchronization Active</span>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Document Viewer Modal */}
+      <AnimatePresence>
+        {viewingDoc && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[60] bg-[#0f172a]/40 backdrop-blur-sm md:hidden"
-            onClick={() => setShowHistory(false)}
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-card w-full max-w-4xl h-full max-h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 border-b border-border bg-secondary">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <FileText className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-maintext truncate max-w-md">{viewingDoc.name}</h3>
+                    <p className="text-xs text-subtext">
+                      {viewingDoc.type === 'image' || viewingDoc.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i)
+                        ? 'Image Preview'
+                        : 'File Preview'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDownload(viewingDoc.url, viewingDoc.name)}
+                    className="p-2 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors text-subtext"
+                    title="Download"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewingDoc(null)}
+                    className="p-2 hover:bg-red-500/10 hover:text-red-500 rounded-lg transition-colors text-subtext"
+                    title="Close"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Viewer Content */}
+              <div className="flex-1 bg-gray-100 dark:bg-gray-900 relative flex items-center justify-center overflow-hidden">
+                {viewingDoc.type === 'image' || viewingDoc.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i) || viewingDoc.url.startsWith('data:image/') ? (
+                  <ImageViewer
+                    src={viewingDoc.url}
+                    alt="Preview"
+                  />
+                ) : viewingDoc.name.match(/\.(docx|doc)$/i) ? (
+                  <div
+                    ref={docContainerRef}
+                    className="bg-gray-100 w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center py-8"
+                  />
+                ) : viewingDoc.name.match(/\.(xls|xlsx|csv)$/i) ? (
+                  <div
+                    className="bg-white w-full h-full overflow-auto p-4 custom-scrollbar text-black text-sm"
+                    dangerouslySetInnerHTML={{ __html: excelHTML || '<div class="flex items-center justify-center h-full"><div class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div></div>' }}
+                  />
+                ) : viewingDoc.name.endsWith('.pdf') || viewingDoc.url.startsWith('data:application/pdf') ? (
+                  <iframe
+                    src={viewingDoc.url}
+                    className="w-full h-full border-0"
+                    title="Document Viewer"
+                  />
+                ) : viewingDoc.name.match(/\.(mp4|webm|ogg|mov)$/i) || viewingDoc.type.startsWith('video/') ? (
+                  <video controls className="max-w-full max-h-full rounded-lg shadow-lg" src={viewingDoc.url}>
+                    Your browser does not support the video tag.
+                  </video>
+                ) : viewingDoc.name.match(/\.(mp3|wav|ogg|m4a)$/i) || viewingDoc.type.startsWith('audio/') ? (
+                  <div className="p-10 bg-surface rounded-2xl flex flex-col items-center gap-6 shadow-md border border-border">
+                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center animate-pulse-slow">
+                      <div className="w-12 h-12 border-2 border-primary rounded-full flex items-center justify-center">
+                        <Mic className="w-6 h-6 text-primary" />
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-bold text-lg mb-1">{viewingDoc.name}</h3>
+                      <p className="text-xs text-subtext">Audio File Player</p>
+                    </div>
+                    <audio controls className="w-full min-w-[300px]" src={viewingDoc.url}>
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-[#1e1e1e] p-0 flex flex-col overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-2 bg-[#252526] border-b border-[#3e3e42] shrink-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#cccccc] uppercase tracking-wider">
+                          {viewingDoc.name.match(/\.(rar|zip|exe|dll|bin|iso|7z)$/i) ? 'BINARY CONTENT' : 'CODE READER'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#0e639c] text-white font-mono shadow-sm">
+                        {viewingDoc.name.split('.').pop().toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 overflow-auto custom-scrollbar p-4">
+                      <code className="text-xs font-mono whitespace-pre-wrap text-[#9cdcfe] break-all leading-relaxed tab-4 block">
+                        {textPreview || "Reading file stream..."}
+                      </code>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Image Editor */}
+      <AnimatePresence>
+        {isEditingImage && selectedFile && (
+          <ImageEditor
+            file={selectedFile}
+            onClose={() => setIsEditingImage(false)}
+            onSave={(newFile) => {
+              processFile(newFile);
+              setIsEditingImage(false);
+              toast.success("Image updated!");
+            }}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar History - Dreamy Glass Style */}
-      <motion.div
-        className={`
-          w-80 ${isDark ? 'bg-[#0f172a] border-white/5 shadow-[20px_0_40px_rgba(0,0,0,0.2)]' : 'bg-white/40 border-white/60'} backdrop-blur-3xl border-r flex flex-col flex-shrink-0
-          absolute inset-y-0 left-0 z-[70] transition-all duration-500 ease-in-out
-          md:relative md:translate-x-0 overflow-hidden
-          ${showHistory ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
-        `}
-      >
-        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-30">
-          <div className="absolute top-[-10%] left-[-10%] w-32 h-32 bg-[#8b5cf6]/20 rounded-full blur-2xl animate-blob"></div>
-        </div>
+      <ModelSelector
+        isOpen={isModelSelectorOpen}
+        onClose={() => setIsModelSelectorOpen(false)}
+        toolType={selectedToolType}
+        currentModel={selectedToolType ? toolModels[selectedToolType] : 'gemini-flash'}
+        onSelectModel={handleModelSelect}
+        pricing={TOOL_PRICING}
+      />
 
-        <div className="p-8">
-          <h2 className={`text-2xl font-black tracking-tight mb-6 transition-colors ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>
-            {t('history')}<span className="text-[#8B5CF6]">.</span>
-          </h2>
-          <button
-            onClick={handleNewChat}
-            className="w-full bg-[#8B5CF6] hover:bg-[#7c3aed] text-white font-black py-4 px-4 rounded-2xl flex items-center justify-center gap-2 transition-all shadow-[0_10px_20px_rgba(139,92,246,0.3)] hover:shadow-[#8B5CF6]/20 hover:scale-[1.02] active:scale-95 uppercase text-xs tracking-widest"
-          >
-            {t('chatHistory')}
-          </button>
-        </div>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-2 no-scrollbar">
-          {sessions.map((session) => (
-            <div key={session.sessionId} className="group relative">
-              <button
-                onClick={() => {
-                  navigate(`/dashboard/chat/${session.sessionId}`);
-                  setShowHistory(false);
-                }}
-                className={`w-full text-left px-5 py-4 rounded-[20px] transition-all duration-300 truncate border
-                  ${currentSessionId === session.sessionId
-                    ? `${isDark ? 'bg-[#242f49] border-[#8B5CF6]/40 text-[#f1f5f9] shadow-[0_10px_30px_rgba(139,92,246,0.1)]' : 'bg-white/80 border-[#8b5cf6]/20 text-[#8b5cf6]'} shadow-sm font-black`
-                    : `${isDark ? 'text-[#94a3b8] border-transparent hover:bg-white/5 hover:text-[#f1f5f9]' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'}`
-                  }
-                `}
-              >
-                <div className="flex items-center gap-3">
-                  <Clock size={14} className={currentSessionId === session.sessionId ? 'text-[#8B5CF6]' : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
-                  <div className="flex-1 truncate text-xs font-bold uppercase tracking-tight">{(session.title?.toUpperCase() === 'NEW CHAT' || !session.title) ? t('untitledSession') : session.title}</div>
-                </div>
-              </button>
-              <button
-                onClick={(e) => handleDeleteSession(e, session.sessionId)}
-                className={`absolute right-4 top-[55%] -translate-y-1/2 p-2 text-red-500 hover:text-red-600 transition-all scale-110 chat-delete-btn 
-                  ${isDark ? 'opacity-0 group-hover:opacity-100' : 'opacity-60 hover:opacity-100'}
-                `}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
 
-          {sessions.length === 0 && (
-            <div className="px-6 py-10 text-center">
-              <div className={`w-12 h-12 ${isDark ? 'bg-[#12182B] border-white/5' : 'bg-white/40 border-white/60'} rounded-2xl flex items-center justify-center mx-auto mb-4 border`}>
-                <History className={`w-6 h-6 ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`} />
-              </div>
-              <p className={`text-[10px] uppercase font-black tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'}`}>{t('memoryEmpty')}</p>
-            </div>
-          )}
-        </div>
-      </motion.div>
 
       {/* Main Area */}
-      <div className={`flex-1 flex flex-col relative ${isDark ? 'bg-[#1a2235]' : 'bg-transparent'} w-full min-w-0`}>
-
-        {/* Header - Transparent & Refined */}
-        <div className={`h-20 flex items-center justify-between px-6 sm:px-10 ${isDark ? 'bg-[#1a2235]/80 border-white/5' : 'bg-white/20 border-white/40'} backdrop-blur-md border-b z-[50] shrink-0 transition-colors`}>
-          <div className="flex items-center gap-4 min-w-0">
-            <button
-              className={`md:hidden p-3 ${isDark ? 'bg-[#242f49]' : 'bg-white/40'} rounded-xl text-gray-500 hover:text-gray-900 border ${isDark ? 'border-[#8B5CF6]/10' : 'border-white/60'} transition-all shrink-0`}
-              onClick={() => setShowHistory(!showHistory)}
-            >
-              <History className={`w-5 h-5 ${isDark ? 'text-[#f1f5f9]' : 'text-gray-500'}`} />
-            </button>
-
-            <div className="flex items-center gap-3 min-w-0">
-              <img src="/AISA (2).svg" alt="AISA Logo" className="w-10 h-10 object-contain" />
-              <div className="flex flex-col">
-                <h3 className={`text-xl font-black uppercase tracking-tighter leading-none transition-colors ${isDark ? 'text-[#f1f5f9]' : 'text-gray-900'}`}>
-                  {t('aisa')}<sup className="text-[10px] font-black ml-0.5">TM</sup>
-                </h3>
-                <span className={`text-[11px] font-bold ${isDark ? 'text-[#8B5CF6]' : 'text-[#8b5cf6]'} uppercase tracking-widest opacity-80`}>{t('onlineReady')}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {!isChatHistoryEnabled && (
-          <div className={`px-10 py-3 ${isDark ? 'bg-[#ef4444]/10 border-b border-[#ef4444]/20' : 'bg-red-50 border-b border-red-100'} flex items-center justify-center gap-2 animate-in slide-in-from-top duration-500`}>
-            <History size={14} className="text-[#ef4444]" />
-            <span className={`text-[10px] uppercase font-black tracking-widest ${isDark ? 'text-[#ef4444]' : 'text-red-500'}`}>{t('ephemeralModeMsg')}</span>
+      <div
+        className="flex-1 flex flex-col relative bg-transparent w-full min-w-0 h-full overflow-hidden"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {isDragging && (
+          <div className="absolute inset-0 z-50 bg-primary/10 backdrop-blur-sm border-2 border-dashed border-primary flex flex-col items-center justify-center pointer-events-none">
+            <Cloud className="w-16 h-16 text-primary mb-4 animate-bounce" />
+            <h3 className="text-2xl font-bold text-primary">Drop to Upload</h3>
           </div>
         )}
 
-        {/* Messages - Fluid & Glassy */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-12 space-y-10 no-scrollbar">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center px-6">
-              <div className="relative mb-2">
-                <div className="absolute inset-0 bg-[#8B5CF6]/30 blur-[100px] rounded-full animate-blob"></div>
-                <div className="relative flex items-center justify-center">
-                  <img src="/AISA (2).svg" alt="AISA Logo" className="w-32 h-32 object-contain" />
-                </div>
-              </div>
-              <h2 className={`text-4xl mb-4 tracking-tighter uppercase transition-colors ${isDark ? 'text-[#f1f5f9] font-black' : 'text-gray-900 font-black'}`}>
-                {t('initializeLogic')}
-              </h2>
-              <p className={`${isDark ? 'text-[#C7CBEA]' : 'text-gray-500'} font-medium max-w-sm leading-relaxed transition-colors`}>{t('chatGreeting')}</p>
-            </div>
-          ) : (
-            <div className="max-w-4xl mx-auto space-y-8">
-              {messages.map((msg) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={msg.id}
-                  className={`flex items-start gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+        {/* Header */}
+        <div className="h-14 md:h-16 border-b border-black/[0.05] dark:border-white/10 flex items-center justify-between px-3 md:px-6 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl z-20 shrink-0 gap-3">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+            <button
+              onClick={() => setTglState(prev => ({ ...prev, sidebarOpen: true }))}
+              className="lg:hidden p-2 -ml-2 text-subtext hover:text-maintext rounded-lg hover:bg-surface/50 transition-colors"
+              title="Menu"
+            >
+              <MenuIcon className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => setShowHistory(true)}
+              className="p-2 text-subtext hover:text-primary rounded-lg hover:bg-primary/5 transition-all group"
+              title="History"
+            >
+              <History className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
+
+          {/* Mode Indicator */}
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300"
+            style={{
+              backgroundColor: `${getModeColor(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}15`,
+              color: getModeColor(isDeepSearch ? 'DEEP_SEARCH' : currentMode)
+            }}
+          >
+            <span>{getModeIcon(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}</span>
+            <span className="hidden sm:inline">{getModeName(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}</span>
+          </div>
+        </div>
+
+
+
+        {/* <button className="flex items-center gap-2 text-subtext hover:text-maintext text-sm">
+              <Monitor className="w-4 h-4" />
+              <span className="hidden sm:inline">Device</span>
+            </button> */}
+
+
+
+        {/* Messages */}
+        <div
+          ref={chatContainerRef}
+          onScroll={handleScroll}
+          className="relative flex-1 overflow-y-auto p-2 sm:p-3 md:p-6 pb-40 sm:pb-48 md:pb-56 space-y-4 scrollbar-none no-scrollbar aisa-scalable-text scroll-smooth"
+        >
+          {messages.length > 0 && (
+            <>
+              {messages.map((msg, idx) => (
+                <div
+                  key={msg.id || `msg-${idx}`}
+                  className={`group relative flex items-start gap-2 md:gap-3 w-full max-w-5xl mx-auto cursor-pointer ${msg.role === 'user' ? 'flex-row-reverse' : ''
+                    }`}
+                  onClick={() => setActiveMessageId(activeMessageId === msg.id ? null : msg.id)}
                 >
-                  <div className={`w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-lg transform transition-transform hover:scale-110 ${msg.role === 'user'
-                    ? 'bg-gradient-to-br from-gray-700 to-gray-900 text-white'
-                    : 'bg-white text-[#8b5cf6] border border-white/60'
-                    }`}>
-                    {msg.role === 'user' ? <User size={20} /> : <Bot size={22} />}
+                  {/* Actions Menu (Always visible for discoverability) */}
+
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user'
+                      ? 'bg-primary/80 backdrop-blur-md shadow-sm dark:shadow-[0_0_15px_rgba(236,72,153,0.3)]'
+                      : 'bg-white/95 dark:bg-gray-800/90 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                      }`}
+                  >
+                    {msg.role === 'user' ? (
+                      <User className="w-4 h-4 text-white" />
+                    ) : (
+                      <img src="/logo/AISA.gif?v=3" alt="AISA" className="w-5 h-5 object-contain" />
+                    )}
                   </div>
 
-                  <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[85%]`}>
-                    <div className={`px-6 py-4 rounded-[28px] text-[15px] font-medium leading-relaxed shadow-glass backdrop-blur-3xl border transition-all hover:shadow-xl ${msg.role === 'user'
-                      ? `${isDark ? 'bg-[#12182B] border-[#8B5CF6]/20 text-white' : 'bg-white/80 text-gray-900 border-white/40'} rounded-tr-none shadow-[0_10px_30px_rgba(0,0,0,0.1)]`
-                      : `${isDark ? 'bg-[#1e293b] border-white/5 text-white' : 'bg-white/40 text-gray-800 border-white/80'} rounded-tl-none`
-                      }`}>
-                      {msg.content}
+                  <div
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'
+                      } max-w-[85%] sm:max-w-[80%] md:max-w-[75%]`}
+                  >
+                    <div
+                      className={`group/bubble relative px-3 py-2.5 sm:px-5 sm:py-4 rounded-2xl sm:rounded-[1.5rem] leading-relaxed whitespace-pre-wrap break-words shadow-sm w-fit max-w-full transition-all duration-300 min-h-[40px] hover:scale-[1.002] ${msg.role === 'user'
+                        ? 'bg-primary/80 backdrop-blur-md border border-white/20 text-white rounded-tr-sm shadow-lg shadow-primary/20 dark:shadow-pink-500/20 text-sm sm:text-base'
+                        : `bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/40 dark:border-white/10 text-gray-900 dark:text-white/90 rounded-tl-sm shadow-sm hover:shadow-md dark:shadow-purple-500/10 text-sm sm:text-base ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''}`
+                        }`}
+                    >
+
+                      {msg.isProcessing && (
+                        <div className="flex items-center gap-3 mb-3 p-3 bg-primary/5 rounded-xl border border-primary/10 animate-pulse">
+                          <Loader size="sm" />
+                          <span className="text-xs font-semibold text-primary uppercase tracking-tighter">Preparing Audio...</span>
+                        </div>
+                      )}
+
+                      {/* Attachment Display */}
+                      {((msg.attachments && msg.attachments.length > 0) || msg.attachment) && (
+                        <div className="flex flex-col gap-3 mb-3 mt-1">
+                          {(msg.attachments || (msg.attachment ? [msg.attachment] : [])).map((att, idx) => (
+                            <div key={idx} className="w-full">
+                              {att.type === 'image' ? (
+                                <div
+                                  className="relative group/image overflow-hidden rounded-xl border border-white/20 shadow-lg transition-all hover:scale-[1.01] cursor-pointer max-w-[320px]"
+                                  onClick={() => setViewingDoc(att)}
+                                >
+                                  <img
+                                    src={att.url}
+                                    alt="Attachment"
+                                    className="w-full h-auto max-h-[400px] object-contain bg-black/5"
+                                  />
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDownload(att.url, att.name);
+                                    }}
+                                    className="absolute top-2 right-2 p-2 bg-black/40 text-white rounded-full opacity-0 group-hover/image:opacity-100 transition-all hover:bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center"
+                                    title="Download"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-colors backdrop-blur-md ${msg.role === 'user' ? 'bg-transparent border-white/20 hover:bg-white/10 shadow-none' : 'bg-secondary/30 border-border hover:bg-secondary/50'}`}>
+                                  <div
+                                    className="flex-1 flex items-center gap-3 min-w-0 cursor-pointer p-0.5 rounded-lg"
+                                    onClick={() => setViewingDoc(att)}
+                                  >
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${(() => {
+                                      const name = (att.name || '').toLowerCase();
+                                      if (msg.role === 'user') return 'bg-white shadow-sm';
+                                      if (name.endsWith('.pdf')) return 'bg-red-50 dark:bg-red-900/20';
+                                      if (name.match(/\.(doc|docx)$/)) return 'bg-blue-50 dark:bg-blue-900/20';
+                                      if (name.match(/\.(xls|xlsx|csv)$/)) return 'bg-emerald-50 dark:bg-emerald-900/20';
+                                      if (name.match(/\.(ppt|pptx)$/)) return 'bg-orange-50 dark:bg-orange-900/20';
+                                      return 'bg-secondary';
+                                    })()}`}>
+                                      {(() => {
+                                        const name = (att.name || '').toLowerCase();
+                                        const baseClass = "w-6 h-6";
+                                        if (name.match(/\.(xls|xlsx|csv)$/)) return <FileSpreadsheet className={`${baseClass} text-emerald-600`} />;
+                                        if (name.match(/\.(ppt|pptx)$/)) return <Presentation className={`${baseClass} text-orange-600`} />;
+                                        if (name.endsWith('.pdf')) return <FileText className={`${baseClass} text-red-600`} />;
+                                        if (name.match(/\.(doc|docx)$/)) return <FileIcon className={`${baseClass} text-blue-600`} />;
+                                        return <FileIcon className={`${baseClass} text-primary`} />;
+                                      })()}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="font-semibold truncate text-xs mb-0.5">{att.name || 'File'}</p>
+                                      <p className="text-[10px] opacity-70 uppercase tracking-tight font-medium">
+                                        {(() => {
+                                          const name = (att.name || '').toLowerCase();
+                                          if (name.endsWith('.pdf')) return 'PDF • Preview';
+                                          if (name.match(/\.(doc|docx)$/)) return 'WORD • Preview';
+                                          if (name.match(/\.(xls|xlsx|csv)$/)) return 'EXCEL';
+                                          if (name.match(/\.(ppt|pptx)$/)) return 'SLIDES';
+                                          return 'DOCUMENT';
+                                        })()}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDownload(att.url, att.name);
+                                    }}
+                                    className={`p-2 rounded-lg transition-colors shrink-0 ${msg.role === 'user' ? 'hover:bg-white/20 text-white' : 'hover:bg-primary/10 text-primary'}`}
+                                    title="Download"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+
+
+
+
+
+                      {editingMessageId === msg.id ? (
+                        <div className="flex flex-col gap-3 min-w-[200px] w-full">
+                          <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="w-full bg-white/10 text-white rounded-xl p-3 text-sm focus:outline-none resize-none border border-white/20 placeholder-white/50"
+                            rows={2}
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                saveEdit(msg);
+                              }
+                              if (e.key === 'Escape') cancelEdit();
+                            }}
+                          />
+                          <div className="flex gap-3 justify-end items-center">
+                            <button
+                              onClick={cancelEdit}
+                              className="text-white/80 hover:text-white text-sm font-medium transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => saveEdit(msg)}
+                              className="bg-white text-primary px-6 py-2 rounded-full text-sm font-bold hover:bg-white/90 transition-colors shadow-sm"
+                            >
+                              Update
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        msg.content && (
+                          <div id={`msg-text-${msg.id}`} className={`max-w-full break-words leading-relaxed whitespace-normal ${msg.role === 'user' ? 'text-white' : 'text-maintext'}`}>
+                            {msg.role === 'user' && msg.mode === MODES.DEEP_SEARCH && (
+                              <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-white/20 rounded-lg w-fit">
+                                <Search size={10} className="text-white" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-white">Deep Search</span>
+                              </div>
+                            )}
+                            <ReactMarkdown
+                              children={typeof msg.content === 'object' ? JSON.stringify(msg.content, null, 2) : (msg.content || '')}
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                a: ({ href, children }) => {
+                                  const isInternal = href && href.startsWith('/');
+                                  return (
+                                    <a
+                                      href={href}
+                                      onClick={(e) => {
+                                        if (isInternal) {
+                                          e.preventDefault();
+                                          navigate(href);
+                                        }
+                                      }}
+                                      className="text-primary hover:underline font-bold cursor-pointer"
+                                      target={isInternal ? "_self" : "_blank"}
+                                      rel={isInternal ? "" : "noopener noreferrer"}
+                                    >
+                                      {children}
+                                    </a>
+                                  );
+                                },
+                                p: ({ children }) => <p className={`mb-1.5 last:mb-0 ${msg.role === 'user' ? 'm-0 leading-normal' : 'leading-relaxed'}`}>{children}</p>,
+                                ul: ({ children }) => <ul className="list-disc pl-5 mb-3 last:mb-0 space-y-1.5 marker:text-primary transition-all">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 last:mb-0 space-y-1.5 marker:text-primary transition-all">{children}</ol>,
+                                li: ({ children }) => <li className="mb-1 last:mb-0 transition-colors">{children}</li>,
+                                h1: ({ children }) => <h1 className="font-bold mb-2 mt-3 block text-[1.4em] text-primary tracking-tight">{children}</h1>,
+                                h2: ({ children }) => <h2 className="font-bold mb-1.5 mt-2 block text-[1.2em] text-primary tracking-tight">{children}</h2>,
+                                h3: ({ children }) => <h3 className="font-bold mb-1 mt-1.5 block text-[1.1em] text-primary tracking-tight">{children}</h3>,
+                                strong: ({ children }) => <strong className="font-bold text-[#5555ff]">{children}</strong>,
+                                mark: ({ children }) => <mark className="bg-[#5555ff] text-white px-1 py-0.5 rounded-sm">{children}</mark>,
+                                code: ({ node, inline, className, children, ...props }) => {
+                                  const match = /language-(\w+)/.exec(className || '');
+                                  const lang = match ? match[1] : '';
+
+                                  if (!inline && match) {
+                                    return (
+                                      <div className="rounded-xl overflow-hidden my-2 border border-border bg-[#1e1e1e] shadow-md w-full max-w-full">
+                                        <div className="flex items-center justify-between px-4 py-2 bg-[#2d2d2d] border-b border-[#404040]">
+                                          <span className="text-xs font-mono text-gray-300 lowercase">{lang}</span>
+                                          <button
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
+                                              toast.success("Code copied!");
+                                            }}
+                                            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                            Copy code
+                                          </button>
+                                        </div>
+                                        <div className="p-4 overflow-x-auto custom-scrollbar bg-[#1e1e1e]">
+                                          <code className={`${className} font-mono text-[0.9em] leading-relaxed text-[#d4d4d4] block min-w-full`} {...props}>
+                                            {children}
+                                          </code>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <code className="bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded font-mono text-primary font-bold mx-0.5" {...props}>
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                                img: ({ node, ...props }) => {
+                                  // Check if this image is actually a video thumbnail or if we have a video URL in the message
+                                  // For now, we assume this renderer handles static images from markdown.
+                                  // Actual Dynamic Video/Image rendering is handled by the msg properties check below.
+                                  return (
+                                    <div
+                                      className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm cursor-zoom-in max-w-md"
+                                      onClick={() => setViewingDoc({ url: props.src, type: 'image', name: 'Generated Image' })}
+                                    >
+                                      <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-2">
+                                          <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Asset</span>
+                                        </div>
+                                      </div>
+                                      <img
+                                        {...props}
+                                        className="w-full max-w-full h-auto rounded-xl bg-black/5"
+                                        loading="lazy"
+                                        onError={(e) => {
+                                          e.target.src = 'https://placehold.co/600x400?text=Image+Generating...';
+                                        }}
+                                      />
+                                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/generated:opacity-100 transition-opacity pointer-events-none" />
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation(); // Prevent opening modal when clicking download
+                                          handleDownload(props.src, 'aisa-generated.png');
+                                        }}
+                                        className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
+                                        title="Download High-Res"
+                                      >
+                                        <div className="flex items-center gap-2 px-1">
+                                          <Download className="w-4 h-4" />
+                                          <span className="text-[10px] font-bold uppercase">Download</span>
+                                        </div>
+                                      </button>
+                                    </div>
+                                  )
+                                },
+                              }}
+                            >
+                              {msg.content || msg.text || ""}
+                            </ReactMarkdown>
+
+                            {/* Dynamic Video Rendering */}
+                            {msg.videoUrl && (
+                              <div className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm">
+                                <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity pointer-events-none">
+                                  <div className="flex items-center gap-2">
+                                    <Video className="w-4 h-4 text-primary animate-pulse" />
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Video</span>
+                                  </div>
+                                </div>
+
+                                <video
+                                  src={msg.videoUrl}
+                                  controls
+                                  autoPlay
+                                  loop
+                                  className="w-full max-w-full h-auto rounded-xl bg-black/5"
+                                />
+
+                                <div className="absolute bottom-3 right-14 pointer-events-auto">
+                                  {/* Additional controls if needed */}
+                                </div>
+
+                                <button
+                                  onClick={() => handleDownload(msg.videoUrl, 'aisa-generated-video.mp4')}
+                                  className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100 z-20"
+                                  title="Download Video"
+                                >
+                                  <div className="flex items-center gap-2 px-1">
+                                    <Download className="w-4 h-4" />
+                                    <span className="text-[10px] font-bold uppercase">Download</span>
+                                  </div>
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Dynamic Image Rendering (if not in markdown) */}
+                            {msg.imageUrl && !(msg.content || msg.text || "").includes(msg.imageUrl) && (
+                              <div
+                                className="relative group/generated mt-4 mb-2 overflow-hidden rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-[1.01] bg-surface/50 backdrop-blur-sm cursor-zoom-in max-w-md"
+                                onClick={() => setViewingDoc({ url: msg.imageUrl, type: 'image', name: 'Generated Image' })}
+                              >
+                                <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity">
+                                  <div className="flex items-center gap-2">
+                                    <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Asset</span>
+                                  </div>
+                                </div>
+                                <img
+                                  src={msg.imageUrl}
+                                  className="w-full max-w-full h-auto rounded-xl bg-black/5"
+                                  loading="lazy"
+                                />
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent opening modal handling
+                                    handleDownload(msg.imageUrl, 'aisa-generated.png');
+                                  }}
+                                  className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
+                                  title="Download High-Res"
+                                >
+                                  <div className="flex items-center gap-2 px-1">
+                                    <Download className="w-4 h-4" />
+                                    <span className="text-[10px] font-bold uppercase">Download</span>
+                                  </div>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      )}
+
+                      {/* File Conversion Download Button */}
+                      {msg.conversion && msg.conversion.file && (
+                        <div className="mt-4 pt-3 border-t border-border/40 space-y-3">
+                          {/* Integrated Audio Player for Voice Conversations */}
+                          {msg.conversion.mimeType.startsWith('audio/') && (
+                            <div className="bg-primary/5 rounded-xl p-2 border border-primary/10 mb-2">
+                              <audio
+                                controls
+                                className="w-full h-10 accent-primary rounded-lg"
+                                src={msg.conversion.blobUrl || `data:${msg.conversion.mimeType};base64,${msg.conversion.file}`}
+                              >
+                                Your browser does not support the audio element.
+                              </audio>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between px-1 py-1">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-maintext truncate">{msg.conversion.fileName}</p>
+                              <p className="text-[10px] text-subtext font-bold uppercase tracking-widest flex items-center gap-2">
+                                <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-md border border-primary/20">
+                                  {msg.conversion.fileSize || "Ready"}
+                                </span>
+                                {msg.conversion.charCount && (
+                                  <span className="px-1.5 py-0.5 bg-secondary/30 text-subtext rounded-md border border-border/50">
+                                    {msg.conversion.charCount} CHARS
+                                  </span>
+                                )}
+                                {msg.conversion.mimeType.includes('audio') ? 'AUDIO • MP3' : msg.conversion.mimeType.includes('pdf') ? 'PDF • DOCUMENT' : 'WORD • DOCUMENT'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <button
+                              onClick={() => {
+                                const downloadToast = toast.loading("Starting download...");
+                                try {
+                                  // Create download link
+                                  const byteCharacters = atob(msg.conversion.file);
+                                  const byteNumbers = new Array(byteCharacters.length);
+                                  for (let i = 0; i < byteCharacters.length; i++) {
+                                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                                  }
+                                  const byteArray = new Uint8Array(byteNumbers);
+                                  const blob = new Blob([byteArray], { type: msg.conversion.mimeType });
+                                  const url = URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = msg.conversion.fileName;
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  setTimeout(() => {
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+                                    toast.dismiss(downloadToast);
+                                    toast.success("Download complete!");
+                                  }, 500);
+                                } catch (err) {
+                                  toast.dismiss(downloadToast);
+                                  toast.error("Download failed");
+                                }
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl transition-all hover:bg-primary/90 shadow-sm font-bold text-sm active:scale-95"
+                            >
+                              <Download className="w-4 h-4" />
+                              Download {msg.conversion.mimeType.includes('audio') ? 'Audio' : msg.conversion.mimeType.includes('pdf') ? 'PDF' : 'Document'}
+                            </button>
+
+                            <Menu as="div" className="relative">
+                              <Menu.Button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-border text-maintext rounded-xl transition-all hover:bg-hover font-bold text-sm shadow-sm active:scale-95 whitespace-nowrap">
+                                <Share className="w-4 h-4" />
+                                Share
+                              </Menu.Button>
+
+                              <Transition
+                                as={Fragment}
+                                enter="transition ease-out duration-100"
+                                enterFrom="transform opacity-0 scale-95"
+                                enterTo="transform opacity-100 scale-100"
+                                leave="transition ease-in duration-75"
+                                leaveFrom="transform opacity-100 scale-100"
+                                leaveTo="transform opacity-0 scale-95"
+                              >
+                                <Menu.Items className="absolute bottom-full right-0 mb-2 w-56 origin-bottom-right divide-y divide-border rounded-xl bg-surface shadow-2xl border border-border focus:outline-none z-[100] overflow-hidden">
+                                  <div className="px-1 py-1">
+
+                                    <Menu.Item>
+                                      {({ active }) => (
+                                        <button
+                                          onClick={() => {
+                                            const text = `I've converted "${msg.conversion.fileName}" into voice audio using AISA! ${window.location.href}`;
+                                            const url = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                                              ? `whatsapp://send?text=${encodeURIComponent(text)}`
+                                              : `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+                                            window.open(url, '_blank');
+                                          }}
+                                          className={`${active ? 'bg-green-500 text-white' : 'text-maintext'} group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors`}
+                                        >
+                                          <MessageCircle className="h-4 w-4" />
+                                          WhatsApp
+                                        </button>
+                                      )}
+                                    </Menu.Item>
+                                    <Menu.Item>
+                                      {({ active }) => (
+                                        <button
+                                          onClick={() => {
+                                            const text = `AISA Audio Conversion: ${msg.conversion.fileName}`;
+                                            const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
+                                            window.open(url, '_blank');
+                                          }}
+                                          className={`${active ? 'bg-sky-500 text-white' : 'text-maintext'} group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors`}
+                                        >
+                                          <Send className="h-4 w-4" />
+                                          Telegram
+                                        </button>
+                                      )}
+                                    </Menu.Item>
+                                  </div>
+                                  <div className="px-1 py-1">
+                                    <Menu.Item>
+                                      {({ active }) => (
+                                        <button
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(window.location.href);
+                                            toast.success("Link copied!");
+                                          }}
+                                          className={`${active ? 'bg-primary text-white' : 'text-maintext'} group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors`}
+                                        >
+                                          <Copy className="h-4 w-4" />
+                                          Copy Link
+                                        </button>
+                                      )}
+                                    </Menu.Item>
+                                  </div>
+                                </Menu.Items>
+                              </Transition>
+                            </Menu>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* AI Feedback Actions */}
+                      {msg.role !== 'user' && !msg.conversion && (
+                        <div className="mt-4 pt-3 border-t border-border/40 w-full block">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
+                            {(() => {
+                              // Detect if the AI response contains Hindi (Devanagari script)
+                              const isHindiContent = /[\u0900-\u097F]/.test(msg.content);
+                              const prompts = isHindiContent ? FEEDBACK_PROMPTS.hi : FEEDBACK_PROMPTS.en;
+                              // Safety check for msg.id
+                              const msgIdStr = msg.id?.toString() || "";
+                              const promptIndex = msgIdStr
+                                ? (msgIdStr.charCodeAt(msgIdStr.length - 1) || 0) % prompts.length
+                                : 0;
+                              return (
+                                <p className="text-xs text-subtext font-medium flex items-center gap-1.5 shrink-0 m-0">
+                                  {prompts[promptIndex]}
+                                  <span className="text-sm">😊</span>
+                                </p>
+                              );
+                            })()}
+                            <div className="flex flex-col items-end gap-2 self-end sm:self-auto">
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => {
+                                    // Pass message ID to speakResponse for tracking
+                                    const isHindi = /[\u0900-\u097F]/.test(msg.content);
+                                    speakResponse(msg.content, isHindi ? 'Hindi' : 'English', msg.id, msg.attachments || [], true);
+                                  }}
+                                  className={`transition-colors p-1.5 rounded-lg ${speakingMessageId === msg.id
+                                    ? 'text-primary bg-primary/10'
+                                    : 'text-subtext hover:text-primary hover:bg-surface-hover'
+                                    }`}
+                                  title={speakingMessageId === msg.id && !isPaused ? "Pause" : "Speak"}
+                                >
+                                  {speakingMessageId === msg.id && !isPaused ? (
+                                    <Pause className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <Volume2 className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleCopyMessage(msg.content)}
+                                  className="text-subtext hover:text-maintext transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
+                                  title="Copy"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleThumbsUp(msg.id)}
+                                  className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'up'
+                                    ? 'text-blue-500 bg-blue-500/10'
+                                    : 'text-subtext hover:text-primary hover:bg-surface-hover'
+                                    }`}
+                                  title="Helpful"
+                                >
+                                  <ThumbsUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleThumbsDown(msg.id)}
+                                  className={`transition-colors p-1.5 rounded-lg ${messageFeedback[msg.id]?.type === 'down'
+                                    ? 'text-red-500 bg-red-500/10'
+                                    : 'text-subtext hover:text-red-500 hover:bg-surface-hover'
+                                    }`}
+                                  title="Not Helpful"
+                                >
+                                  <ThumbsDown className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleShare(msg.content)}
+                                  className="text-subtext hover:text-primary transition-colors p-1.5 hover:bg-surface-hover rounded-lg"
+                                  title="Share Text"
+                                >
+                                  <Share className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* PDF Menu */}
+                                <Menu as="div" className="relative inline-block text-left">
+                                  <Menu.Button className="text-subtext hover:text-red-500 transition-colors flex items-center" disabled={pdfLoadingId === msg.id}>
+                                    {pdfLoadingId === msg.id ? (
+                                      <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+                                    ) : (
+                                      <FileText className="w-4 h-4" />
+                                    )}
+                                  </Menu.Button>
+                                  <Transition
+                                    as={Fragment}
+                                    enter="transition ease-out duration-100"
+                                    enterFrom="transform opacity-0 scale-95"
+                                    enterTo="transform opacity-100 scale-100"
+                                    leave="transition ease-in duration-75"
+                                    leaveFrom="transform opacity-100 scale-100"
+                                    leaveTo="transform opacity-0 scale-95"
+                                  >
+                                    <Menu.Items className="absolute bottom-full right-0 sm:left-0 mb-2 w-44 origin-bottom-right sm:origin-bottom-left divide-y divide-border rounded-xl bg-card shadow-2xl ring-1 ring-black ring-opacity-10 focus:outline-none z-50 overflow-hidden backdrop-blur-xl border border-border/50">
+                                      <div className="px-1.5 py-1.5">
+                                        <Menu.Item>
+                                          {({ active }) => (
+                                            <button
+                                              onClick={() => handlePdfAction('open', msg)}
+                                              className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
+                                                } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
+                                            >
+                                              <Eye className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
+                                              Open PDF
+                                            </button>
+                                          )}
+                                        </Menu.Item>
+                                        <Menu.Item>
+                                          {({ active }) => (
+                                            <button
+                                              onClick={() => handlePdfAction('download', msg)}
+                                              className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
+                                                } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
+                                            >
+                                              <Download className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
+                                              Download PDF
+                                            </button>
+                                          )}
+                                        </Menu.Item>
+                                        <Menu.Item>
+                                          {({ active }) => (
+                                            <button
+                                              onClick={() => handlePdfAction('share', msg)}
+                                              className={`${active ? 'bg-primary text-white shadow-md' : 'text-maintext hover:bg-primary/5'
+                                                } group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200`}
+                                            >
+                                              <Share className={`w-3.5 h-3.5 ${active ? 'text-white' : 'text-primary'}`} />
+                                              Share PDF
+                                            </button>
+                                          )}
+                                        </Menu.Item>
+                                      </div>
+                                    </Menu.Items>
+                                  </Transition>
+                                </Menu>
+                              </div>
+
+
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} mt-2 px-2`}>
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {t('synced')}
+                    <span className="text-[10px] text-subtext mt-0 px-1">
+                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </span>
                   </div>
-                </motion.div>
+
+                  {/* Hover Actions - User Only (AI has footer) */}
+                  {
+                    msg.role === 'user' && (
+                      <div className={`flex items-center gap-1 transition-opacity duration-200 self-start mt-2 mr-0 flex-row-reverse ${activeMessageId === msg.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+
+                        <button
+                          onClick={() => handleCopyMessage(msg.content || msg.text)}
+                          className="p-1.5 text-subtext hover:text-primary hover:bg-surface rounded-full transition-colors"
+                          title="Copy"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+                        {!msg.attachment && (
+                          <button
+                            onClick={() => startEditing(msg)}
+                            className="p-1.5 text-blue-500 hover:text-primary hover:bg-surface rounded-full transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {msg.attachment && (
+                          <button
+                            onClick={() => handleRenameFile(msg)}
+                            className="p-1.5 text-blue-500 hover:text-primary hover:bg-surface rounded-full transition-colors"
+                            title="Rename"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        {/* Only show Undo for the most recent user message if it's the last or second to last message in the whole chat */}
+                        {msg.id === [...messages].reverse().find(m => m.role === 'user')?.id && (
+                          <button
+                            onClick={handleUndo}
+                            className="p-1.5 text-subtext hover:text-primary hover:bg-surface rounded-full transition-colors"
+                            title="Undo"
+                          >
+                            <Undo2 className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleMessageDelete(msg.id)}
+                          className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )
+                  }
+                </div>
               ))}
 
               {isLoading && (
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-white border border-white/60 flex items-center justify-center text-[#8b5cf6]">
-                    <Sparkles size={18} />
+                <div className="flex items-start gap-4 max-w-4xl mx-auto">
+                  <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0">
+                    <img src="/logo/AISA.gif?v=3" alt="AISA" className="w-5 h-5 object-contain" />
+
                   </div>
-                  <div className={`px-6 py-4 rounded-[28px] rounded-tl-none ${isDark ? 'bg-[#242f49] border-white/5' : 'bg-white/20 border-white/40'} backdrop-blur-md border flex items-center gap-2 transition-colors`}>
-                    <Loader />
-                    <span className="text-xs font-black text-[#8b5cf6] uppercase tracking-[0.2em] ml-2 animate-pulse">{t('processingReality')}</span>
+                  <div className="px-5 py-3 rounded-2xl rounded-tl-none bg-surface border border-border flex items-center gap-3">
+                    <span className="text-sm font-medium text-subtext animate-pulse">
+                      {loadingText}
+                    </span>
+                    <div className="flex gap-1">
+                      <span
+                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
+                        style={{ animationDelay: '0ms' }}
+                      ></span>
+                      <span
+                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
+                        style={{ animationDelay: '150ms' }}
+                      ></span>
+                      <span
+                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
+                        style={{ animationDelay: '300ms' }}
+                      ></span>
+                    </div>
                   </div>
                 </div>
               )}
-            </div>
+            </>
           )}
+
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area - Floaty Glass Design */}
-        <div className={`p-4 md:p-8 lg:p-12 shrink-0 bg-transparent relative z-[60] ${isDark ? 'border-t border-white/5 bg-[#1a2235]/50 backdrop-blur-xl' : ''}`}>
-          <div className="max-w-4xl mx-auto flex items-center gap-3">
-            <button
-              className="w-[60px] h-[60px] shrink-0 rounded-full bg-[#3b82f6] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all shadow-blue-500/20"
-              type="button"
-            >
-              <Plus className="w-6 h-6" />
-            </button>
+        {/* Welcome Screen - Compact Fixed Overlay */}
+        {messages.length === 0 && (
+          <div className="absolute inset-0 z-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden no-scrollbar pointer-events-auto px-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))', paddingBottom: '6rem' }}>
+            {/* Dreamy Background blobs - AI Mall Style */}
+            <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  x: [0, 30, 0],
+                  y: [0, -50, 0]
+                }}
+                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-[10%] right-[15%] w-96 h-96 bg-purple-500/20 rounded-full blur-[100px]"
+              />
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  x: [0, -40, 0],
+                  y: [0, 20, 0]
+                }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute bottom-[20%] left-[10%] w-80 h-80 bg-blue-500/20 rounded-full blur-[100px]"
+              />
+              <motion.div
+                animate={{
+                  scale: [1, 1.3, 1],
+                  rotate: [0, 10, 0]
+                }}
+                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                className="absolute top-[40%] left-[30%] w-64 h-64 bg-pink-500/10 rounded-full blur-[80px]"
+              />
+            </div>
 
-            <form onSubmit={handleSendMessage} className="relative flex-1 group">
-              <div className="absolute inset-0 bg-blue-500/5 blur-2xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-              <textarea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={t('askPlaceholder')}
-                className={`w-full h-[60px] ${isDark ? 'bg-[#1a2235] border-white/20 text-white placeholder-[#6F76A8]' : 'bg-white/60 border-white text-gray-900 placeholder-gray-400'} backdrop-blur-3xl border rounded-[32px] pl-6 pr-14 md:pr-48 py-4 text-[13px] md:text-[15px] font-medium focus:outline-none focus:ring-4 focus:ring-[#8B5CF6]/10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all resize-none overflow-y-auto no-scrollbar`}
+            <div className="flex flex-col items-center w-full max-w-5xl px-2 sm:px-4 pt-4 sm:pt-8 text-center">
+              <div className="select-none flex items-center justify-center w-full" style={{ minHeight: 'auto', marginTop: '0.25rem', marginBottom: '0.5rem' }}>
+                <img
+                  src="/logo/AISA.gif?v=3"
+                  alt="AISA Icon"
+                  className="object-contain drop-shadow-2xl pointer-events-none shrink-0"
+                  style={{ width: 'clamp(2.5rem, 8vw, 4.5rem)', height: 'clamp(2.5rem, 8vw, 4.5rem)' }}
+                  draggable={false}
+                  onDragStart={(e) => e.preventDefault()}
+                />
+              </div>
+              <h2 className="font-extrabold text-maintext tracking-tight w-full px-4" style={{ fontSize: 'clamp(1rem, 4.5vw, 1.6rem)', lineHeight: '1.2', marginBottom: '0.75rem' }}>
+                {t('welcomeMessage')}
+              </h2>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-4 w-full px-1 sm:px-4 animate-in fade-in duration-700 pb-2">
+                {[
+                  {
+                    icon: <ImageIcon className="w-5 h-5 text-pink-500" />,
+                    title: "Generate Image",
+                    desc: "Create visuals",
+                    action: () => {
+                      if (inputRef.current) {
+                        inputRef.current.value = "Generate an image of ";
+                        inputRef.current.focus();
+                      }
+                    }
+                  },
+                  {
+                    icon: <Search className="w-5 h-5 text-purple-500" />,
+                    title: "Deep Search",
+                    desc: "Research topics",
+                    action: () => {
+                      setIsDeepSearch(true);
+                      if (inputRef.current) inputRef.current.focus();
+                      toast.success("Deep Search Mode Enabled");
+                    }
+                  },
+                  {
+                    icon: <FileText className="w-5 h-5 text-fuchsia-500" />,
+                    title: "Analyze Docs",
+                    desc: "Chat with PDFs",
+                    action: () => uploadInputRef.current?.click()
+                  },
+                  {
+                    icon: <Mic className="w-5 h-5 text-pink-500" />,
+                    title: "Voice Chat",
+                    desc: "Talk naturally",
+                    action: () => handleVoiceInput()
+                  },
+                  {
+                    icon: <Code className="w-5 h-5 text-purple-500" />,
+                    title: "Code Writer",
+                    desc: "Write & debug",
+                    action: () => {
+                      setIsCodeWriter(true);
+                      toast.success("Code Writer Mode Enabled");
+                    }
+                  }
+                ].map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={item.action}
+                    className="flex flex-col items-center justify-center gap-1 sm:gap-3 p-2 sm:p-5 bg-white/40 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-primary/30 rounded-xl sm:rounded-[28px] text-center transition-all duration-300 group active:scale-95 shadow-[0_4px_15px_rgb(0,0,0,0.03)] hover:shadow-xl hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-xl w-full min-h-[90px] sm:min-h-[160px]"
+                  >
+                    <div className="p-1.5 sm:p-3 bg-white/80 dark:bg-white/10 rounded-lg sm:rounded-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm border border-white/50 dark:border-white/10">
+                      {item.icon}
+                    </div>
+                    <div className="min-w-0 w-full">
+                      <h3 className="font-extrabold text-maintext text-[10px] sm:text-sm truncate px-1">{item.title}</h3>
+                      <p className="text-[8px] text-subtext font-black uppercase tracking-tighter leading-none opacity-60 mt-0.5 truncate px-1">{item.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fixed Input Area - ChatGPT Style (Enhanced Transparency) */}
+        <div className="absolute bottom-0 left-0 right-0 z-40 bg-transparent backdrop-blur-2xl" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))', paddingTop: '1.25rem' }}>
+          {/* Subtle glow for input area */}
+          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+          <div className="max-w-5xl mx-auto relative px-2 sm:px-4">
+
+            {/* File Preview Area */}
+            {filePreviews.length > 0 && (
+              <div className="absolute bottom-full left-0 right-0 mb-4 px-2 overflow-x-auto custom-scrollbar no-scrollbar flex gap-3 pb-2 z-20 pointer-events-auto">
+                {filePreviews.map((preview) => (
+                  <div
+                    key={preview.id}
+                    className="relative shrink-0 w-64 md:w-72 bg-surface/95 dark:bg-zinc-900/95 border border-border/50 rounded-2xl p-2.5 flex items-center gap-3 shadow-xl backdrop-blur-xl animate-in slide-in-from-bottom-2 duration-300 ring-1 ring-black/5"
+                  >
+                    <div className="relative group shrink-0">
+                      {preview.type.startsWith('image/') ? (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-border/50 bg-black/5">
+                          <img src={preview.url} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        </div>
+                      ) : (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shadow-sm">
+                          <FileText className="w-7 h-7 text-primary" />
+                        </div>
+                      )}
+
+                      <div className="absolute -top-2 -right-2">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFile(preview.id)}
+                          className="p-1 w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg hover:scale-110 active:scale-95 flex items-center justify-center border-2 border-surface"
+                          title="Remove file"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 flex-1 py-1">
+                      <p className="text-sm font-semibold text-maintext truncate pr-1">{preview.name}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-lg uppercase tracking-wider font-bold">
+                          {preview.type.split('/')[1]?.split('-')[0] || 'FILE'}
+                        </span>
+                        <span className="text-[10px] text-subtext font-medium">
+                          {(preview.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form onSubmit={handleSendMessage} className="relative w-full max-w-5xl mx-auto flex items-center gap-1.5 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-[24px] p-1.5 shadow-[0_15px_45px_-10px_rgba(0,0,0,0.08)] dark:shadow-[0_15px_45px_-10px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_20px_55px_-10px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_20px_55px_-10px_rgba(0,0,0,0.6)] hover:border-primary/40 hover:bg-white/70 dark:hover:bg-gray-900/60 z-50">
+              <input
+                id="file-upload"
+                type="file"
+                ref={uploadInputRef}
+                onChange={handleFileSelect}
+                multiple
+                className="hidden"
+              />
+              <input
+                id="drive-upload"
+                type="file"
+                ref={driveInputRef}
+                onChange={handleFileSelect}
+                multiple
+                className="hidden"
+              />
+              <input
+                id="doc-voice-upload"
+                type="file"
+                onChange={handleDocToVoiceSelect}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.txt"
+              />
+              <input
+                id="photos-upload"
+                type="file"
+                ref={photosInputRef}
+                onChange={handleFileSelect}
+                multiple
+                className="hidden"
+                accept="image/*"
+              />
+              <input
+                id="camera-upload"
+                type="file"
+                onChange={handleFileSelect}
+                className="hidden"
+                accept="image/*"
+                capture="environment"
               />
 
-              <div className="absolute right-6 top-0 h-full flex items-center gap-2">
-                <button type="button" className={`p-2.5 ${isDark ? 'text-[#8B5CF6] hover:bg-white/5' : 'text-[#3b82f6] hover:bg-blue-50'} transition-colors rounded-full flex items-center justify-center`}>
-                  <Video className="w-5 h-5" />
-                </button>
-                <button type="button" className={`p-2.5 ${isDark ? 'text-[#8B5CF6] hover:bg-white/5' : 'text-[#3b82f6] hover:bg-blue-50'} transition-colors rounded-full flex items-center justify-center`}>
-                  <Mic className="w-5 h-5" />
-                </button>
+              {/* Left Actions Group */}
+              <div className="flex items-center gap-0.5 pl-0.5 shrink-0">
+                <AnimatePresence>
+                  {isAttachMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      ref={menuRef}
+                      className="absolute bottom-full left-0 mb-4 w-60 bg-white dark:bg-gray-900/95 border border-black/10 dark:border-white/10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden z-30 ring-1 ring-black/[0.03] dark:ring-white/5 backdrop-blur-xl"
+                    >
+                      <div className="p-2 space-y-1">
+                        {getAgentCapabilities(activeAgent.agentName, activeAgent.category).canCamera && (
+                          <label
+                            htmlFor="camera-upload"
+                            onClick={() => setTimeout(() => setIsAttachMenuOpen(false), 500)}
+                            className="w-full text-left px-3 py-3 flex items-center gap-4 hover:bg-black/[0.03] dark:hover:bg-white/5 active:bg-black/[0.05] dark:active:bg-white/10 rounded-xl transition-all group cursor-pointer"
+                          >
+                            <div className="w-10 h-10 rounded-full bg-black/[0.03] dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center group-hover:border-primary/20 group-hover:bg-primary/5 transition-all shrink-0">
+                              <Camera className="w-5 h-5 text-black/60 dark:text-white/70 group-hover:text-primary transition-colors" />
+                            </div>
+                            <span className="text-[15px] font-semibold text-black/80 dark:text-white/90 group-hover:text-primary transition-colors">Camera & Scan</span>
+                          </label>
+                        )}
+                        <label
+                          htmlFor="file-upload"
+                          onClick={() => setIsAttachMenuOpen(false)}
+                          className="w-full text-left px-3 py-3 flex items-center gap-4 hover:bg-black/[0.03] dark:hover:bg-white/5 active:bg-black/[0.05] dark:active:bg-white/10 rounded-xl transition-all group cursor-pointer"
+                        >
+                          <div className="w-10 h-10 rounded-full bg-black/[0.03] dark:bg-white/5 border border-black/5 dark:border-white/10 flex items-center justify-center group-hover:border-primary/20 group-hover:bg-primary/5 transition-all shrink-0">
+                            <Paperclip className="w-5 h-5 text-black/60 dark:text-white/70 group-hover:text-primary transition-colors" />
+                          </div>
+                          <span className="text-[15px] font-semibold text-black/80 dark:text-white/90 group-hover:text-primary transition-colors">Upload files</span>
+                        </label>
+
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <button
-                  type="submit"
-                  disabled={!inputValue.trim() || isLoading}
-                  className="w-10 h-10 rounded-full bg-[#8B5CF6] text-white hover:scale-105 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-md flex items-center justify-center shadow-[#8B5CF6]/20"
+                  type="button"
+                  ref={attachBtnRef}
+                  onClick={() => setIsAttachMenuOpen(!isAttachMenuOpen)}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isAttachMenuOpen ? 'bg-primary text-white rotate-45 shadow-lg shadow-primary/25' : 'text-black/40 hover:text-primary hover:bg-black/[0.03]'}`}
+                  title="Add to chat"
                 >
-                  <Send className="w-5 h-5" />
+                  <Plus className="w-5 h-5" />
                 </button>
+
+                <div className="relative">
+                  <button
+                    type="button"
+                    ref={toolsBtnRef}
+                    onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isToolsMenuOpen || isImageGeneration || isDeepSearch || isAudioConvertMode || isDocumentConvert || isCodeWriter ? 'bg-primary/10 text-primary scale-105' : 'text-black/40 hover:text-primary hover:bg-black/[0.03]'}`}
+                    title="AISA Capabilities"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                  </button>
+                  <AnimatePresence>
+                    {isToolsMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        ref={toolsMenuRef}
+                        className="absolute bottom-full left-0 mb-3 w-64 sm:w-72 bg-white dark:bg-gray-900/95 border border-black/10 dark:border-white/10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] overflow-hidden z-30 ring-1 ring-black/[0.03] dark:ring-white/5 backdrop-blur-xl"
+                        style={{ maxHeight: 'calc(100svh - 140px)' }}
+                      >
+                        <div className="p-3 bg-black/[0.02] dark:bg-white/5 border-b border-black/5 dark:border-white/10 shrink-0">
+                          <h3 className="text-[10px] font-black text-black/40 dark:text-white/50 uppercase tracking-[0.15em] flex items-center gap-2">
+                            <Sparkles className="w-3.5 h-3.5 text-primary" /> AISA Magic Tools
+                          </h3>
+                        </div>
+                        <div className="p-2 space-y-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100svh - 200px)' }}>
+                          <button
+                            onClick={() => {
+                              setIsToolsMenuOpen(false);
+                              setIsImageGeneration(!isImageGeneration);
+                              setIsDeepSearch(false);
+                              setIsAudioConvertMode(false);
+                              setIsDocumentConvert(false);
+                              if (!isImageGeneration) toast.success("Image Generation Mode Enabled");
+                            }}
+                            className={`w-full text-left px-3 py-3 flex items-center gap-4 rounded-xl transition-all group cursor-pointer ${isImageGeneration ? 'bg-primary/5 ring-1 ring-primary/10' : 'hover:bg-black/[0.03] dark:hover:bg-white/5'}`}
+                          >
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shrink-0 ${isImageGeneration ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-black/[0.03] dark:bg-white/5 border-black/5 dark:border-white/10 group-hover:border-primary/20 group-hover:bg-primary/5'}`}>
+                              <ImageIcon className={`w-5 h-5 ${isImageGeneration ? 'text-white' : 'text-black/60 dark:text-white/70 group-hover:text-primary'}`} />
+                            </div>
+                            <div className="flex-1">
+                              <span className={`text-[15px] font-bold block ${isImageGeneration ? 'text-primary' : 'text-black/80 dark:text-white/90'}`}>Generate Image</span>
+                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">Create beautiful visuals from text</span>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsToolsMenuOpen(false);
+                              setIsDeepSearch(!isDeepSearch);
+                              setIsImageGeneration(false);
+                              setIsAudioConvertMode(false);
+                              setIsDocumentConvert(false);
+                              if (!isDeepSearch) toast.success("Deep Search Mode Enabled");
+                            }}
+                            className={`w-full text-left px-3 py-3 flex items-center gap-4 rounded-xl transition-all group cursor-pointer ${isDeepSearch ? 'bg-primary/5 ring-1 ring-primary/10' : 'hover:bg-black/[0.03] dark:hover:bg-white/5'}`}
+                          >
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shrink-0 ${isDeepSearch ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-black/[0.03] dark:bg-white/5 border-black/5 dark:border-white/10 group-hover:border-primary/20 group-hover:bg-primary/5'}`}>
+                              <Search className={`w-5 h-5 ${isDeepSearch ? 'text-white' : 'text-black/60 dark:text-white/70 group-hover:text-primary'}`} />
+                            </div>
+                            <div className="flex-1">
+                              <span className={`text-[15px] font-bold block ${isDeepSearch ? 'text-primary' : 'text-black/80 dark:text-white/90'}`}>Deep Search</span>
+                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">Advanced web research & analysis</span>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsToolsMenuOpen(false);
+                              setIsAudioConvertMode(!isAudioConvertMode);
+                              setIsDeepSearch(false);
+                              setIsImageGeneration(false);
+                              setIsDocumentConvert(false);
+                              if (!isAudioConvertMode) toast.success("Convert to Audio Mode Active");
+                            }}
+                            className={`w-full text-left px-3 py-3 flex items-center gap-4 rounded-xl transition-all group cursor-pointer ${isAudioConvertMode ? 'bg-primary/5 ring-1 ring-primary/10' : 'hover:bg-black/[0.03] dark:hover:bg-white/5'}`}
+                          >
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shrink-0 ${isAudioConvertMode ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-black/[0.03] dark:bg-white/5 border-black/5 dark:border-white/10 group-hover:border-primary/20 group-hover:bg-primary/5'}`}>
+                              <Headphones className={`w-5 h-5 ${isAudioConvertMode ? 'text-white' : 'text-black/60 dark:text-white/70 group-hover:text-primary'}`} />
+                            </div>
+                            <div className="flex-1">
+                              <span className={`text-[15px] font-bold block ${isAudioConvertMode ? 'text-primary' : 'text-black/80 dark:text-white/90'}`}>Convert to Audio</span>
+                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">Turn documents into speech</span>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsToolsMenuOpen(false);
+                              setIsDocumentConvert(!isDocumentConvert);
+                              setIsDeepSearch(false);
+                              setIsImageGeneration(false);
+                              setIsAudioConvertMode(false);
+                              if (!isDocumentConvert) toast.success("Document Converter Mode Active");
+                            }}
+                            className={`w-full text-left px-3 py-3 flex items-center gap-4 rounded-xl transition-all group cursor-pointer ${isDocumentConvert ? 'bg-primary/5 ring-1 ring-primary/10' : 'hover:bg-black/[0.03] dark:hover:bg-white/5'}`}
+                          >
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shrink-0 ${isDocumentConvert ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-black/[0.03] dark:bg-white/5 border-black/5 dark:border-white/10 group-hover:border-primary/20 group-hover:bg-primary/5'}`}>
+                              <FileText className={`w-5 h-5 ${isDocumentConvert ? 'text-white' : 'text-black/60 dark:text-white/70 group-hover:text-primary'}`} />
+                            </div>
+                            <div className="flex-1">
+                              <span className={`text-[15px] font-bold block ${isDocumentConvert ? 'text-primary' : 'text-black/80 dark:text-white/90'}`}>Convert Documents</span>
+                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">PDF ↔ Word conversion</span>
+                            </div>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setIsToolsMenuOpen(false);
+                              setIsCodeWriter(!isCodeWriter);
+                              setIsDeepSearch(false);
+                              setIsImageGeneration(false);
+                              setIsAudioConvertMode(false);
+                              setIsDocumentConvert(false);
+                              if (!isCodeWriter) toast.success("Code Writer Mode Enabled");
+                            }}
+                            className={`w-full text-left px-3 py-3 flex items-center gap-4 rounded-xl transition-all group cursor-pointer ${isCodeWriter ? 'bg-primary/5 ring-1 ring-primary/10' : 'hover:bg-black/[0.03] dark:hover:bg-white/5'}`}
+                          >
+                            <div className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all shrink-0 ${isCodeWriter ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-black/[0.03] dark:bg-white/5 border-black/5 dark:border-white/10 group-hover:border-primary/20 group-hover:bg-primary/5'}`}>
+                              <Code className={`w-5 h-5 ${isCodeWriter ? 'text-white' : 'text-black/60 dark:text-white/70 group-hover:text-primary'}`} />
+                            </div>
+                            <div className="flex-1">
+                              <span className={`text-[15px] font-bold block ${isCodeWriter ? 'text-primary' : 'text-black/80 dark:text-white/90'}`}>Code Writer</span>
+                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">Write & debug code with AISA</span>
+                            </div>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Input Area */}
+              <div className="relative flex-1 min-w-0 py-1 px-1">
+                <AnimatePresence>
+                  {(isDeepSearch || isImageGeneration || isVoiceMode || isAudioConvertMode || isDocumentConvert || isCodeWriter) && (
+                    <div className="absolute bottom-full left-0 mb-3 flex gap-2 overflow-x-auto no-scrollbar pointer-events-auto w-full">
+                      {isDeepSearch && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold border border-primary/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <Search size={12} strokeWidth={3} /> <span className="hidden sm:inline">Deep Search</span>
+                          <button onClick={() => setIsDeepSearch(false)} className="ml-1 hover:text-primary/80"><X size={12} /></button>
+                        </motion.div>
+                      )}
+                      {isImageGeneration && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-pink-500/10 text-pink-600 rounded-full text-xs font-bold border border-pink-500/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <ImageIcon size={12} strokeWidth={3} /> <span className="hidden sm:inline">Image Gen</span>
+                          <button onClick={() => setIsImageGeneration(false)} className="ml-1 hover:text-pink-800"><X size={12} /></button>
+                        </motion.div>
+                      )}
+                      {isVoiceMode && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-blue-500/10 text-blue-600 rounded-full text-xs font-bold border border-blue-500/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <Volume2 size={12} strokeWidth={3} /> <span className="hidden sm:inline">Voice Mode</span>
+                          <button onClick={() => setIsVoiceMode(false)} className="ml-1 hover:text-blue-800"><X size={12} /></button>
+                        </motion.div>
+                      )}
+                      {isAudioConvertMode && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-indigo-500/10 text-indigo-600 rounded-full text-xs font-bold border border-indigo-500/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <Headphones size={12} strokeWidth={3} /> <span className="hidden sm:inline">Audio Convert</span>
+                          <button onClick={() => setIsAudioConvertMode(false)} className="ml-1 hover:text-indigo-800"><X size={12} /></button>
+                        </motion.div>
+                      )}
+                      {isDocumentConvert && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-emerald-500/10 text-emerald-600 rounded-full text-xs font-bold border border-emerald-500/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <FileText size={12} strokeWidth={3} /> <span className="hidden sm:inline">Doc Convert</span>
+                          <button onClick={() => setIsDocumentConvert(false)} className="ml-1 hover:text-emerald-800"><X size={12} /></button>
+                        </motion.div>
+                      )}
+                      {isCodeWriter && (
+                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 bg-purple-500/10 text-purple-600 rounded-full text-xs font-bold border border-purple-500/20 backdrop-blur-md whitespace-nowrap shrink-0">
+                          <Code size={12} strokeWidth={3} /> <span className="hidden sm:inline">Code Writer</span>
+                          <button onClick={() => setIsCodeWriter(false)} className="ml-1 hover:text-purple-800"><X size={12} /></button>
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
+                </AnimatePresence>
+
+
+
+                <textarea
+                  ref={inputRef}
+                  value={inputValue}
+                  disabled={isLoading || isLimitReached}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (inputValue.trim() || selectedFiles.length > 0) {
+                        handleSendMessage(e);
+                      }
+                    }
+                  }}
+                  onPaste={handlePaste}
+                  placeholder={isLimitReached ? "Chat limit reached. Sign in to continue." : (isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : "Ask AISA")}
+                  rows={1}
+                  className={`w-full bg-transparent border-0 focus:ring-0 outline-none focus:outline-none px-2 text-black/80 dark:text-white/90 font-medium placeholder-black/30 dark:placeholder-white/30 resize-none overflow-y-auto custom-scrollbar leading-relaxed aisa-scalable-text ${isLimitReached ? 'cursor-not-allowed opacity-50' : ''}`}
+                  style={{ minHeight: '1.5em', height: '1.5em', maxHeight: '150px', lineHeight: '1.5' }}
+                />
+              </div>
+
+              {/* Right Actions Group */}
+              <div className="flex items-center gap-1 sm:gap-1.5 pr-0.5 shrink-0">
+                {isListening && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 rounded-full border border-red-500/20 mr-2">
+                    <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                    <span className="text-[10px] font-bold text-red-600 uppercase">REC</span>
+                  </div>
+                )}
+
+                {!isListening && (
+                  <>
+                    {getAgentCapabilities(activeAgent.agentName, activeAgent.category).canVideo && !inputValue.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => setIsLiveMode(true)}
+                        className="w-10 h-10 min-w-[2.5rem] rounded-full flex items-center justify-center text-black/40 hover:text-primary hover:bg-black/[0.03] transition-all shrink-0"
+                        title="Live Video Call"
+                      >
+                        <Video className="w-5 h-5 shrink-0" />
+                      </button>
+                    )}
+
+                    {getAgentCapabilities(activeAgent.agentName, activeAgent.category).canVoice && (
+                      <button
+                        type="button"
+                        onClick={handleVoiceInput}
+                        className={`w-10 h-10 min-w-[2.5rem] rounded-full flex items-center justify-center transition-all shrink-0 ${isListening ? 'bg-red-500 text-white shadow-lg shadow-red-500/25' : 'text-black/40 hover:text-primary hover:bg-black/[0.03]'}`}
+                        title="Voice Input"
+                      >
+                        <Mic className="w-5 h-5 shrink-0" />
+                      </button>
+                    )}
+                  </>
+                )}
+
+                {isLoading ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (abortControllerRef.current) abortControllerRef.current.abort();
+                      setIsLoading(false);
+                      isSendingRef.current = false;
+                    }}
+                    className="w-10 h-10 rounded-full bg-[#5555ff] text-white flex items-center justify-center shadow-lg hover:bg-[#4444ee] hover:scale-105 transition-all"
+                  >
+                    <div className="w-3 h-3 bg-white rounded-sm" />
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+
+                    <button
+                      type="submit"
+                      disabled={(!inputValue.trim() && filePreviews.length === 0) || isLoading}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${(!inputValue.trim() && filePreviews.length === 0) ? 'bg-black/[0.04] text-black/20' : 'bg-primary text-white shadow-lg shadow-primary/30 hover:scale-105 hover:shadow-primary/40'}`}
+                    >
+                      <Send className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
             </form>
           </div>
-
         </div>
-      </div>
-    </div>
+
+        {/* Live AI Modal */}
+        <AnimatePresence>
+          {isLiveMode && (
+            <LiveAI
+              onClose={() => setIsLiveMode(false)}
+              language={currentLang}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Feedback Modal */}
+        <Transition appear show={feedbackOpen} as={Fragment}>
+          <Dialog as="div" className="relative z-50" onClose={() => setFeedbackOpen(false)}>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-4 text-center">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-surface p-6 text-left align-middle shadow-xl transition-all border border-border">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-medium leading-6 text-maintext flex justify-between items-center"
+                    >
+                      Share feedback
+                      <button onClick={() => setFeedbackOpen(false)} className="text-subtext hover:text-maintext">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </Dialog.Title>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {["Incorrect or incomplete", "Not what I asked for", "Slow or buggy", "Style or tone", "Safety or legal concern", "Other"].map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => toggleFeedbackCategory(cat)}
+                          className={`text-xs px-3 py-2 rounded-full border transition-colors ${feedbackCategory.includes(cat)
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-transparent text-subtext border-border hover:border-maintext'
+                            }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="mt-4">
+                      <textarea
+                        className="w-full bg-black/5 dark:bg-white/5 rounded-xl p-3 text-sm focus:outline-none border border-transparent focus:border-border text-maintext placeholder-subtext resize-none"
+                        rows={3}
+                        placeholder="Share details (optional)"
+                        value={feedbackDetails}
+                        onChange={(e) => setFeedbackDetails(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="mt-4 text-[10px] text-subtext leading-tight">
+                      Your conversation will be included with your feedback to help improve the AI.
+                    </div>
+
+                    <div className="mt-6 flex justify-end">
+                      <button
+                        type="button"
+                        disabled={isSubmittingFeedback}
+                        className={`inline-flex justify-center items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-white transition-all ${isSubmittingFeedback ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]'
+                          }`}
+                        onClick={submitFeedback}
+                      >
+                        {isSubmittingFeedback && <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                        {isSubmittingFeedback ? 'Submitting...' : 'Submit'}
+                      </button>
+                    </div>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
+
+        {/* Limit Reached Modal */}
+        <Transition show={isLimitReached} as={Fragment}>
+          <Dialog as="div" className="relative z-[200]" onClose={() => { }}>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-md" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-4">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-3xl bg-white dark:bg-slate-900 border border-border p-8 text-center shadow-2xl transition-all">
+                    <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+                    </div>
+
+                    <Dialog.Title as="h3" className="text-2xl font-black text-maintext mb-2 tracking-tight uppercase">
+                      Chat Limit Reached
+                    </Dialog.Title>
+
+                    <p className="text-subtext mb-8 leading-relaxed text-sm">
+                      You've reached the guest limit of 10 sessions and 5 messages per session.
+                      Sign in to unlock **unlimited chat**, image generation, and more!
+                    </p>
+
+                    <div className="flex flex-col gap-3">
+                      <button
+                        onClick={() => navigate('/login', { state: { from: location.pathname } })}
+                        className="w-full py-4 bg-primary text-white rounded-2xl font-bold text-sm tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 active:scale-95 uppercase"
+                      >
+                        Sign In Now
+                      </button>
+                      <button
+                        onClick={() => navigate('/signup')}
+                        className="w-full py-4 bg-black/5 dark:bg-white/5 border border-border text-maintext rounded-2xl font-bold text-sm tracking-widest hover:bg-black/10 dark:hover:bg-white/10 transition-all active:scale-95 uppercase"
+                      >
+                        Create Free Account
+                      </button>
+                    </div>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
+      </div >
+    </div >
   );
 };
 

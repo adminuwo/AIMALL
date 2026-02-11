@@ -90,7 +90,7 @@ const DashboardLayout = () => {
   return (
     <div className={`fixed inset-0 flex bg-transparent ${isDark ? 'text-[#E6E9F2]' : 'text-slate-900'} overflow-hidden font-sans h-[100dvh] transition-colors duration-700`}>
       {/* Background Dreamy Orbs */}
-      <div className={`fixed inset-0 -z-10 transition-all duration-700 ${isDark ? 'bg-[#131c31]' : 'bg-gradient-to-br from-[#f8fafc] via-[#eef2ff] to-[#fce7f3]'}`}>
+      <div className={`fixed inset-0 -z-10 transition-all duration-700 ${isDark ? 'bg-[#131c31]' : 'bg-gradient-to-br from-[#E0C3FC] via-[#C6D8FF] to-[#8EC5FC]'}`}>
         <div className={`absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full ${isDark ? 'bg-purple-900/20' : 'bg-purple-200/30'} blur-[120px] transition-colors duration-700`}></div>
         <div className={`absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full ${isDark ? 'bg-blue-900/20' : 'bg-blue-200/30'} blur-[120px] transition-colors duration-700`}></div>
         <div className={`absolute top-[40%] left-[30%] w-[40%] h-[40%] rounded-full ${isDark ? 'bg-pink-900/20' : 'bg-pink-200/20'} blur-[100px] transition-colors duration-700`}></div>

@@ -117,6 +117,7 @@ export const LanguageProvider = ({ children }) => {
             faq9_q: "How do I get started?",
             faq9_a: "Try the demo now or contact us for a walkthrough.",
             syncingData: 'Loading data...',
+            welcomeMessage: 'Hello! I’m AISA™, your Artificial Intelligence Super Assistant.',
 
             // Settings & Profile
             personalization: 'Personalization',

@@ -225,8 +225,8 @@ body.dark-mode .sidebar-purple-btn {
 }
 
 body.dark-mode .sidebar-purple-btn.sidebar-active {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6) !important;
-    /* Purple -> Pink -> Blue */
+    background: linear-gradient(135deg, #ec4899, #d946ef, #8b5cf6) !important;
+    /* Pink -> Fuchsia -> Purple */
     border-color: transparent !important;
     color: #FFFFFF !important;
     box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3) !important;
@@ -234,11 +234,11 @@ body.dark-mode .sidebar-purple-btn.sidebar-active {
 }
 
 body.dark-mode .sidebar-purple-btn:hover {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6) !important;
-    /* Purple -> Pink -> Blue */
+    background: linear-gradient(135deg, #ec4899, #d946ef, #8b5cf6) !important;
+    /* Pink -> Fuchsia -> Purple */
     border-color: transparent !important;
     color: #FFFFFF !important;
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3) !important;
+    box-shadow: 0 10px 25px rgba(217, 70, 239, 0.3) !important;
     filter: brightness(1.1) !important;
 }
 

@@ -46,14 +46,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   const theme = useRecoilValue(themeState);
   const isDark = theme === 'Dark';
 
-  // Debug: Log user info to verify admin detection
-  console.log('🔍 Sidebar Debug:', {
-    email: user.email,
-    role: user.role,
-    userRole,
-    isAdminView,
-    currentUserData
-  });
+  // Debug: Log user info only in non-production or when needed
+  // console.log('🔍 Sidebar Debug:', { email: user.email, role: user.role, userRole, isAdminView });
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
@@ -174,25 +168,20 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   // Navigation items configuration
   const allNavItems = [
-    { id: 'chat', icon: MessageSquare, label: t('chat'), route: '/dashboard/chat', roles: ['user', 'admin', 'vendor'] },
-    //{ id: 'myAgents', icon: Bot, label: t('myAgents'), route: AppRoute.MY_AGENTS, roles: ['user', 'admin', 'vendor'] },
-    { id: 'marketplace', icon: ShoppingBag, label: t('marketplace') || "Marketplace", route: AppRoute.MARKETPLACE, roles: ['user', 'admin', 'vendor'] },
-    { id: 'settings', icon: Settings, label: t('settings'), route: AppRoute.PROFILE, roles: ['user', 'vendor'] },
+    { id: 'chat', icon: MessageSquare, label: t('chat'), route: '/dashboard/chat', roles: ['guest', 'user', 'admin', 'vendor'] },
+    { id: 'marketplace', icon: ShoppingBag, label: t('marketplace') || "Marketplace", route: AppRoute.MARKETPLACE, roles: ['guest', 'user', 'admin', 'vendor'] },
     { id: 'admin', icon: LayoutGrid, label: t('adminDashboard'), route: AppRoute.ADMIN, roles: ['admin'] },
+    { id: 'adminSupport', icon: ShieldAlert, label: t('adminSupport'), route: AppRoute.ADMIN_SUPPORT, roles: ['admin'] },
   ];
 
-  // Show all standard user items to guests, but filter admin-only items
-  const navItems = allNavItems.filter(item => {
-    // 1. If user is Admin, show admin dashboard, admin support, and common items
-    if (isAdminView) {
-      return item.roles.includes('admin') || ['chat', 'myAgents', 'marketplace'].includes(item.id);
-    }
-    // 2. For everyone else (User, Vendor, Guest), show these specific ones
-    return ['chat', 'myAgents', 'marketplace'].includes(item.id);
-  });
+  // Effective role for filtering - if isAdminView is true (email match), treat as admin
+  const effectiveRole = isAdminView ? 'admin' : userRole;
+
+  // Filter items based on roles
+  const navItems = allNavItems.filter(item => item.roles.includes(effectiveRole));
 
   const handleNavClick = (e, item) => {
-    const isPublic = item.id === 'chat';
+    const isPublic = ['chat', 'marketplace'].includes(item.id);
     if (!isLoggedIn && !isPublic) {
       e.preventDefault();
       navigate('/login', { state: { from: location } });
@@ -293,8 +282,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                   }
 
                   return `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isTabActive
-                    ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
-                    : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
+                    ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#d946ef] to-[#8b5cf6] text-white border-transparent shadow-[0_10px_25px_rgba(236,72,153,0.3)]'} scale-[1.02]`
+                    : `${isDark ? 'sidebar-purple-btn' : 'bg-[#8B5CF6] text-white border-transparent shadow-[0_10px_20px_rgba(139,92,246,0.15)] hover:bg-[#7c3aed]'} hover:shadow-xl hover:scale-[1.02]`
                     }`;
                 }}
               >
@@ -310,8 +299,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                   return (
                     <>
                       {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isTabActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
-                      <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
-                      <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : ''}`}>{item.label}</span>
+                      <item.icon size={14} className={`mr-3 transition-colors relative z-10 ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-white'} group-hover:text-white`}`} />
+                      <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : 'text-white'}`}>{item.label}</span>
                     </>
                   );
                 }}
@@ -339,8 +328,8 @@ const Sidebar = ({ isOpen, onClose }) => {
             className={({ isActive }) => {
               const isTabActive = isActive && !isFaqOpen;
               return `flex items-center px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isTabActive
-                ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
-                : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
+                ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#d946ef] to-[#8b5cf6] text-white border-transparent shadow-[0_10px_25px_rgba(236,72,153,0.3)]'} scale-[1.02]`
+                : `${isDark ? 'sidebar-purple-btn' : 'bg-[#8B5CF6] text-white border-transparent shadow-[0_10px_20px_rgba(139,92,246,0.15)] hover:bg-[#7c3aed]'} hover:shadow-xl hover:scale-[1.02]`
                 }`;
             }}
           >
@@ -350,14 +339,14 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <>
                   {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isTabActive ? 'opacity-0' : 'group-hover:opacity-5'}`} />}
                   <div className="relative mr-3 z-10">
-                    <Bell size={14} className={`transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-gray-400'} group-hover:text-[#8B5CF6]`}`} />
+                    <Bell size={14} className={`transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-[#6F76A8]' : 'text-white'} group-hover:text-white`}`} />
                     {notifications.filter(n => !n.isRead).length > 0 && (
                       <div className={`absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[7px] font-black text-white flex items-center justify-center border ${isDark ? 'border-[#1a2235]' : 'border-white'}`}>
                         {notifications.filter(n => !n.isRead).length}
                       </div>
                     )}
                   </div>
-                  <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t('notifications')}</span>
+                  <span className={`relative z-10 transition-colors ${isTabActive ? (isDark ? 'text-white' : 'text-black') : 'text-white'}`}>{t('notifications')}</span>
                   {isTabActive && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
                 </>
               );
@@ -379,14 +368,14 @@ const Sidebar = ({ isOpen, onClose }) => {
               }
             }}
             className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen)
-              ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
-              : `${isDark ? 'sidebar-purple-btn' : 'text-gray-500 border-transparent hover:bg-white/40 hover:text-gray-900'} hover:shadow-lg hover:scale-[1.02]`
+              ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#d946ef] to-[#8b5cf6] text-white border-transparent shadow-[0_10px_25px_rgba(236,72,153,0.3)]'} scale-[1.02]`
+              : `${isDark ? 'sidebar-purple-btn' : 'bg-[#8B5CF6] text-white border-transparent shadow-[0_10px_20px_rgba(139,92,246,0.15)] hover:bg-[#7c3aed]'} hover:shadow-lg hover:scale-[1.02]`
               }`}
           >
             {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen) ? 'opacity-0' : 'group-hover:opacity-10'}`} />}
             <div className={`profile-initial w-6 h-6 rounded-lg mr-3 flex items-center justify-center font-black text-[10px] z-10 transition-all shadow-sm ${((location.pathname === AppRoute.PROFILE || location.pathname === AppRoute.SETTINGS) && !isFaqOpen)
               ? 'bg-white text-[#ec4899]'
-              : `${isDark ? 'bg-white/20 text-white group-hover:bg-white group-hover:text-black' : 'bg-gray-100 text-[#7c3aed] group-hover:bg-white group-hover:text-[#ec4899]'}`
+              : `${isDark ? 'bg-white/20 text-white group-hover:bg-white group-hover:text-black' : 'bg-white/20 text-white group-hover:bg-white group-hover:text-[#ec4899]'}`
               }`}>
               {t(user.name?.toUpperCase())?.charAt(0)}
             </div>
@@ -397,12 +386,12 @@ const Sidebar = ({ isOpen, onClose }) => {
           <button
             onClick={() => { setIsFaqOpen(true); onClose(); }}
             className={`flex items-center w-full px-4 py-2.5 rounded-[18px] text-[9px] font-black uppercase tracking-wider transition-all duration-300 group relative overflow-hidden border ${isFaqOpen
-              ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#8b5cf6] to-[#4f46e5] text-black border-transparent shadow-[0_10px_20px_-5px_rgba(236,72,153,0.4)]'} scale-[1.02]`
-              : `${isDark ? 'sidebar-purple-btn' : 'bg-white shadow-[0_8px_20px_rgba(255,255,255,0.8)] text-gray-500 border-white hover:bg-white/80 hover:text-gray-900'} hover:shadow-xl hover:scale-[1.02]`
+              ? `${isDark ? 'sidebar-purple-btn sidebar-active' : 'bg-gradient-to-r from-[#ec4899] via-[#d946ef] to-[#8b5cf6] text-white border-transparent shadow-[0_10px_25px_rgba(236,72,153,0.3)]'} scale-[1.02]`
+              : `${isDark ? 'sidebar-purple-btn' : 'bg-[#8B5CF6] text-white border-transparent shadow-[0_10px_20px_rgba(139,92,246,0.15)] hover:bg-[#7c3aed]'} hover:shadow-xl hover:scale-[1.02]`
               }`}
           >
             {!isDark && <div className={`absolute inset-0 bg-gradient-to-r from-[#d946ef] to-[#8b5cf6] opacity-0 transition-opacity duration-300 ${isFaqOpen ? 'opacity-0' : 'group-hover:opacity-10'}`} />}
-            <HelpCircle size={15} className={`mr-3 transition-colors relative z-10 ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : `${isDark ? 'text-white' : 'text-gray-400 group-hover:text-[#ec4899]'}`}`} />
+            <HelpCircle size={15} className={`mr-3 transition-colors relative z-10 ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : 'text-white group-hover:text-white'}`} />
             <span className={`relative z-10 transition-colors ${isFaqOpen ? (isDark ? 'text-white' : 'text-black') : ''}`}>{t('helpFaq')}</span>
             {isFaqOpen && <div className={`absolute right-3 w-1.5 h-1.5 rounded-full ${isDark ? 'bg-white' : 'bg-black'} animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]`} />}
           </button>

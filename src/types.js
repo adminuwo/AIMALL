@@ -69,9 +69,11 @@ export const AppRoute = {
 // Environment detection
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-export const API = isLocal
-  ? "http://localhost:8080/api"
-  : "https://aimall-backend.onrender.com/api";
+// export const API = isLocal
+//   ? "http://localhost:8080/api"
+//   : "https://aimall-backend.onrender.com/api";
+
+export const API = "http://localhost:8080/api";
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
@@ -90,5 +92,13 @@ export const apis = {
   chatAgent: `${API}/chat`,
   aibiz: `${API}/aibiz`,
   support: `${API}/support`,
+  synthesizeVoice: `${API}/voice/synthesize`,
+  synthesizeFile: `${API}/voice/synthesize-file`,
+  feedback: `${API}/feedback`,
+  payment: `${API}/payment`,
+  createOrder: `${API}/payment/create-order`,
+  verifyPayment: `${API}/payment/verify-payment`,
+  getPaymentHistory: `${API}/payment/history`,
+  resendCode: `${API}/auth/resend-code`,
   BASE_URL: isLocal ? "http://localhost:8080" : "https://aimall-backend.onrender.com",
 };
