@@ -147,7 +147,7 @@ const Marketplace = () => {
             const isApproved = agent.reviewStatus === 'Approved';
 
             const aSeriesNames = [
-                'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
+                'AIBIZ', 'AIBASE', 'AICRAFT', 'AIVA', 'AIBOTT',
                 'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
             ];
 
@@ -174,7 +174,7 @@ const Marketplace = () => {
     // Exclude A-Series from Top Trending too
     const topUsedAgents = useMemo(() => {
         return agents.filter(a => ![
-            'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
+            'AIBIZ', 'AIBASE', 'AICRAFT', 'AIVA', 'AIBOTT',
             'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
         ].includes(a.agentName?.trim().toUpperCase())).slice(0, 3);
     }, [agents]);

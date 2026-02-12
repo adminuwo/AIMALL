@@ -11,7 +11,7 @@ const UserManagement = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [expandedUser, setExpandedUser] = useState(null);
 
-    const [viewMode, setViewMode] = useState('AIMALL'); // 'AIMALL', 'ASERIES', or 'AISA'
+    const [viewMode, setViewMode] = useState('AIMALL'); // 'AIMALL', 'ASERIES', or 'AIVA'
 
     useEffect(() => {
         fetchUsers();
@@ -48,17 +48,17 @@ const UserManagement = () => {
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
 
         const isAdmin = user.role?.toLowerCase() === 'admin' || user.email === 'admin@uwo24.com';
-        const isAISA = user.platform === 'AISA' || user.email?.includes('aisa');
+        const isAIVA = user.platform === 'AIVA' || user.email?.includes('aiva');
         const isASeries = user.platform === 'A-SERIES' || user.platform === 'ASERIES';
-        const isAIMall = user.platform === 'AI-MALL' || user.platform === 'AIMALL' || (!user.platform && !isAISA && !isASeries);
+        const isAIMall = user.platform === 'AI-MALL' || user.platform === 'AIMALL' || (!user.platform && !isAIVA && !isASeries);
 
         if (viewMode === 'ASERIES') {
             // Show A-SERIES users AND all admins
             return matchesSearch && (isASeries || isAdmin);
         }
 
-        if (viewMode === 'AISA') {
-            return matchesSearch && !isAdmin && isAISA;
+        if (viewMode === 'AIVA') {
+            return matchesSearch && !isAdmin && isAIVA;
         }
 
         // AI-MALL view: Show AI-MALL users AND all admins
@@ -104,12 +104,12 @@ const UserManagement = () => {
                     <div>
                         <h2 className="text-lg md:text-2xl font-black text-gray-900 tracking-tighter mb-1 flex-wrap">
                             <span>
-                                {viewMode === 'ASERIES' ? <>A-SERIES<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></> : viewMode === 'AISA' ? <>AISA<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></> : <>AI-MALL<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></>}
+                                {viewMode === 'ASERIES' ? <>A-SERIES<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></> : viewMode === 'AIVA' ? <>AIVA<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></> : <>AI-MALL<sup className="text-[10px] md:text-[0.5em] font-bold ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">TM</sup></>}
                             </span>
                             <span className="ml-2">User Management</span>
                         </h2>
                         <p className="text-gray-500 font-medium text-xs">
-                            {viewMode === 'ASERIES' ? 'Manage platform system users and admins' : viewMode === 'AISA' ? <>Manage AISA<sup className="text-[8px] font-bold ml-0.5 relative -top-[0.5em]">TM</sup> platform specific users</> : 'Manage platform users, vendors, and roles'}
+                            {viewMode === 'ASERIES' ? 'Manage platform system users and admins' : viewMode === 'AIVA' ? <>Manage AIVA<sup className="text-[8px] font-bold ml-0.5 relative -top-[0.5em]">TM</sup> platform specific users</> : 'Manage platform users, vendors, and roles'}
                         </p>
                     </div>
 
@@ -125,14 +125,14 @@ const UserManagement = () => {
                             <span>A SERIES<sup className="text-[7px] md:text-[0.6em] font-bold ml-1 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                         <button
-                            onClick={() => setViewMode('AISA')}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'AISA'
+                            onClick={() => setViewMode('AIVA')}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${viewMode === 'AIVA'
                                 ? 'bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20 scale-105'
                                 : 'text-gray-400 hover:text-gray-900 hover:bg-white/40'
                                 }`}
                         >
                             <Bot className="w-4 h-4" />
-                            <span>AISA<sup className="text-[7px] md:text-[0.6em] font-bold ml-1 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
+                            <span>AIVA<sup className="text-[7px] md:text-[0.6em] font-bold ml-1 relative -top-[0.4em] md:-top-[0.6em]">TM</sup></span>
                         </button>
                         <button
                             onClick={() => setViewMode('AIMALL')}
