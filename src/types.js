@@ -73,7 +73,8 @@ const isLocal = window.location.hostname === "localhost" || window.location.host
 //   ? "http://localhost:8080/api"
 //   : "https://aimall-backend.onrender.com/api";
 
-export const API = "http://localhost:8080/api";
+//export const API = "http://localhost:8080/api";
+export const API ="https://ai-mall-backend-rm4d.onrender.com/api"
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
