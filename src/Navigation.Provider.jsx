@@ -123,7 +123,7 @@ const DashboardLayout = () => {
         </div>
 
         {/* Outlet for pages */}
-        <main className="flex-1 overflow-auto relative w-full">
+        <main className="flex-1 flex flex-col overflow-hidden relative w-full">
           <Outlet />
         </main>
       </div>

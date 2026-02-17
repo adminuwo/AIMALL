@@ -7,6 +7,7 @@ import { apis, AppRoute } from '../types';
 import { setUserData, userData as userDataAtom, themeState } from '../userStore/userData';
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { useLanguage } from '../context/LanguageContext';
+import Logo from '../assets/Logo.svg';
 
 const Login = () => {
   const { t } = useLanguage();
@@ -70,7 +71,7 @@ const Login = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="mb-0 mx-auto flex items-center justify-center p-0"
           >
-            <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-32 h-32 object-contain" />
+            <img src={Logo} alt="AI Mall Logo" className="w-32 h-32 object-contain" />
           </motion.div>
         </div>
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import Logo from '../assets/Logo.svg';
 import { useNavigate } from 'react-router';
 import { Bot, User, Zap, ArrowRight, UserCircle } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
@@ -10,7 +11,7 @@ const Series = () => {
     const theme = useRecoilValue(themeState);
     const isDark = theme === 'Dark';
     const navigate = useNavigate();
-    const Logo = "/logo/Logo.png";
+    const logoExport = Logo;
 
     return (
         <div className={`min-h-screen ${isDark ? 'bg-slate-950' : 'bg-white'} relative overflow-hidden font-sans transition-colors duration-700`}>

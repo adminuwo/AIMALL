@@ -9,6 +9,7 @@ import { setUserData, themeState } from '../userStore/userData.js';
 import { useRecoilValue } from 'recoil';
 import { logo } from '../constants';
 import { useLanguage } from '../context/LanguageContext';
+import Logo from '../assets/Logo.svg';
 import TermsModal from '../Components/Landing/TermsModal';
 
 const Signup = () => {
@@ -66,7 +67,7 @@ const Signup = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="mb-0 mx-auto flex items-center justify-center p-0"
           >
-            <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-32 h-32 object-contain" />
+            <img src={Logo} alt="AI Mall Logo" className="w-32 h-32 object-contain" />
           </motion.div>
         </div>
 

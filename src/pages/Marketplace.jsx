@@ -147,7 +147,7 @@ const Marketplace = () => {
             const isApproved = agent.reviewStatus === 'Approved';
 
             const aSeriesNames = [
-                'AIBIZ', 'AIBASE', 'AICRAFT', 'AIVA', 'AIBOTT',
+                'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
                 'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
             ];
 
@@ -174,7 +174,7 @@ const Marketplace = () => {
     // Exclude A-Series from Top Trending too
     const topUsedAgents = useMemo(() => {
         return agents.filter(a => ![
-            'AIBIZ', 'AIBASE', 'AICRAFT', 'AIVA', 'AIBOTT',
+            'AIBIZ', 'AIBASE', 'AICRAFT', 'AISA', 'AIBOTT',
             'AIGENE', 'AIBRAND', 'AISTREAM', 'AIOFFICE', 'AIDESK', 'AIFLOW'
         ].includes(a.agentName?.trim().toUpperCase())).slice(0, 3);
     }, [agents]);
@@ -359,7 +359,11 @@ const Marketplace = () => {
                                     transition={{ delay: 0.2 }}
                                     className="relative z-10 block"
                                 >
-                                    {subToggle.marketPlaceMode === 'ASeries' ? t('aseriesMarketplace') : t('aiMallMarketplace')}
+                                    {subToggle.marketPlaceMode === 'ASeries' ? (
+                                        <>A-SERIES</>
+                                    ) : (
+                                        <><span className="aiva-glitch" data-text="AI">AI</span> MALL</>
+                                    )}
                                     <sup className="text-sm md:text-3xl font-black ml-0.5 relative md:-top-8" style={{ color: '#000000 !important', opacity: 1 }}>TM</sup>
                                 </motion.span>
                                 <motion.span

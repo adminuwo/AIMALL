@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
-import { MapPin, Mail, Phone } from 'lucide-react';
+import { Github, Twitter, Linkedin, Mail, ArrowRight, Heart, Cpu, Sparkles, Shield, Zap, Globe, MessageSquare, MapPin } from 'lucide-react';
+import Logo from '../../assets/Logo.svg';
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
 import LinkedinIcon from '../../assets/social-icons/Linkedin.svg';
@@ -55,7 +56,7 @@ const Footer = () => {
 
                         {/* Brand */}
                         <div className="space-y-2">
-                            <img src="/logo/Logo.png" alt="AI Mall Logo" className="w-16 h-16 object-contain" />
+                            <img src={Logo} alt="AI Mall Logo" className="w-16 h-16 object-contain" />
                             <p className={`text-sm leading-relaxed font-medium ${isDark ? 'footer-text-glow' : 'text-black'}`}>
                                 AI-MALL<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup> — {t('footerTagline')}<br />
                                 {t('aiAppsCount')} | AI-MALL<sup className="text-[10px] md:text-[0.5em] font-black ml-0.5 relative -top-[0.5em] md:-top-[0.7em]">TM</sup> | {t('partnerIntegrations')}<br />

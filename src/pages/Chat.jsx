@@ -25,9 +25,12 @@ import html2canvas from 'html2canvas';
 import { detectMode, getModeName, getModeIcon, getModeColor, MODES } from '../utils/modeDetection';
 import { getUserData, sessionsData, toggleState } from '../userStore/userData';
 import { usePersonalization } from '../context/PersonalizationContext';
+import './Chat.css';
+import Logo from '../assets/Logo.svg';
 
 
-const WELCOME_MESSAGE = "Hello! I’m AIVA™, your Artificial Intelligence Super Assistant.";
+
+const WELCOME_MESSAGE = "Hello! I’m AISA™, your Artificial Intelligence Super Assistant.";
 
 const FEEDBACK_PROMPTS = {
   en: [
@@ -238,7 +241,7 @@ const Chat = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLimitReached, setIsLimitReached] = useState(false);
   const [filePreviews, setFilePreviews] = useState([]);
-  const [activeAgent, setActiveAgent] = useState({ agentName: 'AIVA', category: 'General' });
+  const [activeAgent, setActiveAgent] = useState({ agentName: 'AISA', category: 'General' });
   const [userAgents, setUserAgents] = useState([]);
   const [toolModels, setToolModels] = useState({
     chat: 'gemini-flash',
@@ -439,7 +442,7 @@ const Chat = () => {
       };
       setMessages(prev => [...prev, userMsg]);
 
-      // 2. Add Processing Message from AIVA
+      // 2. Add Processing Message from AISA
       const aiMsgId = (Date.now() + 1).toString();
       const processingMsg = {
         id: aiMsgId,
@@ -664,7 +667,7 @@ const Chat = () => {
           conversion: {
             file: mp3Base64,
             blobUrl: audioUrl,
-            fileName: `AIVA_Voice_${Date.now()}.mp3`,
+            fileName: `AISA_Voice_${Date.now()}.mp3`,
             mimeType: 'audio/mpeg',
             fileSize: formattedSize,
             rawSize: rawBytes,
@@ -1346,20 +1349,20 @@ const Chat = () => {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             const agents = res.data?.agents || [];
-            // Add default AIVA agent if not present
-            const processedAgents = [{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA_BRAIN_LOGO.png' }, ...agents];
+            // Add default AISA agent if not present
+            const processedAgents = [{ agentName: 'AISA', category: 'General', avatar: Logo }, ...agents];
             setUserAgents(processedAgents);
           } catch (agentErr) {
             // Silently use defaults if fetch fails (no console warning)
-            setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA_BRAIN_LOGO.png' }]);
+            setUserAgents([{ agentName: 'AISA', category: 'General', avatar: Logo }]);
           }
         } else {
           // No user logged in, use default
-          setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA_BRAIN_LOGO.png' }]);
+          setUserAgents([{ agentName: 'AISA', category: 'General', avatar: Logo }]);
         }
       } catch (err) {
         // Silently handle errors
-        setUserAgents([{ agentName: 'AIVA', category: 'General', avatar: '/AGENTS_IMG/AIVA_BRAIN_LOGO.png' }]);
+        setUserAgents([{ agentName: 'AISA', category: 'General', avatar: Logo }]);
       }
     };
     loadSessions();
@@ -1682,7 +1685,7 @@ const Chat = () => {
         }
 
         const SYSTEM_INSTRUCTION = `
-You are ${activeAgent.agentName || 'AIVA'}, an advanced AI assistant powered by A-Series.
+You are ${activeAgent.agentName || 'AISA'}, an advanced AI assistant powered by A-Series.
 ${activeAgent.category ? `Your specialization is in ${activeAgent.category}.` : ''}
 
 ${PERSONA_INSTRUCTION}
@@ -1695,7 +1698,7 @@ ${PERSONA_INSTRUCTION}
 
 ### RESPONSE BEHAVIOR:
 - Answer the user's question directly without greeting messages
-- Do NOT say "Hello... welcome to AIVA" or similar greetings
+- Do NOT say "Hello... welcome to AISA" or similar greetings
 - Focus ONLY on providing the answer to what user asked
 - Be helpful, clear, and concise
 
@@ -1779,7 +1782,7 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
 `;
         // Check for greeting to send the specific welcome message
         const lowerInput = (contentToSend || "").toLowerCase().trim();
-        const isGreeting = ['hi', 'hello', 'hey', 'namaste', 'नमस्ते', 'greetings', 'hi aiva', 'hello aiva'].includes(lowerInput);
+        const isGreeting = ['hi', 'hello', 'hey', 'namaste', 'नमस्ते', 'greetings', 'hi AISA', 'hello AISA'].includes(lowerInput);
 
         let aiResponseData;
 
@@ -1972,8 +1975,8 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
     const name = (agentName || '').toLowerCase();
     const cat = (category || '').toLowerCase();
 
-    // Default: Everything enabled for AIVA
-    if (name === 'aiva' || !name) {
+    // Default: Everything enabled for AISA
+    if (name === 'AISA' || !name) {
       return {
         canUploadImages: true,
         canUploadDocs: true,
@@ -2144,8 +2147,8 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
             try {
               await navigator.share({
                 files: [file],
-                title: 'AIVA Document',
-                text: 'Check out this document generated by AIVA AI.'
+                title: 'AISA Document',
+                text: 'Check out this document generated by AISA AI.'
               });
               toast.success("Shared successfully!", { id: shareToastId });
             } catch (shareErr) {
@@ -2250,7 +2253,7 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
         heightLeft -= contentHeightPerPage;
       }
 
-      const filename = `aiva-response-${msg.id}.pdf`;
+      const filename = `AISA-response-${msg.id}.pdf`;
 
       if (action === 'download') {
         pdf.save(filename);
@@ -2444,7 +2447,7 @@ ${documentConvertActive ? `### DOCUMENT CONVERSION MODE ENABLED (CRITICAL):
 
       // Generate new AI response based on the edited message
       const SYSTEM_INSTRUCTION = `
-You are AIVA, an advanced AI assistant.
+You are AISA, an advanced AI assistant.
 IMAGE GENERATION CAPABILITIES:
 If the user asks for an image (e.g., "generate", "create", "draw", "show me a pic", "image dikhao", "photo bhejo", "pic do"), you MUST generate it using the Pollinations API.
 Format: ![Image](https://image.pollinations.ai/prompt/{URL_ENCODED_DESCRIPTION}?nologo=true)
@@ -2642,7 +2645,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
   }, [viewingDoc]);
 
   return (
-    <div className="flex w-full bg-transparent relative overflow-hidden aiva-scalable-text overscroll-none h-[100dvh] fixed inset-0 lg:static lg:h-full no-scrollbar select-none">
+    <div className="flex w-full bg-transparent relative overflow-hidden AISA-scalable-text overscroll-none h-[100dvh] fixed inset-0 lg:static lg:h-full no-scrollbar select-none">
 
       {/* Chat History Sidebar */}
       <AnimatePresence>
@@ -2700,7 +2703,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                       <MessageCircle className="w-6 h-6 text-black/20" />
                     </div>
                     <h3 className="text-sm font-bold text-black/60 mb-1">No History Yet</h3>
-                    <p className="text-[11px] text-black/40 font-medium leading-relaxed">Your future conversations with AIVA will appear here for easy access.</p>
+                    <p className="text-[11px] text-black/40 font-medium leading-relaxed">Your future conversations with AISA will appear here for easy access.</p>
                   </div>
                 ) : (
                   sessions.map((session) => (
@@ -2928,35 +2931,36 @@ For "Remix" requests with an attachment, analyze the attached image, then create
           </div>
         )}
 
-        {/* Header */}
-        <div className="h-14 md:h-16 border-b border-black/[0.05] dark:border-white/10 flex items-center justify-between px-3 md:px-6 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl z-20 shrink-0 gap-3">
-          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+        {/* Header - Slimmer on mobile */}
+        <div className="h-12 md:h-16 border-b border-black/[0.05] dark:border-white/10 flex items-center justify-between px-2 md:px-6 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl z-20 shrink-0 gap-2">
+          <div className="flex items-center gap-1 md:gap-3 min-w-0">
+            {/* Show sidebar toggle only on desktop where global mobile header is hidden */}
             <button
               onClick={() => setTglState(prev => ({ ...prev, sidebarOpen: true }))}
-              className="lg:hidden p-2 -ml-2 text-subtext hover:text-maintext rounded-lg hover:bg-surface/50 transition-colors"
+              className="hidden lg:flex p-2 -ml-2 text-subtext hover:text-maintext rounded-lg hover:bg-surface/50 transition-colors"
               title="Menu"
             >
               <MenuIcon className="w-6 h-6" />
             </button>
             <button
               onClick={() => setShowHistory(true)}
-              className="p-2 text-subtext hover:text-primary rounded-lg hover:bg-primary/5 transition-all group"
+              className="p-1.5 md:p-2 text-subtext hover:text-primary rounded-lg hover:bg-primary/5 transition-all group"
               title="History"
             >
               <History className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
           </div>
 
-          {/* Mode Indicator */}
+          {/* Mode Indicator - More compact on mobile */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-300"
+            className="flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-0.5 md:py-1 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300"
             style={{
               backgroundColor: `${getModeColor(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}15`,
               color: getModeColor(isDeepSearch ? 'DEEP_SEARCH' : currentMode)
             }}
           >
             <span>{getModeIcon(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}</span>
-            <span className="hidden sm:inline">{getModeName(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}</span>
+            <span className="hidden xs:inline sm:inline">{getModeName(isDeepSearch ? 'DEEP_SEARCH' : currentMode)}</span>
           </div>
         </div>
 
@@ -2973,7 +2977,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
         <div
           ref={chatContainerRef}
           onScroll={handleScroll}
-          className="relative flex-1 overflow-y-auto p-2 sm:p-3 md:p-6 pb-40 sm:pb-48 md:pb-56 space-y-4 scrollbar-none no-scrollbar aiva-scalable-text scroll-smooth"
+          className="relative flex-1 overflow-y-auto p-2 sm:p-3 md:p-6 pb-28 sm:pb-36 md:pb-48 space-y-4 scrollbar-none no-scrollbar AISA-scalable-text scroll-smooth"
         >
           {messages.length > 0 && (
             <>
@@ -2995,7 +2999,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     {msg.role === 'user' ? (
                       <User className="w-4 h-4 text-white" />
                     ) : (
-                      <img src="/logo/AIVA.gif?v=3" alt="AIVA" className="w-5 h-5 object-contain" />
+                      <img src={Logo} alt="AISA" className={`w-5 h-5 object-contain ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-icon-glitch' : ''}`} />
                     )}
                   </div>
 
@@ -3006,14 +3010,14 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     <div
                       className={`group/bubble relative px-3 py-2.5 sm:px-5 sm:py-4 rounded-2xl sm:rounded-[1.5rem] leading-relaxed whitespace-pre-wrap break-words shadow-sm w-fit max-w-full transition-all duration-300 min-h-[40px] hover:scale-[1.002] ${msg.role === 'user'
                         ? 'bg-primary/80 backdrop-blur-md border border-white/20 text-white rounded-tr-sm shadow-lg shadow-primary/20 dark:shadow-pink-500/20 text-sm sm:text-base'
-                        : `bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/40 dark:border-white/10 text-gray-900 dark:text-white/90 rounded-tl-sm shadow-sm hover:shadow-md dark:shadow-purple-500/10 text-sm sm:text-base ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''}`
+                        : `bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/40 dark:border-white/10 text-gray-900 dark:text-white/90 rounded-tl-sm shadow-sm hover:shadow-md dark:shadow-purple-500/10 text-sm sm:text-base ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''} ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-bubble-glow' : ''}`
                         }`}
                     >
 
                       {msg.isProcessing && (
                         <div className="flex items-center gap-3 mb-3 p-3 bg-primary/5 rounded-xl border border-primary/10 animate-pulse">
                           <Loader size="sm" />
-                          <span className="text-xs font-semibold text-primary uppercase tracking-tighter">Preparing Audio...</span>
+                          <span className="text-xs font-semibold text-primary uppercase tracking-tighter aisa-glitch" data-text="Preparing Audio...">Preparing Audio...</span>
                         </div>
                       )}
 
@@ -3222,7 +3226,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity">
                                         <div className="flex items-center gap-2">
                                           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">AIVA Generated Asset</span>
+                                          <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Asset</span>
                                         </div>
                                       </div>
                                       <img
@@ -3237,7 +3241,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       <button
                                         onClick={(e) => {
                                           e.stopPropagation(); // Prevent opening modal when clicking download
-                                          handleDownload(props.src, 'aiva-generated.png');
+                                          handleDownload(props.src, 'AISA-generated.png');
                                         }}
                                         className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
                                         title="Download High-Res"
@@ -3261,7 +3265,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity pointer-events-none">
                                   <div className="flex items-center gap-2">
                                     <Video className="w-4 h-4 text-primary animate-pulse" />
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AIVA Generated Video</span>
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Video</span>
                                   </div>
                                 </div>
 
@@ -3278,7 +3282,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 </div>
 
                                 <button
-                                  onClick={() => handleDownload(msg.videoUrl, 'aiva-generated-video.mp4')}
+                                  onClick={() => handleDownload(msg.videoUrl, 'AISA-generated-video.mp4')}
                                   className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100 z-20"
                                   title="Download Video"
                                 >
@@ -3299,7 +3303,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent z-10 flex justify-between items-center opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-opacity">
                                   <div className="flex items-center gap-2">
                                     <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AIVA Generated Asset</span>
+                                    <span className="text-[10px] font-bold text-white uppercase tracking-widest">AISA Generated Asset</span>
                                   </div>
                                 </div>
                                 <img
@@ -3310,7 +3314,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation(); // Prevent opening modal handling
-                                    handleDownload(msg.imageUrl, 'aiva-generated.png');
+                                    handleDownload(msg.imageUrl, 'AISA-generated.png');
                                   }}
                                   className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
                                   title="Download High-Res"
@@ -3417,7 +3421,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       {({ active }) => (
                                         <button
                                           onClick={() => {
-                                            const text = `I've converted "${msg.conversion.fileName}" into voice audio using AIVA! ${window.location.href}`;
+                                            const text = `I've converted "${msg.conversion.fileName}" into voice audio using AISA! ${window.location.href}`;
                                             const url = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
                                               ? `whatsapp://send?text=${encodeURIComponent(text)}`
                                               : `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`;
@@ -3434,7 +3438,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                       {({ active }) => (
                                         <button
                                           onClick={() => {
-                                            const text = `AIVA Audio Conversion: ${msg.conversion.fileName}`;
+                                            const text = `AISA Audio Conversion: ${msg.conversion.fileName}`;
                                             const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
                                             window.open(url, '_blank');
                                           }}
@@ -3676,7 +3680,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
               {isLoading && (
                 <div className="flex items-start gap-4 max-w-4xl mx-auto">
                   <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0">
-                    <img src="/logo/AIVA.gif?v=3" alt="AIVA" className="w-5 h-5 object-contain" />
+                    <img src={Logo} alt="AISA" className="w-5 h-5 object-contain" />
 
                   </div>
                   <div className="px-5 py-3 rounded-2xl rounded-tl-none bg-surface border border-border flex items-center gap-3">
@@ -3708,7 +3712,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
 
         {/* Welcome Screen - Compact Fixed Overlay */}
         {messages.length === 0 && (
-          <div className="absolute inset-0 z-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden no-scrollbar pointer-events-auto px-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))', paddingBottom: '6rem' }}>
+          <div className="absolute inset-0 z-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden no-scrollbar pointer-events-auto px-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))', paddingBottom: '5rem' }}>
             {/* Dreamy Background blobs - AI Mall Style */}
             <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
               <motion.div
@@ -3742,16 +3746,22 @@ For "Remix" requests with an attachment, analyze the attached image, then create
             <div className="flex flex-col items-center w-full max-w-5xl px-2 sm:px-4 pt-4 sm:pt-8 text-center">
               <div className="select-none flex items-center justify-center w-full" style={{ minHeight: 'auto', marginTop: '0.25rem', marginBottom: '0.5rem' }}>
                 <img
-                  src="/logo/AIVA.gif?v=3"
-                  alt="AIVA Icon"
+                  src={Logo}
+                  alt="AISA Icon"
                   className="object-contain drop-shadow-2xl pointer-events-none shrink-0"
-                  style={{ width: 'clamp(2.5rem, 8vw, 4.5rem)', height: 'clamp(2.5rem, 8vw, 4.5rem)' }}
+                  style={{ width: 'clamp(3rem, 10vw, 5.5rem)', height: 'clamp(3rem, 10vw, 5.5rem)' }}
                   draggable={false}
                   onDragStart={(e) => e.preventDefault()}
                 />
               </div>
               <h2 className="font-extrabold text-maintext tracking-tight w-full px-4" style={{ fontSize: 'clamp(1rem, 4.5vw, 1.6rem)', lineHeight: '1.2', marginBottom: '0.75rem' }}>
-                {t('welcomeMessage')}
+                {t('welcomeMessage').includes('AISA™') ? (
+                  <>
+                    {t('welcomeMessage').split('AISA™')[0]}
+                    <span className="aisa-glitch text-primary inline-block font-semibold" data-text="AISA™">AISA™</span>
+                    {t('welcomeMessage').split('AISA™')[1]}
+                  </>
+                ) : t('welcomeMessage')}
               </h2>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-4 w-full px-1 sm:px-4 animate-in fade-in duration-700 pb-2">
@@ -3819,7 +3829,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
         )}
 
         {/* Fixed Input Area - ChatGPT Style (Enhanced Transparency) */}
-        <div className="absolute bottom-0 left-0 right-0 z-40 bg-transparent backdrop-blur-2xl" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))', paddingTop: '1.25rem' }}>
+        <div className="absolute bottom-0 left-0 right-0 z-40 bg-transparent backdrop-blur-2xl" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))', paddingTop: '0.75rem' }}>
           {/* Subtle glow for input area */}
           <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
           <div className="max-w-5xl mx-auto relative px-2 sm:px-4">
@@ -3871,7 +3881,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
               </div>
             )}
 
-            <form onSubmit={handleSendMessage} className="relative w-full max-w-5xl mx-auto flex items-center gap-1.5 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-[24px] p-1.5 shadow-[0_15px_45px_-10px_rgba(0,0,0,0.08)] dark:shadow-[0_15px_45px_-10px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_20px_55px_-10px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_20px_55px_-10px_rgba(0,0,0,0.6)] hover:border-primary/40 hover:bg-white/70 dark:hover:bg-gray-900/60 z-50">
+            <form onSubmit={handleSendMessage} className="relative w-full max-w-5xl mx-auto flex items-end gap-1.5 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl border border-white/80 dark:border-white/10 rounded-[24px] p-1.5 shadow-[0_15px_45px_-10px_rgba(0,0,0,0.08)] dark:shadow-[0_15px_45px_-10px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_20px_55px_-10px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_20px_55px_-10px_rgba(0,0,0,0.6)] hover:border-primary/40 hover:bg-white/70 dark:hover:bg-gray-900/60 z-50">
               <input
                 id="file-upload"
                 type="file"
@@ -3914,7 +3924,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
               />
 
               {/* Left Actions Group */}
-              <div className="flex items-center gap-0.5 pl-0.5 shrink-0">
+              <div className="flex items-end gap-0.5 pl-0.5 pb-0.5 shrink-0">
                 <AnimatePresence>
                   {isAttachMenuOpen && (
                     <motion.div
@@ -3970,7 +3980,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     ref={toolsBtnRef}
                     onClick={() => setIsToolsMenuOpen(!isToolsMenuOpen)}
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isToolsMenuOpen || isImageGeneration || isDeepSearch || isAudioConvertMode || isDocumentConvert || isCodeWriter ? 'bg-primary/10 text-primary scale-105' : 'text-black/40 hover:text-primary hover:bg-black/[0.03]'}`}
-                    title="AIVA Capabilities"
+                    title="AISA Capabilities"
                   >
                     <Sparkles className="w-5 h-5" />
                   </button>
@@ -3987,7 +3997,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                       >
                         <div className="p-3 bg-black/[0.02] dark:bg-white/5 border-b border-black/5 dark:border-white/10 shrink-0">
                           <h3 className="text-[10px] font-black text-black/40 dark:text-white/50 uppercase tracking-[0.15em] flex items-center gap-2">
-                            <Sparkles className="w-3.5 h-3.5 text-primary" /> AIVA Magic Tools
+                            <Sparkles className="w-3.5 h-3.5 text-primary" /> AISA Magic Tools
                           </h3>
                         </div>
                         <div className="p-2 space-y-1 overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(100svh - 200px)' }}>
@@ -4088,7 +4098,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             </div>
                             <div className="flex-1">
                               <span className={`text-[15px] font-bold block ${isCodeWriter ? 'text-primary' : 'text-black/80 dark:text-white/90'}`}>Code Writer</span>
-                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">Write & debug code with AIVA</span>
+                              <span className="text-[10px] text-black/40 dark:text-white/40 font-medium">Write & debug code with AISA</span>
                             </div>
                           </button>
                         </div>
@@ -4163,15 +4173,15 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     }
                   }}
                   onPaste={handlePaste}
-                  placeholder={isLimitReached ? "Chat limit reached. Sign in to continue." : (isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : "Ask AIVA")}
+                  placeholder={isLimitReached ? "Chat limit reached. Sign in to continue." : (isAudioConvertMode ? "Enter text to convert..." : isDocumentConvert ? "Upload file & ask to convert..." : "Ask AISA")}
                   rows={1}
-                  className={`w-full bg-transparent border-0 focus:ring-0 outline-none focus:outline-none px-2 text-black/80 dark:text-white/90 font-medium placeholder-black/30 dark:placeholder-white/30 resize-none overflow-y-auto custom-scrollbar leading-relaxed aiva-scalable-text ${isLimitReached ? 'cursor-not-allowed opacity-50' : ''}`}
+                  className={`w-full bg-transparent border-0 focus:ring-0 outline-none focus:outline-none px-2 text-black/80 dark:text-white/90 font-medium placeholder-black/30 dark:placeholder-white/30 resize-none overflow-y-auto custom-scrollbar leading-relaxed AISA-scalable-text ${isLimitReached ? 'cursor-not-allowed opacity-50' : ''}`}
                   style={{ minHeight: '1.5em', height: '1.5em', maxHeight: '150px', lineHeight: '1.5' }}
                 />
               </div>
 
               {/* Right Actions Group */}
-              <div className="flex items-center gap-1 sm:gap-1.5 pr-0.5 shrink-0">
+              <div className="flex items-end gap-1.5 pr-0.5 pb-0.5 shrink-0">
                 {isListening && (
                   <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 rounded-full border border-red-500/20 mr-2">
                     <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />

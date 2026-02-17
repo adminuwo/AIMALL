@@ -37,11 +37,13 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
 
                         <div className="space-y-1">
                             {(() => {
+                                const name = t(agent.agentName);
+                                const isAiva = name.toUpperCase() === 'AIVA';
                                 if (isDark) {
                                     return (
                                         <>
-                                            <h3 className="text-[16px] md:text-[19px] font-bold text-white tracking-tight uppercase leading-tight agent-name-text">
-                                                {t(agent.agentName)}
+                                            <h3 className={`text-[16px] md:text-[19px] font-bold text-white tracking-tight uppercase leading-tight agent-name-text ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
+                                                {name}
                                             </h3>
                                             <p className="text-[9px] md:text-[11px] text-white/90 font-semibold truncate max-w-[220px] agent-desc-text">
                                                 {t(agent.description)}
@@ -53,8 +55,8 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                                 // Light Mode Fallback
                                 return (
                                     <>
-                                        <h3 className={`text-[16px] md:text-[19px] font-black text-gray-900 tracking-tight uppercase leading-tight`}>
-                                            {t(agent.agentName)}
+                                        <h3 className={`text-[16px] md:text-[19px] font-black text-gray-900 tracking-tight uppercase leading-tight ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
+                                            {name}
                                         </h3>
                                         <p className={`text-[9px] md:text-[11px] text-gray-500 font-semibold truncate max-w-[220px] opacity-80`}>
                                             {t(agent.description)}

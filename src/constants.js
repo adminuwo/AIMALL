@@ -1,4 +1,6 @@
-export const logo = "/logo/Logo.png";
+import Logo from './assets/Logo.svg';
+
+export const logo = Logo;
 export const name = "AI-MALL";
 
 export const faqs = [

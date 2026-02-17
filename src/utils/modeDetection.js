@@ -1,5 +1,5 @@
 /**
- * Mode Detection Utility for AIVA Frontend
+ * Mode Detection Utility for AISA Frontend
  * Mirrors backend mode detection for UI consistency
  */
 

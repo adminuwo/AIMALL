@@ -7,6 +7,7 @@ import axios from 'axios';
 import { getUserData, setUserData } from '../userStore/userData';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import Logo from '../assets/Logo.svg';
 
 export default function VerificationForm() {
     const { t, language } = useLanguage();
@@ -79,22 +80,17 @@ export default function VerificationForm() {
             <div className="relative z-10 w-full max-w-md">
 
                 {/* Header */}
-                <div className="text-center mb-10">
+                <div className="text-center mb-0">
                     <motion.div
-                        initial={{ scale: 0.5, opacity: 0 }}
+                        initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="inline-flex items-center justify-center w-28 h-28 bg-white/60 backdrop-blur-2xl rounded-[40px] shadow-glass border border-white/80 mb-10 mx-auto group relative"
+                        className="mb-0 mx-auto flex items-center justify-center p-0"
                     >
-                        {/* Highlights & Glow */}
-                        <div className="absolute inset-0 bg-[#8b5cf6]/20 rounded-[40px] animate-pulse blur-2xl -z-10 transition-colors duration-500" />
-                        <div className="absolute -inset-2 bg-gradient-to-br from-[#d946ef]/30 to-[#8b5cf6]/30 rounded-[45px] blur-md opacity-50 -z-10 animate-spin-slow" />
-
-                        <div className="w-16 h-16 rounded-[24px] bg-white flex items-center justify-center text-[#8B5CF6] shadow-[0_15px_35px_-5px_rgba(139,92,246,0.3)] border border-purple-100 group-hover:scale-110 transition-transform duration-500 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-[#8b5cf6]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Mail className="w-8 h-8 relative z-10" />
-                        </div>
+                        <img src={Logo} alt="AI Mall Logo" className="w-32 h-32 object-contain" />
                     </motion.div>
+                </div>
 
+                <div className="text-center mb-10">
                     <h2 className="text-5xl font-black text-gray-900 tracking-tighter mb-2">{t('verify')} <span className="text-[#8b5cf6]">{t('recovery') || 'Identity'}.</span></h2>
                     <p className="text-gray-500 font-black tracking-[0.2em] text-[10px] opacity-70">
                         <span className="uppercase">{t('confirmingNeuralLink')}</span> <span className="text-[#8b5cf6] lowercase">{email}</span>

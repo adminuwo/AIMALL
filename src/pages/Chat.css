@@ -18,3 +18,308 @@ h2.dark-mode-heading {
     color: #FFFFFF !important;
     font-weight: 900 !important;
 }
+
+/* Premium AISA Glitch Effect */
+.aisa-glitch {
+    position: relative;
+    display: inline-block;
+    color: inherit;
+    text-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
+    transition: text-shadow 0.3s ease;
+}
+
+.aisa-glitch:hover {
+    text-shadow: 0 0 15px rgba(139, 92, 246, 0.6), 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.aisa-glitch::before,
+.aisa-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+}
+
+.aisa-glitch::before {
+    animation: aisa-glitch-1 3s infinite linear alternate-reverse;
+    text-shadow: 2px 0 #ff00c1, 0 0 5px rgba(255, 0, 193, 0.4);
+    clip: rect(44px, 450px, 56px, 0);
+    z-index: -1;
+}
+
+.aisa-glitch::after {
+    animation: aisa-glitch-2 2s infinite linear alternate-reverse;
+    text-shadow: -2px 0 #00fff9, 0 0 5px rgba(0, 255, 249, 0.4);
+    clip: rect(12px, 450px, 20px, 0);
+    z-index: -2;
+}
+
+@keyframes aisa-glitch-1 {
+    0% {
+        clip: rect(10px, 9999px, 20px, 0);
+        transform: skew(0.5deg);
+    }
+
+    5% {
+        clip: rect(30px, 9999px, 15px, 0);
+        transform: skew(0.1deg);
+    }
+
+    10% {
+        clip: rect(60px, 9999px, 80px, 0);
+        transform: skew(0.4deg);
+    }
+
+    15% {
+        clip: rect(40px, 9999px, 30px, 0);
+        transform: skew(0.2deg);
+    }
+
+    20% {
+        clip: rect(80px, 9999px, 90px, 0);
+        transform: skew(0.3deg);
+    }
+
+    25% {
+        clip: rect(15px, 9999px, 25px, 0);
+        transform: skew(0.1deg);
+    }
+
+    30% {
+        clip: rect(50px, 9999px, 60px, 0);
+        transform: skew(0.2deg);
+    }
+
+    35% {
+        clip: rect(20px, 9999px, 40px, 0);
+        transform: skew(0.4deg);
+    }
+
+    40% {
+        clip: rect(70px, 9999px, 85px, 0);
+        transform: skew(0.3deg);
+    }
+
+    45% {
+        clip: rect(10px, 9999px, 30px, 0);
+        transform: skew(0.1deg);
+    }
+
+    50% {
+        clip: rect(30px, 9999px, 50px, 0);
+        transform: skew(0.2deg);
+    }
+
+    55% {
+        clip: rect(60px, 9999px, 70px, 0);
+        transform: skew(0.4deg);
+    }
+
+    60% {
+        clip: rect(40px, 9999px, 60px, 0);
+        transform: skew(0.3deg);
+    }
+
+    65% {
+        clip: rect(80px, 9999px, 100px, 0);
+        transform: skew(0.2deg);
+    }
+
+    70% {
+        clip: rect(15px, 9999px, 35px, 0);
+        transform: skew(0.1deg);
+    }
+
+    75% {
+        clip: rect(50px, 9999px, 80px, 0);
+        transform: skew(0.4deg);
+    }
+
+    80% {
+        clip: rect(20px, 9999px, 50px, 0);
+        transform: skew(0.2deg);
+    }
+
+    85% {
+        clip: rect(70px, 9999px, 95px, 0);
+        transform: skew(0.3deg);
+    }
+
+    90% {
+        clip: rect(10px, 9999px, 40px, 0);
+        transform: skew(0.1deg);
+    }
+
+    95% {
+        clip: rect(30px, 9999px, 60px, 0);
+        transform: skew(0.4deg);
+    }
+
+    100% {
+        clip: rect(60px, 9999px, 90px, 0);
+        transform: skew(0.2deg);
+    }
+}
+
+@keyframes aisa-glitch-2 {
+    0% {
+        clip: rect(40px, 9999px, 60px, 0);
+        transform: skew(0.2deg);
+    }
+
+    5% {
+        clip: rect(10px, 9999px, 30px, 0);
+        transform: skew(0.4deg);
+    }
+
+    10% {
+        clip: rect(70px, 9999px, 90px, 0);
+        transform: skew(0.1deg);
+    }
+
+    15% {
+        clip: rect(20px, 9999px, 50px, 0);
+        transform: skew(0.3deg);
+    }
+
+    20% {
+        clip: rect(60px, 9999px, 80px, 0);
+        transform: skew(0.2deg);
+    }
+
+    25% {
+        clip: rect(30px, 9999px, 45px, 0);
+        transform: skew(0.1deg);
+    }
+
+    30% {
+        clip: rect(80px, 9999px, 100px, 0);
+        transform: skew(0.4deg);
+    }
+
+    35% {
+        clip: rect(15px, 9999px, 35px, 0);
+        transform: skew(0.3deg);
+    }
+
+    40% {
+        clip: rect(50px, 9999px, 75px, 0);
+        transform: skew(0.2deg);
+    }
+
+    45% {
+        clip: rect(90px, 9999px, 110px, 0);
+        transform: skew(0.1deg);
+    }
+
+    50% {
+        clip: rect(20px, 9999px, 40px, 0);
+        transform: skew(0.3deg);
+    }
+
+    55% {
+        clip: rect(70px, 9999px, 85px, 0);
+        transform: skew(0.4deg);
+    }
+
+    60% {
+        clip: rect(10px, 9999px, 50px, 0);
+        transform: skew(0.2deg);
+    }
+
+    65% {
+        clip: rect(60px, 9999px, 90px, 0);
+        transform: skew(0.1deg);
+    }
+
+    70% {
+        clip: rect(30px, 9999px, 65px, 0);
+        transform: skew(0.3deg);
+    }
+
+    75% {
+        clip: rect(85px, 9999px, 105px, 0);
+        transform: skew(0.4deg);
+    }
+
+    80% {
+        clip: rect(15px, 9999px, 45px, 0);
+        transform: skew(0.2deg);
+    }
+
+    85% {
+        clip: rect(50px, 9999px, 80px, 0);
+        transform: skew(0.1deg);
+    }
+
+    90% {
+        clip: rect(10px, 9999px, 40px, 0);
+        transform: skew(0.3deg);
+    }
+
+    95% {
+        clip: rect(70px, 9999px, 100px, 0);
+        transform: skew(0.4deg);
+    }
+
+    100% {
+        clip: rect(20px, 9999px, 60px, 0);
+        transform: skew(0.2deg);
+    }
+}
+
+/* AISA Specific Chat Enhancements */
+.aisa-bubble-glow {
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1) !important;
+    position: relative;
+}
+
+.aisa-bubble-glow::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, transparent, rgba(139, 92, 246, 0.2), transparent);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    animation: border-glimmer 4s infinite linear;
+}
+
+@keyframes border-glimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+}
+
+.aisa-icon-glitch {
+    filter: drop-shadow(0 0 2px rgba(139, 92, 246, 0.5));
+    transition: all 0.3s ease;
+}
+
+.aisa-icon-glitch:hover {
+    filter: drop-shadow(0 0 5px rgba(255, 0, 193, 0.6)) drop-shadow(0 0 5px rgba(0, 255, 249, 0.6));
+    transform: scale(1.1);
+}
+
+/* Scrollbar Refinement */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
