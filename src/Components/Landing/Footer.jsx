@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { Github, Twitter, Linkedin, Mail, ArrowRight, Heart, Cpu, Sparkles, Shield, Zap, Globe, MessageSquare, MapPin } from 'lucide-react';
-import Logo from '../../assets/Logo.svg';
+const Logo = "/logo/Logo.png";
 import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
 import LinkedinIcon from '../../assets/social-icons/Linkedin.svg';

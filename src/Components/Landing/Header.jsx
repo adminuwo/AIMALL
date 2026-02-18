@@ -7,8 +7,7 @@ import { themeState } from '../../userStore/userData';
 import { Globe, Search, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import Logo from '../../assets/Logo.svg';
-const logo = Logo;
+const logo = "/logo/Logo.png";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -59,7 +58,7 @@ const Header = () => {
         {/* Logo Section */}
         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate(AppRoute.HOME)}>
           <div className="relative">
-            <img className='w-10 h-10 md:w-14 md:h-14 transition-transform duration-500 group-hover:scale-110' src={logo} alt="AI MALL" />
+            <img className='w-12 h-12 md:w-16 md:h-16 object-contain transition-transform duration-500 group-hover:scale-110' src={logo} alt="AI MALL" />
             <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
           </div>
           <span className={`font-black text-lg md:text-2xl tracking-tighter uppercase transition-colors duration-300 ${theme === 'Dark' ? 'text-white' : 'text-[#1A1A1A]'}`}>

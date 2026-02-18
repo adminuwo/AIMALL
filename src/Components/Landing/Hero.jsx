@@ -53,6 +53,7 @@ import { useRecoilValue } from 'recoil';
 import { themeState } from '../../userStore/userData';
 import { useLanguage } from '../../context/LanguageContext';
 import './Hero.css';
+const Logo = "/logo/Logo.png";
 
 const Hero = () => {
     const navigate = useNavigate();
@@ -84,10 +85,19 @@ const Hero = () => {
     return (
         <section className="relative overflow-visible min-h-[400px] sm:min-h-[500px] flex items-center py-6 sm:py-10 md:pb-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 xl:px-16 w-full flex flex-col items-center justify-center text-center md:-mt-10">
-                <div className="z-10 max-w-4xl w-full">
+                <div className="z-10 max-w-4xl w-full flex flex-col items-center">
+
+                    <div className={`mb-6 relative transition-all duration-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                        <div className="absolute inset-0 bg-purple-500/30 blur-3xl rounded-full scale-110"></div>
+                        <img
+                            src={Logo}
+                            alt="AI Mall Logo"
+                            className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain relative z-10 drop-shadow-2xl animate-float"
+                        />
+                    </div>
 
                     <h1
-                        className={`${isDark ? 'text-white' : 'hero-heading-dark'} text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 drop-shadow-sm transition-[opacity,transform,color] duration-500 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                        className={`${isDark ? 'text-white' : 'hero-heading-dark'} text-2xl sm:text-3xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.2] mb-3 sm:mb-4 md:mb-0 drop-shadow-sm transition-[opacity,transform,color] duration-500 delay-100 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                     >
                         {t('heroHeading')} <br />
                         {t('heroHeadingLine2')}
@@ -96,12 +106,12 @@ const Hero = () => {
                     <div className="h-3 sm:h-4 md:h-6" />
 
                     <p
-                        className={`${isDark ? 'text-white/90' : 'hero-subtext-dark'} text-sm sm:text-base md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-[opacity,transform,color] duration-500 delay-75 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                        className={`${isDark ? 'text-white/90' : 'hero-subtext-dark'} text-sm sm:text-base md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-10 font-medium drop-shadow-sm transition-[opacity,transform,color] duration-500 delay-200 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                     >
                         {t('heroSubheading')}
                     </p>
 
-                    <div className={`relative w-full flex flex-col md:flex-row gap-4 sm:gap-6 justify-center items-center transition-[opacity,transform] duration-500 delay-150 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+                    <div className={`relative w-full flex flex-col md:flex-row gap-4 sm:gap-6 justify-center items-center transition-[opacity,transform] duration-500 delay-300 ease-out transform px-4 sm:px-0 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
 
                         {/* ================= AI MALL ================= */}
                         <div
