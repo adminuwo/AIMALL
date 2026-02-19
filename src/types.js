@@ -97,5 +97,5 @@ export const apis = {
   verifyPayment: `${API}/payment/verify-payment`,
   getPaymentHistory: `${API}/payment/history`,
   resendCode: `${API}/auth/resend-code`,
-  BASE_URL: import.meta.env.VITE_BASE_URL || (isLocal ? "http://localhost:8080" : "https://ai-mall-backend-rm4d.onrender.com"),
+  BASE_URL: import.meta.env.VITE_BASE_URL,
 };
