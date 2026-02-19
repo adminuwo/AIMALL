@@ -69,8 +69,8 @@ export const AppRoute = {
 // Environment detection
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-export const API = import.meta.env.VITE_API_URL;
-console.log('backend api:',API);
+export const API = window.env?.VITE_API_URL || import.meta.env.VITE_API_URL;
+console.log('backend api:', API);
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
@@ -97,5 +97,5 @@ export const apis = {
   verifyPayment: `${API}/payment/verify-payment`,
   getPaymentHistory: `${API}/payment/history`,
   resendCode: `${API}/auth/resend-code`,
-  BASE_URL: import.meta.env.VITE_BASE_URL,
+  BASE_URL: window.env?.VITE_BASE_URL || import.meta.env.VITE_BASE_URL,
 };
