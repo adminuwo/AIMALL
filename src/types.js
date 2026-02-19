@@ -69,9 +69,8 @@ export const AppRoute = {
 // Environment detection
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
-export const API = import.meta.env.VITE_API_URL || (isLocal
-  ? "http://localhost:8080/api"
-  : "https://ai-mall-backend-rm4d.onrender.com/api");
+export const API = import.meta.env.VITE_API_URL;
+console.log(API);
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
