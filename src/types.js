@@ -70,7 +70,7 @@ export const AppRoute = {
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
 export const API = import.meta.env.VITE_API_URL;
-console.log(API);
+console.log('backend api:',API);
 
 export const apis = {
   emailVerificationApi: `${API}/email_varification`,
