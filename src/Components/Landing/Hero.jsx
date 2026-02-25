@@ -161,6 +161,11 @@ const Hero = () => {
                             </div>
                         </div>
 
+                        {/* Spacer for AI Mall Card on mobile - pushes A Series button down */}
+                        <div
+                            className={`transition-all duration-300 ease-in-out md:hidden w-full ${showAIMall ? 'h-[180px]' : 'h-0'}`}
+                        />
+
                         {/* ================= A SERIES ================= */}
                         <div
                             className="relative w-full max-w-[280px] md:w-auto flex flex-col items-center"
@@ -211,9 +216,9 @@ const Hero = () => {
 
                     </div>
 
-                    {/* Dynamic Spacer for mobile - pushes HowItWorks down ONLY when A Series card is open */}
+                    {/* Spacer for A Series Card on mobile - pushes HowItWorks down */}
                     <div
-                        className={`transition-all duration-300 ease-in-out md:hidden ${showASeries ? 'h-[150px]' : 'h-0'}`}
+                        className={`transition-all duration-300 ease-in-out md:hidden ${showASeries ? 'h-[180px]' : 'h-0'}`}
                     />
                 </div>
             </div>

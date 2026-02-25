@@ -8,7 +8,7 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
     return (
         <div className="w-full h-full">
             <div
-                className={`relative h-[280px] md:h-[340px] w-full ${isDark ? 'bg-[#12182B] border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(139,92,246,0.2)]' : 'bg-white border-white shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:shadow-[0_30px_60px_-10px_rgba(139,92,246,0.35)]'} rounded-[32px] md:rounded-[48px] border overflow-hidden flex flex-col transition-all duration-300 ease-out cursor-pointer transform hover:-translate-y-2 hover:scale-[1.04] group`}
+                className={`relative h-[320px] md:h-[340px] w-full ${isDark ? 'bg-[#12182B] border-white/5 shadow-[0_10px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_50px_rgba(139,92,246,0.2)]' : 'bg-white border-white shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:shadow-[0_30px_60px_-10px_rgba(139,92,246,0.35)]'} rounded-[32px] md:rounded-[48px] border overflow-hidden flex flex-col transition-all duration-300 ease-out cursor-pointer transform hover:-translate-y-2 hover:scale-[1.04] group`}
             >
                 {/* Background Layer: Radial Glow & Watermark Icon */}
                 <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none">
@@ -27,7 +27,7 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                 <div className="relative z-10 h-full w-full flex flex-col items-center justify-between p-6 md:p-8 pt-8 md:pt-12 pb-6 md:pb-10">
                     {/* Title & Description Section */}
                     <div className="flex flex-col items-center space-y-3 md:space-y-4 w-full text-center">
-                        <div className="w-16 h-16 md:w-24 md:h-24 transition-transform duration-500 group-hover:scale-110 flex items-center justify-center pointer-events-none drop-shadow-xl">
+                        <div className="w-24 h-24 md:w-24 md:h-24 transition-transform duration-500 group-hover:scale-110 flex items-center justify-center pointer-events-none drop-shadow-xl">
                             <img
                                 src={agent.avatar}
                                 alt={agent.agentName}
@@ -42,10 +42,10 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                                 if (isDark) {
                                     return (
                                         <>
-                                            <h3 className={`text-[16px] md:text-[19px] font-bold text-white tracking-tight uppercase leading-tight agent-name-text ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
+                                            <h3 className={`text-[24px] md:text-[19px] font-bold text-white tracking-tight uppercase leading-tight agent-name-text ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
                                                 {name}
                                             </h3>
-                                            <p className="text-[9px] md:text-[11px] text-white/90 font-semibold truncate max-w-[220px] agent-desc-text">
+                                            <p className="text-[13px] md:text-[11px] text-white/90 font-semibold line-clamp-2 max-w-[280px] agent-desc-text">
                                                 {t(agent.description)}
                                             </p>
                                         </>
@@ -55,10 +55,10 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                                 // Light Mode Fallback
                                 return (
                                     <>
-                                        <h3 className={`text-[16px] md:text-[19px] font-black text-gray-900 tracking-tight uppercase leading-tight ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
+                                        <h3 className={`text-[24px] md:text-[19px] font-black text-gray-900 tracking-tight uppercase leading-tight ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
                                             {name}
                                         </h3>
-                                        <p className={`text-[9px] md:text-[11px] text-gray-500 font-semibold truncate max-w-[220px] opacity-80`}>
+                                        <p className={`text-[13px] md:text-[11px] text-gray-500 font-semibold line-clamp-2 max-w-[280px] opacity-80`}>
                                             {t(agent.description)}
                                         </p>
                                     </>
@@ -86,7 +86,7 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                                     toggleBuy(agent._id);
                                 }
                             }}
-                            className={`bg-[#8B5CF6] hover:bg-[#7C3AED] text-white py-2.5 md:py-3 px-6 md:px-8 rounded-[20px] md:rounded-[24px] font-black text-[9px] md:text-[11px] uppercase tracking-widest shadow-lg ${isDark ? 'shadow-purple-900/20' : 'shadow-purple-200/50'} flex items-center gap-2 transition-all duration-300 hover:shadow-xl hover:translate-x-1 active:scale-95`}
+                            className={`bg-[#8B5CF6] hover:bg-[#7C3AED] text-white py-2.5 md:py-3 px-6 md:px-8 rounded-[20px] md:rounded-[24px] font-black text-[12px] md:text-[11px] uppercase tracking-widest shadow-lg ${isDark ? 'shadow-purple-900/20' : 'shadow-purple-200/50'} flex items-center gap-2 transition-all duration-300 hover:shadow-xl hover:translate-x-1 active:scale-95`}
                         >
                             <Play size={14} fill="white" />
                             {t('use')}
