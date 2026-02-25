@@ -816,7 +816,9 @@ const Chat = () => {
       }
 
       const prompt = overridePrompt || inputRef.current.value;
+      setLoadingText("Generating Image... 🎨");
       setIsLoading(true);
+
 
       // Add user's prompt message first (shows on right side like normal chat)
       const userMsgId = Date.now().toString();
@@ -1621,19 +1623,23 @@ const Chat = () => {
       userMsg.mode = detectedMode;
 
       // Determine loading intent for UI feedback
+      // Priority: active mode state > detected mode > content keywords
       const lowerContent = (userMsg.content || "").toLowerCase();
-      if (
+      if (isImageGeneration || detectedMode === 'IMAGE_GENERATION' || detectedMode === 'IMAGE_GEN') {
+        setLoadingText("Generating Image... 🎨");
+      } else if (
         (lowerContent.includes('image') || lowerContent.includes('photo') || lowerContent.includes('pic') || lowerContent.includes('draw')) &&
         (lowerContent.includes('generate') || lowerContent.includes('create') || lowerContent.includes('make') || lowerContent.includes('show'))
       ) {
         setLoadingText("Generating Image... 🎨");
-      } else if (lowerContent.includes('video')) {
+      } else if (lowerContent.includes('video') || detectedMode === 'VIDEO_GENERATION') {
         setLoadingText("Generating Video... 🎥");
       } else if (documentConvertActive) {
         setLoadingText("Converting Document... 🔄");
       } else {
         setLoadingText("Thinking...");
       }
+
 
       handleRemoveFile(); // Clear file after sending
       setIsLoading(true);
@@ -3733,41 +3739,214 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                 </div>
               ))}
 
-              {isLoading && (
-                <div className="flex items-start gap-4 max-w-4xl mx-auto">
-                  <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0">
-                    <img src={Logo} alt="AISA" className="w-5 h-5 object-contain" />
+              {isLoading && (() => {
+                const isImageGen = loadingText.toLowerCase().includes('image');
+                const isVideoGen = loadingText.toLowerCase().includes('video');
 
-                  </div>
-                  <div className="px-5 py-3 rounded-2xl rounded-tl-none bg-surface border border-border flex items-center gap-3">
-                    <span className="text-sm font-medium text-subtext animate-pulse">
-                      {loadingText}
-                    </span>
-                    <div className="flex gap-1">
-                      <span
-                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
-                        style={{ animationDelay: '0ms' }}
-                      ></span>
-                      <span
-                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
-                        style={{ animationDelay: '150ms' }}
-                      ></span>
-                      <span
-                        className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce"
-                        style={{ animationDelay: '300ms' }}
-                      ></span>
+                if (isImageGen) {
+                  // ─── FULL-BLEED GLOBE IMAGE LOADER ───
+                  return (
+                    <div className="flex items-start gap-3 max-w-4xl mx-auto w-full px-1">
+                      <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0 mt-1">
+                        <img src={Logo} alt="AI MALL" className="w-5 h-5 object-contain" />
+                      </div>
+
+                      <div className="flex flex-col gap-2.5">
+                        {/* Full-bleed card */}
+                        <div style={{
+                          width: '260px', height: '260px', borderRadius: '18px',
+                          overflow: 'hidden', position: 'relative',
+                          boxShadow: '0 4px 24px rgba(109,40,217,0.22)',
+                        }}>
+
+                          {/* ── PLANET SURFACE (fills entire card) ── */}
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'radial-gradient(ellipse at 38% 38%, #a78bfa 0%, #7c3aed 28%, #4c1d95 58%, #2e1065 80%, #1a0533 100%)',
+                            animation: 'globe-surface-shift 6s ease-in-out infinite alternate',
+                          }} />
+
+                          {/* Atmosphere glow — edge highlight */}
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: 'radial-gradient(ellipse at center, transparent 55%, rgba(167,139,250,0.35) 80%, rgba(196,165,253,0.55) 100%)',
+                            pointerEvents: 'none',
+                          }} />
+
+                          {/* Planet surface texture — cloud-like noise */}
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: `
+                              radial-gradient(ellipse 80px 40px at 30% 45%, rgba(196,165,253,0.18) 0%, transparent 100%),
+                              radial-gradient(ellipse 60px 30px at 65% 30%, rgba(167,139,250,0.14) 0%, transparent 100%),
+                              radial-gradient(ellipse 90px 50px at 70% 65%, rgba(124,58,237,0.20) 0%, transparent 100%),
+                              radial-gradient(ellipse 50px 25px at 20% 70%, rgba(196,165,253,0.12) 0%, transparent 100%)
+                            `,
+                            animation: 'globe-clouds 8s ease-in-out infinite alternate',
+                          }} />
+
+                          {/* ── SVG GLOBE GRID LINES ── */}
+                          <svg
+                            viewBox="0 0 260 260"
+                            style={{
+                              position: 'absolute', inset: 0, width: '100%', height: '100%',
+                              opacity: 0.28, animation: 'sphere-spin-y 12s linear infinite',
+                            }}
+                          >
+                            {/* Equator */}
+                            <ellipse cx="130" cy="130" rx="128" ry="38" fill="none" stroke="rgba(221,214,254,0.9)" strokeWidth="1" />
+                            {/* Latitude lines */}
+                            <ellipse cx="130" cy="95" rx="110" ry="30" fill="none" stroke="rgba(196,165,253,0.6)" strokeWidth="0.8" />
+                            <ellipse cx="130" cy="165" rx="110" ry="30" fill="none" stroke="rgba(196,165,253,0.6)" strokeWidth="0.8" />
+                            <ellipse cx="130" cy="60" rx="78" ry="20" fill="none" stroke="rgba(167,139,250,0.4)" strokeWidth="0.7" />
+                            <ellipse cx="130" cy="200" rx="78" ry="20" fill="none" stroke="rgba(167,139,250,0.4)" strokeWidth="0.7" />
+                            {/* Vertical meridian lines */}
+                            <ellipse cx="130" cy="130" rx="35" ry="128" fill="none" stroke="rgba(196,165,253,0.5)" strokeWidth="0.8" />
+                            <ellipse cx="130" cy="130" rx="88" ry="128" fill="none" stroke="rgba(167,139,250,0.35)" strokeWidth="0.7" />
+                            <ellipse cx="130" cy="130" rx="128" ry="128" fill="none" stroke="rgba(221,214,254,0.3)" strokeWidth="0.6" />
+                          </svg>
+
+                          {/* ── RENDER SCANLINE — moves top to bottom, "image forming" ── */}
+                          <div style={{
+                            position: 'absolute', left: 0, right: 0, height: '3px',
+                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 40%, rgba(221,214,254,1) 50%, rgba(255,255,255,0.9) 60%, transparent)',
+                            boxShadow: '0 0 12px 4px rgba(196,165,253,0.7)',
+                            animation: 'scanline-down 1.8s ease-in-out infinite',
+                          }} />
+
+                          {/* "Image forming" blur overlay — fades to simulate reveal */}
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            backdropFilter: 'blur(0px)',
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 100%)',
+                            animation: 'image-forming 3s ease-in-out infinite',
+                            pointerEvents: 'none',
+                          }} />
+
+                          {/* Corner sparkles */}
+                          {[[8, 8], [252, 8], [8, 252], [252, 252]].map(([x, y], i) => (
+                            <div key={i} style={{
+                              position: 'absolute', left: `${x - 3}px`, top: `${y - 3}px`,
+                              width: '6px', height: '6px', borderRadius: '50%',
+                              background: 'rgba(221,214,254,0.7)',
+                              boxShadow: '0 0 4px 2px rgba(196,165,253,0.5)',
+                              animation: `image-dot-pulse 2s ease-in-out ${i * 0.3}s infinite`,
+                            }} />
+                          ))}
+
+                          {/* ── BOTTOM STATUS STRIP ── */}
+                          <div style={{
+                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                            height: '44px',
+                            background: 'linear-gradient(0deg, rgba(30,10,60,0.85) 0%, rgba(76,29,149,0.6) 100%)',
+                            backdropFilter: 'blur(12px)',
+                            display: 'flex', alignItems: 'center',
+                            paddingLeft: '14px', paddingRight: '14px',
+                            gap: '8px', justifyContent: 'space-between',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                              {[0, 0.25, 0.5].map((delay, i) => (
+                                <div key={i} style={{
+                                  width: '5px', height: '5px', borderRadius: '50%',
+                                  background: '#c4b5fd',
+                                  animation: `image-dot-pulse 1.1s ease-in-out ${delay}s infinite`,
+                                }} />
+                              ))}
+                              <span style={{
+                                fontSize: '11px', fontWeight: 700,
+                                color: 'rgba(221,214,254,0.95)', letterSpacing: '0.05em',
+                                textTransform: 'uppercase',
+                                animation: 'fade-in-out 2s ease-in-out infinite',
+                              }}>
+                                Generating…
+                              </span>
+                            </div>
+                            {/* Mini progress bar */}
+                            <div style={{ width: '60px', height: '3px', borderRadius: '99px', background: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+                              <div style={{
+                                height: '100%', borderRadius: '99px',
+                                background: 'linear-gradient(90deg, #a78bfa, #c4b5fd)',
+                                animation: 'progress-indeterminate 1.8s ease-in-out infinite',
+                              }} />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Prompt echo bar */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '2px' }}>
+                          <span style={{ fontSize: '13px' }}>🎨</span>
+                          <div style={{
+                            height: '8px', width: '130px', borderRadius: '99px',
+                            background: 'linear-gradient(90deg, #ddd6fe, #ede9fe, #ddd6fe)',
+                            backgroundSize: '200% 100%',
+                            animation: 'chatgpt-shimmer 1.6s ease-in-out infinite',
+                          }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+
+
+                if (isVideoGen) {
+                  // ─── VIDEO GENERATION LOADER ───
+                  return (
+                    <div className="flex items-start gap-3 max-w-4xl mx-auto w-full px-1">
+                      <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0 mt-1">
+                        <img src={Logo} alt="AI MALL" className="w-5 h-5 object-contain" />
+                      </div>
+                      <div className="flex flex-col gap-2.5">
+                        <div style={{ width: '300px', height: '170px', borderRadius: '14px', overflow: 'hidden', position: 'relative', background: 'linear-gradient(145deg, #e0e7ff 0%, #eef2ff 40%, #e0e7ff 70%, #c7d2fe 100%)', backgroundSize: '400% 400%', animation: 'bg-shift 3.5s ease infinite', boxShadow: '0 2px 16px 0 rgba(99,102,241,0.10)' }}>
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.50) 50%, transparent 70%)', backgroundSize: '200% 200%', animation: 'chatgpt-shimmer 2s ease-in-out infinite' }} />
+                          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '8px', background: 'rgba(99,102,241,0.12)', display: 'flex', gap: '4px', padding: '1px 8px' }}>
+                            {[...Array(18)].map((_, i) => (<div key={i} style={{ flex: 1, background: 'rgba(99,102,241,0.25)', borderRadius: '1px' }} />))}
+                          </div>
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '8px', background: 'rgba(99,102,241,0.12)', display: 'flex', gap: '4px', padding: '1px 8px' }}>
+                            {[...Array(18)].map((_, i) => (<div key={i} style={{ flex: 1, background: 'rgba(99,102,241,0.25)', borderRadius: '1px' }} />))}
+                          </div>
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            {[0, 0.15, 0.3].map((delay, i) => (<div key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1', animation: `image-dot-pulse 1.2s ease-in-out ${delay}s infinite` }} />))}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '2px' }}>
+                          <span style={{ fontSize: '13px' }}>🎬</span>
+                          <div style={{ height: '8px', width: '110px', borderRadius: '99px', background: 'linear-gradient(90deg, #c7d2fe, #e0e7ff, #c7d2fe)', backgroundSize: '200% 100%', animation: 'chatgpt-shimmer 2s ease-in-out infinite' }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // ─── DEFAULT THINKING LOADER ───
+                return (
+                  <div className="flex items-start gap-4 max-w-4xl mx-auto">
+                    <div className="w-8 h-8 rounded-full bg-surface border border-border flex items-center justify-center shrink-0">
+                      <img src={Logo} alt="AI MALL" className="w-5 h-5 object-contain" />
+                    </div>
+                    <div className="px-5 py-3 rounded-2xl rounded-tl-none bg-surface border border-border flex items-center gap-3">
+                      <span className="text-sm font-medium text-subtext animate-pulse">{loadingText}</span>
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-1.5 h-1.5 bg-subtext/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
+
             </>
           )}
 
           <div ref={messagesEndRef} />
         </div>
 
+
+
         {/* Welcome Screen - Compact Fixed Overlay */}
         {messages.length === 0 && (
+
           <div className="absolute inset-0 z-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden no-scrollbar pointer-events-auto px-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))', paddingBottom: '5rem' }}>
             {/* Dreamy Background blobs - AI Mall Style */}
             <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -3882,10 +4061,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
               </div>
             </div>
           </div>
-        )}
+        )
+        }
 
-        {/* Fixed Input Area - ChatGPT Style (Enhanced Transparency) */}
-        <div className="absolute bottom-0 left-0 right-0 z-40 bg-transparent backdrop-blur-2xl" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))', paddingTop: '0.75rem' }}>
+        {/* Fixed Input Area - ChatGPT Style */}
+        <div className="absolute bottom-0 left-0 right-0 z-40 bg-[#EEF0FD] dark:bg-[#0f0f1a]" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom, 0.75rem))', paddingTop: '0.75rem' }}>
+
           {/* Subtle glow for input area */}
           <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
           <div className="max-w-5xl mx-auto relative px-2 sm:px-4">

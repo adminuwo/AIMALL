@@ -3,6 +3,218 @@
     color: #FFFFFF !important;
 }
 
+/* ─── Image / Video Generation Loader Animations ─── */
+@keyframes shimmer-scan {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}
+
+@keyframes chatgpt-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes bg-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes image-dot-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+}
+
+@keyframes sphere-spin-y {
+    from {
+        transform: rotateY(0deg);
+    }
+
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+@keyframes sphere-spin-x {
+    from {
+        transform: rotateX(65deg) rotateZ(0deg);
+    }
+
+    to {
+        transform: rotateX(65deg) rotateZ(360deg);
+    }
+}
+
+@keyframes sphere-spin-d {
+    from {
+        transform: rotateX(30deg) rotateY(45deg) rotateZ(0deg);
+    }
+
+    to {
+        transform: rotateX(30deg) rotateY(45deg) rotateZ(360deg);
+    }
+}
+
+@keyframes scanline-down {
+    0% {
+        top: -3px;
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 263px;
+        opacity: 0;
+    }
+}
+
+@keyframes globe-surface-shift {
+    0% {
+        filter: brightness(1) saturate(1);
+    }
+
+    50% {
+        filter: brightness(1.08) saturate(1.15);
+    }
+
+    100% {
+        filter: brightness(1) saturate(1);
+    }
+}
+
+@keyframes globe-clouds {
+    0% {
+        opacity: 0.7;
+        transform: translateX(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(6px);
+    }
+}
+
+@keyframes image-forming {
+
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.08;
+    }
+}
+
+@keyframes progress-indeterminate {
+    0% {
+        width: 0%;
+        margin-left: 0%;
+    }
+
+    50% {
+        width: 60%;
+        margin-left: 20%;
+    }
+
+    100% {
+        width: 0%;
+        margin-left: 100%;
+    }
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse-scale {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.6;
+    }
+}
+
+@keyframes orbit {
+    from {
+        transform: rotate(0deg) translateX(32px) rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg) translateX(32px) rotate(-360deg);
+    }
+}
+
+@keyframes progress-slide {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes fade-in-out {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+
+
 /* Force ALL links in AI chat bubbles to be purple — override browser default blue */
 #msg-text-wrapper a,
 [id^="msg-text-"] a,
