@@ -3,6 +3,28 @@
     color: #FFFFFF !important;
 }
 
+/* Force ALL links in AI chat bubbles to be purple — override browser default blue */
+#msg-text-wrapper a,
+[id^="msg-text-"] a,
+.ai-speech-tail a,
+.aisa-bubble-glow a,
+.prose a {
+    color: #8B5CF6 !important;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+[id^="msg-text-"] a:hover,
+.ai-speech-tail a:hover,
+.aisa-bubble-glow a:hover {
+    color: #7C3AED !important;
+    text-decoration: underline;
+    opacity: 0.9;
+}
+
+
+
 .dark-mode-heading {
     color: #FFFFFF !important;
     font-weight: 900 !important;
@@ -359,5 +381,5 @@ h2.dark-mode-heading {
     height: 0;
     border-top: 7px solid transparent;
     border-bottom: 7px solid transparent;
-    border-left: 8px solid #8B5CF6;
+    border-left: 8px solid #A78BFA;
 }

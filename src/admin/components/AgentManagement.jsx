@@ -69,7 +69,7 @@ const AgentManagement = () => {
     };
 
     const A_SERIES_FALLBACK = [
-        "AIVA", "AIDOC", "AIPHOTO", "AIPHARMA", "AIHEALTH", "AIDESK", "AIBRAND", "AIHR", "AISTAFF",
+        "AISA", "AIDOC", "AIPHOTO", "AIPHARMA", "AIHEALTH", "AIDESK", "AIBRAND", "AIHR", "AISTAFF",
         "AIDESIGN", "AIVOICE", "AIWRITE", "AISALES", "AILEAD", "AIMARKET", "AITEAM", "AIBILL",
         "AISCRIPT", "AILAB", "AIANIMATE", "AIMED", "AIMIND", "AIOFFICE", "AIFIT", "AIGENE",
         "AIBIZ", "AIFUNNEL", "AIVIDEO", "AIAUDIT", "AIPAY", "AITRANS", "AICALL", "AICARE",
@@ -404,3 +404,4 @@ const AgentManagement = () => {
 };
 
 export default AgentManagement;
+

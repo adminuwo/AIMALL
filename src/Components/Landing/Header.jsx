@@ -62,7 +62,7 @@ const Header = () => {
             <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-500"></div>
           </div>
           <span className={`font-black text-lg md:text-2xl tracking-tighter uppercase transition-colors duration-300 ${theme === 'Dark' ? 'text-white' : 'text-[#1A1A1A]'}`}>
-            <span className="aiva-glitch" data-text="AI">AI</span> MALL<sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup>
+            <span className="AISA-glitch" data-text="AI">AI</span> MALL<sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup>
           </span>
         </div>
 
@@ -181,4 +181,5 @@ const Header = () => {
 };
 
 export default Header;
+
 

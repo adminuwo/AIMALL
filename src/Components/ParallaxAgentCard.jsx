@@ -38,11 +38,11 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                         <div className="space-y-1">
                             {(() => {
                                 const name = t(agent.agentName);
-                                const isAiva = name.toUpperCase() === 'AIVA';
+                                const isAISA = name.toUpperCase() === 'AISA';
                                 if (isDark) {
                                     return (
                                         <>
-                                            <h3 className={`text-[24px] md:text-[19px] font-bold text-white tracking-tight uppercase leading-tight agent-name-text ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
+                                            <h3 className={`text-[24px] md:text-[19px] font-bold text-white tracking-tight uppercase leading-tight agent-name-text ${isAISA ? 'AISA-glitch' : ''}`} data-text={name}>
                                                 {name}
                                             </h3>
                                             <p className="text-[13px] md:text-[11px] text-white/90 font-semibold line-clamp-2 max-w-[280px] agent-desc-text">
@@ -55,7 +55,7 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
                                 // Light Mode Fallback
                                 return (
                                     <>
-                                        <h3 className={`text-[24px] md:text-[19px] font-black text-gray-900 tracking-tight uppercase leading-tight ${isAiva ? 'aiva-glitch' : ''}`} data-text={name}>
+                                        <h3 className={`text-[24px] md:text-[19px] font-black text-gray-900 tracking-tight uppercase leading-tight ${isAISA ? 'AISA-glitch' : ''}`} data-text={name}>
                                             {name}
                                         </h3>
                                         <p className={`text-[13px] md:text-[11px] text-gray-500 font-semibold line-clamp-2 max-w-[280px] opacity-80`}>
@@ -104,3 +104,4 @@ const ParallaxAgentCard = ({ agent, isDark, onOpenInfo, toggleBuy }) => {
 };
 
 export default ParallaxAgentCard;
+

@@ -257,7 +257,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
                 <span className={`text-xl font-black ${isDark ? 'text-[#E6E9F2]' : 'text-gray-900'} tracking-tighter uppercase leading-none transition-colors`}>
-                  <span className="aiva-glitch" data-text="AI">AI</span> MALL
+                  <span className="AISA-glitch" data-text="AI">AI</span> MALL
                   <sup className="text-[10px] md:text-[0.45em] font-black ml-0.5 relative -top-[0.6em] md:-top-[0.8em]">{t('trademark')}</sup>
                 </span>
               </div>
@@ -617,3 +617,4 @@ const Sidebar = ({ isOpen, onClose }) => {
 };
 
 export default Sidebar;
+

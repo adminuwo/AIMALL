@@ -87,6 +87,19 @@ const TOOL_PRICING = {
 };
 
 
+const highlightKeywords = (text) => {
+  if (typeof text !== 'string') return text;
+  const keywords = ['AI-MALL', 'A-Series', 'AISA', 'Frase'];
+  let processedText = text;
+  keywords.forEach(keyword => {
+    // Basic replace to wrap in double asterisks for markdown bold (which we styled purple)
+    // Only replace if not already part of a markdown link or already bolded
+    const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+    processedText = processedText.replace(regex, (match) => `**${match}**`);
+  });
+  return processedText;
+};
+
 const ImageViewer = ({ src, alt }) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -2997,7 +3010,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                   {/* Actions Menu (Always visible for discoverability) */}
 
                   {msg.role === 'user' ? (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-[#8B5CF6] shadow-sm dark:shadow-[0_0_15px_rgba(139,92,246,0.3)] border-none">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-[#A78BFA] shadow-sm dark:shadow-[0_0_15px_rgba(167,139,250,0.3)] border-none">
                       <User className="w-4 h-4 text-white" />
                     </div>
                   ) : (
@@ -3014,7 +3027,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                   >
                     <div
                       className={`group/bubble relative px-3 py-2.5 sm:px-5 sm:py-4 rounded-2xl sm:rounded-[1.5rem] leading-relaxed whitespace-pre-wrap break-words shadow-sm w-fit max-w-full transition-all duration-300 min-h-[40px] hover:scale-[1.002] ${msg.role === 'user'
-                        ? 'bg-[#8B5CF6] text-white [&_*]:!text-white rounded-tr-sm shadow-xl shadow-[#8B5CF6]/30 text-sm sm:text-base border-none user-speech-tail'
+                        ? 'bg-[#A78BFA] text-white rounded-tr-sm shadow-xl shadow-[#A78BFA]/30 text-sm sm:text-base border-none user-speech-tail'
                         : `bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/40 dark:border-white/10 text-gray-900 dark:text-white/90 rounded-tl-sm shadow-sm hover:shadow-md dark:shadow-purple-500/10 text-sm sm:text-base ai-speech-tail ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''} ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-bubble-glow' : ''}`
                         }`}
                     >
@@ -3053,18 +3066,17 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   </button>
                                 </div>
                               ) : (
-                                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-colors backdrop-blur-md ${msg.role === 'user' ? 'bg-transparent border-white/20 hover:bg-white/10 shadow-none' : 'bg-secondary/30 border-border hover:bg-secondary/50'}`}>
+                                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-colors backdrop-blur-md ${msg.role === 'user' ? 'bg-white/10 border-white/20 hover:bg-white/20 shadow-none' : 'bg-secondary/30 border-border hover:bg-secondary/50'}`}>
                                   <div
                                     className="flex-1 flex items-center gap-3 min-w-0 cursor-pointer p-0.5 rounded-lg"
                                     onClick={() => setViewingDoc(att)}
                                   >
                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${(() => {
                                       const name = (att.name || '').toLowerCase();
-                                      if (msg.role === 'user') return 'bg-white shadow-sm';
-                                      if (name.endsWith('.pdf')) return 'bg-red-50 dark:bg-red-900/20';
-                                      if (name.match(/\.(doc|docx)$/)) return 'bg-blue-50 dark:bg-blue-900/20';
-                                      if (name.match(/\.(xls|xlsx|csv)$/)) return 'bg-emerald-50 dark:bg-emerald-900/20';
-                                      if (name.match(/\.(ppt|pptx)$/)) return 'bg-orange-50 dark:bg-orange-900/20';
+                                      if (name.endsWith('.pdf')) return 'bg-red-50 dark:bg-red-900/40';
+                                      if (name.match(/\.(doc|docx)$/)) return 'bg-blue-50 dark:bg-blue-900/40';
+                                      if (name.match(/\.(xls|xlsx|csv)$/)) return 'bg-emerald-50 dark:bg-emerald-900/40';
+                                      if (name.match(/\.(ppt|pptx)$/)) return 'bg-orange-50 dark:bg-orange-900/40';
                                       return 'bg-secondary';
                                     })()}`}>
                                       {(() => {
@@ -3073,17 +3085,17 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                         if (name.match(/\.(xls|xlsx|csv)$/)) return <FileSpreadsheet className={`${baseClass} text-emerald-600`} />;
                                         if (name.match(/\.(ppt|pptx)$/)) return <Presentation className={`${baseClass} text-orange-600`} />;
                                         if (name.endsWith('.pdf')) return <FileText className={`${baseClass} text-red-600`} />;
-                                        if (name.match(/\.(doc|docx)$/)) return <FileIcon className={`${baseClass} text-blue-600`} />;
-                                        return <FileIcon className={`${baseClass} text-primary`} />;
+                                        if (name.match(/\.(doc|docx)$/)) return <FileText className={`${baseClass} text-blue-600`} />;
+                                        return <FileText className={`${baseClass} text-primary`} />;
                                       })()}
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <p className="font-semibold truncate text-xs mb-0.5">{att.name || 'File'}</p>
-                                      <p className="text-[10px] opacity-70 uppercase tracking-tight font-medium">
+                                      <p className={`font-semibold truncate text-xs mb-0.5 ${msg.role === 'user' ? 'text-white' : 'text-maintext'}`}>{att.name || 'File'}</p>
+                                      <p className={`text-[10px] uppercase tracking-tight font-medium ${msg.role === 'user' ? 'text-white/70' : 'text-subtext'}`}>
                                         {(() => {
                                           const name = (att.name || '').toLowerCase();
-                                          if (name.endsWith('.pdf')) return 'PDF • Preview';
-                                          if (name.match(/\.(doc|docx)$/)) return 'WORD • Preview';
+                                          if (name.endsWith('.pdf')) return 'PDF • PREVIEW';
+                                          if (name.match(/\.(doc|docx)$/)) return 'WORD • PREVIEW';
                                           if (name.match(/\.(xls|xlsx|csv)$/)) return 'EXCEL';
                                           if (name.match(/\.(ppt|pptx)$/)) return 'SLIDES';
                                           return 'DOCUMENT';
@@ -3146,7 +3158,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                         </div>
                       ) : (
                         msg.content && (
-                          <div id={`msg-text-${msg.id}`} className={`max-w-full break-words leading-relaxed whitespace-normal ${msg.role === 'user' ? 'text-white !text-white [&_*]:!text-white' : 'text-maintext'}`}>
+                          <div id={`msg-text-${msg.id}`} className={`max-w-full break-words leading-relaxed whitespace-normal ${msg.role === 'user' ? 'text-white' : 'text-maintext'}`}>
                             {msg.role === 'user' && msg.mode === MODES.DEEP_SEARCH && (
                               <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-white/20 rounded-lg w-fit">
                                 <Search size={10} className="text-white" />
@@ -3154,7 +3166,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                               </div>
                             )}
                             <ReactMarkdown
-                              children={typeof msg.content === 'object' ? JSON.stringify(msg.content, null, 2) : (msg.content || '')}
+                              children={typeof msg.content === 'object' ? JSON.stringify(msg.content, null, 2) : highlightKeywords(msg.content || '')}
                               remarkPlugins={[remarkGfm]}
                               components={{
                                 a: ({ href, children }) => {
@@ -3168,7 +3180,8 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                           navigate(href);
                                         }
                                       }}
-                                      className="text-primary hover:underline font-bold cursor-pointer"
+                                      className="hover:underline font-bold cursor-pointer"
+                                      style={{ color: '#8B5CF6' }}
                                       target={isInternal ? "_self" : "_blank"}
                                       rel={isInternal ? "" : "noopener noreferrer"}
                                     >
@@ -3176,15 +3189,16 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                     </a>
                                   );
                                 },
+
                                 p: ({ children }) => <p className={`mb-1.5 last:mb-0 ${msg.role === 'user' ? 'm-0 leading-normal text-white' : 'leading-relaxed'}`}>{children}</p>,
                                 ul: ({ children }) => <ul className={`list-disc pl-5 mb-3 last:mb-0 space-y-1.5 transition-all ${msg.role === 'user' ? 'text-white' : 'marker:text-primary'}`}>{children}</ul>,
                                 ol: ({ children }) => <ol className={`list-decimal pl-5 mb-3 last:mb-0 space-y-1.5 transition-all ${msg.role === 'user' ? 'text-white' : 'marker:text-primary'}`}>{children}</ol>,
                                 li: ({ children }) => <li className="mb-1 last:mb-0 transition-colors">{children}</li>,
-                                h1: ({ children }) => <h1 className="font-bold mb-2 mt-3 block text-[1.4em] text-primary tracking-tight">{children}</h1>,
-                                h2: ({ children }) => <h2 className="font-bold mb-1.5 mt-2 block text-[1.2em] text-primary tracking-tight">{children}</h2>,
-                                h3: ({ children }) => <h3 className="font-bold mb-1 mt-1.5 block text-[1.1em] text-primary tracking-tight">{children}</h3>,
-                                strong: ({ children }) => <strong className="font-bold text-[#5555ff]">{children}</strong>,
-                                mark: ({ children }) => <mark className="bg-[#5555ff] text-white px-1 py-0.5 rounded-sm">{children}</mark>,
+                                h1: ({ children }) => <h1 className="font-bold mb-2 mt-3 block text-[1.4em] text-[#8b5cf6] tracking-tight">{children}</h1>,
+                                h2: ({ children }) => <h2 className="font-bold mb-1.5 mt-2 block text-[1.2em] text-[#8b5cf6] tracking-tight">{children}</h2>,
+                                h3: ({ children }) => <h3 className="font-bold mb-1 mt-1.5 block text-[1.1em] text-[#8b5cf6] tracking-tight">{children}</h3>,
+                                strong: ({ children }) => <strong className="font-bold text-[#8b5cf6]">{children}</strong>,
+                                mark: ({ children }) => <mark className="bg-[#8b5cf6] text-white px-1 py-0.5 rounded-sm">{children}</mark>,
                                 code: ({ node, inline, className, children, ...props }) => {
                                   const match = /language-(\w+)/.exec(className || '');
                                   const lang = match ? match[1] : '';
@@ -3248,7 +3262,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                           e.stopPropagation(); // Prevent opening modal when clicking download
                                           handleDownload(props.src, 'AISA-generated.png');
                                         }}
-                                        className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
+                                        className="absolute bottom-3 right-3 p-2.5 bg-[#8b5cf6] text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-[#7c3aed] shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
                                         title="Download High-Res"
                                       >
                                         <div className="flex items-center gap-2 px-1">
@@ -3261,7 +3275,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                 },
                               }}
                             >
-                              {msg.content || msg.text || ""}
+                              {highlightKeywords(msg.content || msg.text || "")}
                             </ReactMarkdown>
 
                             {/* Dynamic Video Rendering */}
@@ -3288,7 +3302,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
 
                                 <button
                                   onClick={() => handleDownload(msg.videoUrl, 'AISA-generated-video.mp4')}
-                                  className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100 z-20"
+                                  className="absolute bottom-3 right-3 p-2.5 bg-[#8b5cf6] text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-[#7c3aed] shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100 z-20"
                                   title="Download Video"
                                 >
                                   <div className="flex items-center gap-2 px-1">
@@ -3321,7 +3335,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                     e.stopPropagation(); // Prevent opening modal handling
                                     handleDownload(msg.imageUrl, 'AISA-generated.png');
                                   }}
-                                  className="absolute bottom-3 right-3 p-2.5 bg-primary text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-primary/90 shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
+                                  className="absolute bottom-3 right-3 p-2.5 bg-[#8b5cf6] text-white rounded-xl opacity-100 sm:opacity-0 sm:group-hover/generated:opacity-100 transition-all hover:bg-[#7c3aed] shadow-lg border border-white/20 scale-100 sm:scale-90 sm:group-hover/generated:scale-100"
                                   title="Download High-Res"
                                 >
                                   <div className="flex items-center gap-2 px-1">
@@ -3338,13 +3352,25 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                       {msg.proTip && (
                         <div className="mt-4 pt-3 border-t border-border/40">
                           <ReactMarkdown
-                            children={msg.proTip}
+                            children={highlightKeywords(msg.proTip)}
                             remarkPlugins={[remarkGfm]}
                             components={{
                               p: ({ children }) => <p className={`text-sm tracking-tight ${msg.role === 'user' ? 'text-white' : 'text-maintext'}`}>{children}</p>,
-                              strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
+                              strong: ({ children }) => <strong className="font-bold text-[#8b5cf6]">{children}</strong>,
+                              a: ({ href, children }) => (
+                                <a
+                                  href={href}
+                                  style={{ color: '#8B5CF6' }}
+                                  className="font-bold hover:underline cursor-pointer"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {children}
+                                </a>
+                              ),
                             }}
                           />
+
                         </div>
                       )}
 
@@ -3364,11 +3390,23 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             </div>
                           )}
 
-                          <div className="flex items-center justify-between px-1 py-1">
+                          <div className="flex items-center gap-4 px-1 py-1">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${msg.conversion.mimeType.includes('pdf') ? 'bg-red-50 dark:bg-red-900/30' :
+                              msg.conversion.mimeType.includes('audio') ? 'bg-indigo-50 dark:bg-indigo-900/30' :
+                                'bg-blue-50 dark:bg-blue-900/30'
+                              }`}>
+                              {msg.conversion.mimeType.includes('pdf') ? (
+                                <FileText className="w-6 h-6 text-red-600" />
+                              ) : msg.conversion.mimeType.includes('audio') ? (
+                                <Headphones className="w-6 h-6 text-indigo-600" />
+                              ) : (
+                                <FileText className="w-6 h-6 text-blue-600" />
+                              )}
+                            </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-bold text-maintext truncate">{msg.conversion.fileName}</p>
                               <p className="text-[10px] text-subtext font-bold uppercase tracking-widest flex items-center gap-2">
-                                <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded-md border border-primary/20">
+                                <span className="px-1.5 py-0.5 bg-[#8b5cf6]/10 text-[#8b5cf6] rounded-md border border-[#8b5cf6]/20">
                                   {msg.conversion.fileSize || "Ready"}
                                 </span>
                                 {msg.conversion.charCount && (
@@ -3411,7 +3449,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                   toast.error("Download failed");
                                 }
                               }}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl transition-all hover:bg-primary/90 shadow-sm font-bold text-sm active:scale-95"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#8b5cf6] text-white rounded-xl transition-all hover:bg-[#7c3aed] shadow-sm font-bold text-sm active:scale-95"
                             >
                               <Download className="w-4 h-4" />
                               Download {msg.conversion.mimeType.includes('audio') ? 'Audio' : msg.conversion.mimeType.includes('pdf') ? 'PDF' : 'Document'}
@@ -3858,16 +3896,25 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                 {filePreviews.map((preview) => (
                   <div
                     key={preview.id}
-                    className="relative shrink-0 w-64 md:w-72 bg-surface/95 dark:bg-zinc-900/95 border border-border/50 rounded-2xl p-2.5 flex items-center gap-3 shadow-xl backdrop-blur-xl animate-in slide-in-from-bottom-2 duration-300 ring-1 ring-black/5"
+                    className="relative shrink-0 w-64 md:w-72 bg-[#f8f7ff]/90 dark:bg-[#15152e]/95 border border-purple-100/50 dark:border-purple-500/30 rounded-2xl p-2.5 flex items-center gap-3 shadow-xl backdrop-blur-xl animate-in slide-in-from-bottom-2 duration-300 ring-1 ring-black/5"
                   >
                     <div className="relative group shrink-0">
                       {preview.type.startsWith('image/') ? (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-border/50 bg-black/5">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-purple-200/50 bg-black/5">
                           <img src={preview.url} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                         </div>
                       ) : (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 shadow-sm">
-                          <FileText className="w-7 h-7 text-primary" />
+                        <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center border shadow-sm ${preview.name.toLowerCase().endsWith('.pdf') ? 'bg-red-50 border-red-200/50' :
+                          preview.name.toLowerCase().match(/\.(doc|docx)$/) ? 'bg-blue-50 border-blue-200/50' :
+                            'bg-primary/15 border-primary/20'
+                          }`}>
+                          {preview.name.toLowerCase().endsWith('.pdf') ? (
+                            <FileText className="w-7 h-7 text-red-600" />
+                          ) : preview.name.toLowerCase().match(/\.(doc|docx)$/) ? (
+                            <FileText className="w-7 h-7 text-blue-600" />
+                          ) : (
+                            <FileText className="w-7 h-7 text-primary" />
+                          )}
                         </div>
                       )}
 
@@ -3884,12 +3931,12 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                     </div>
 
                     <div className="min-w-0 flex-1 py-1">
-                      <p className="text-sm font-semibold text-maintext truncate pr-1">{preview.name}</p>
+                      <p className="text-sm font-semibold text-maintext dark:text-white truncate pr-1">{preview.name}</p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <span className="text-[10px] text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-lg uppercase tracking-wider font-bold">
                           {preview.type.split('/')[1]?.split('-')[0] || 'FILE'}
                         </span>
-                        <span className="text-[10px] text-subtext font-medium">
+                        <span className="text-[10px] text-subtext dark:text-purple-200/70 font-medium">
                           {(preview.size / 1024 / 1024).toFixed(2)} MB
                         </span>
                       </div>

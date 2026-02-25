@@ -362,7 +362,7 @@ const Marketplace = () => {
                                     {subToggle.marketPlaceMode === 'ASeries' ? (
                                         <>A-SERIES</>
                                     ) : (
-                                        <><span className="aiva-glitch" data-text="AI">AI</span> MALL</>
+                                        <><span className="AISA-glitch" data-text="AI">AI</span> MALL</>
                                     )}
                                     <sup className="text-sm md:text-3xl font-black ml-0.5 relative md:-top-8" style={{ color: '#000000 !important', opacity: 1 }}>TM</sup>
                                 </motion.span>
@@ -483,3 +483,4 @@ const Marketplace = () => {
 };
 
 export default Marketplace;
+
