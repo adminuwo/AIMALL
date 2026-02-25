@@ -323,3 +323,41 @@ h2.dark-mode-heading {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+/* AI Speech Bubble Tail/Arrow */
+.ai-speech-tail {
+    position: relative;
+}
+
+.ai-speech-tail::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: -7px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-right: 8px solid rgba(255, 255, 255, 0.95);
+}
+
+.dark .ai-speech-tail::before {
+    border-right-color: rgba(31, 41, 55, 0.9);
+}
+
+/* User Speech Bubble Tail/Arrow (points RIGHT → towards user avatar) */
+.user-speech-tail {
+    position: relative;
+}
+
+.user-speech-tail::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: -7px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 8px solid #8B5CF6;
+}

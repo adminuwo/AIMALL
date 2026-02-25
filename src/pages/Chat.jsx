@@ -593,9 +593,9 @@ const Chat = () => {
           const formattedSize = rawBytes > 1024 * 1024 ? (rawBytes / (1024 * 1024)).toFixed(1) + ' MB' : (rawBytes / 1024).toFixed(1) + ' KB';
 
           setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
-            ...msg,
             isProcessing: false,
             content: `✅ Audio conversion complete for **${file.name}**.`,
+            proTip: `✨ **Pro Tip:** For ultra-realistic voices, emotional narrations, and professional voiceovers, check out our highly capable agents like **AIVOICE** (A-Series), **ElevenLabs**, or **Murf.ai** (AI-MALL marketplace). A subscription plan will perfectly solve your audio needs!`,
             conversion: {
               file: mp3Base64,
               blobUrl: audioUrl,
@@ -661,9 +661,9 @@ const Chat = () => {
         const formattedSize = rawBytes > 1024 * 1024 ? (rawBytes / (1024 * 1024)).toFixed(1) + ' MB' : (rawBytes / 1024).toFixed(1) + ' KB';
 
         setMessages(prev => prev.map(msg => msg.id === aiMsgId ? {
-          ...msg,
           isProcessing: false,
           content: `✅ Your text has been converted to voice audio.`,
+          proTip: `✨ **Pro Tip:** For ultra-realistic voices, emotional narrations, and professional voiceovers, check out our highly capable agents like **AIVOICE** (A-Series), **ElevenLabs**, or **Murf.ai** (AI-MALL marketplace). A subscription plan will give you perfect, studio-quality audio every time!`,
           conversion: {
             file: mp3Base64,
             blobUrl: audioUrl,
@@ -773,6 +773,7 @@ const Chat = () => {
             id: tempId, // Keep same ID so we replace the correct one (or just update)
             role: 'assistant',
             content: `🎥 Video generated successfully!`, // Use content
+            proTip: `✨ **Pro Tip:** Need professional video editing, avatars, or cinematic capabilities? Check out specialized agents like **AIVIDEO** (A-Series), **Synthesia**, or **Vidiq** (AI-MALL marketplace). Taking a plan will perfectly serve all your video creation needs!`,
             videoUrl: data.videoUrl,
             timestamp: new Date(),
           };
@@ -826,6 +827,7 @@ const Chat = () => {
             id: tempId, // Keep same ID
             role: 'assistant',
             content: `🖼️ Image generated successfully!`, // Use content
+            proTip: `✨ **Pro Tip:** For even better image generation with advanced control, lifelike accuracy, and precise details, explore our dedicated agents like **AIDESIGN** (A-Series), **Synthesia**, or **Headshotpro** (AI-MALL marketplace)! Subscribing to a specialized agent is the ultimate way to permanently elevate your creative workflow!`,
             imageUrl: finalUrl,
             timestamp: new Date(),
           };
@@ -886,6 +888,7 @@ const Chat = () => {
             type: 'ai',
             text: responseData.reply,
             content: responseData.reply,
+            proTip: `✨ **Pro Tip:** Want deeper analysis or automated research on a regular basis? Explore our dedicated research agents like **AIBASE** (A-Series), **Originality.ai**, or **LLM Auditor** (AI-MALL marketplace). A specialized agent subscription is the ultimate solution for your research needs!`,
             timestamp: new Date(),
           };
 
@@ -1709,6 +1712,7 @@ ${PERSONA_INSTRUCTION}
 - Do NOT add summaries or closing lines after interruption
 - Resume ONLY if user explicitly asks again
 
+${filePreviews.length > 0 ? `
 ### MULTI-FILE ANALYSIS MANDATE (STRICT 1:1 RULE):
 You have received exactly ${filePreviews.length} file(s).
 You MUST provide exactly ${filePreviews.length} distinct analysis blocks.
@@ -1730,7 +1734,7 @@ REQUIRED OUTPUT FORMAT:
 **Analysis of: {Filename 2}**
 [Full detailed answer/analysis for File 2]
 
-(Repeat strictly for ALL ${filePreviews.length} files)
+(Repeat strictly for ALL ${filePreviews.length} files)` : ''}
 
 ### RESPONSE FORMATTING RULES (STRICT):
 1.  **Structure**: ALWAYS use **Bold Headings** and **Bullet Points**. Avoid long paragraphs.
@@ -2934,14 +2938,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
         {/* Header - Slimmer on mobile */}
         <div className="h-12 md:h-16 border-b border-black/[0.05] dark:border-white/10 flex items-center justify-between px-2 md:px-6 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl z-20 shrink-0 gap-2">
           <div className="flex items-center gap-1 md:gap-3 min-w-0">
-            {/* Show sidebar toggle only on desktop where global mobile header is hidden */}
-            <button
-              onClick={() => setTglState(prev => ({ ...prev, sidebarOpen: true }))}
-              className="hidden lg:flex p-2 -ml-2 text-subtext hover:text-maintext rounded-lg hover:bg-surface/50 transition-colors"
-              title="Menu"
-            >
-              <MenuIcon className="w-6 h-6" />
-            </button>
+
             <button
               onClick={() => setShowHistory(true)}
               className="p-1.5 md:p-2 text-subtext hover:text-primary rounded-lg hover:bg-primary/5 transition-all group"
@@ -2990,18 +2987,17 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                 >
                   {/* Actions Menu (Always visible for discoverability) */}
 
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user'
-                      ? 'bg-primary/80 backdrop-blur-md shadow-sm dark:shadow-[0_0_15px_rgba(236,72,153,0.3)]'
-                      : 'bg-white/95 dark:bg-gray-800/90 border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                      }`}
-                  >
-                    {msg.role === 'user' ? (
+                  {msg.role === 'user' ? (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-[#8B5CF6] shadow-sm dark:shadow-[0_0_15px_rgba(139,92,246,0.3)] border-none">
                       <User className="w-4 h-4 text-white" />
-                    ) : (
-                      <img src={Logo} alt="AISA" className={`w-5 h-5 object-contain ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-icon-glitch' : ''}`} />
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={Logo}
+                      alt="AISA"
+                      className={`w-8 h-8 object-contain shrink-0 ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-icon-glitch' : ''}`}
+                    />
+                  )}
 
                   <div
                     className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'
@@ -3009,8 +3005,8 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                   >
                     <div
                       className={`group/bubble relative px-3 py-2.5 sm:px-5 sm:py-4 rounded-2xl sm:rounded-[1.5rem] leading-relaxed whitespace-pre-wrap break-words shadow-sm w-fit max-w-full transition-all duration-300 min-h-[40px] hover:scale-[1.002] ${msg.role === 'user'
-                        ? 'bg-primary/80 backdrop-blur-md border border-white/20 text-white rounded-tr-sm shadow-lg shadow-primary/20 dark:shadow-pink-500/20 text-sm sm:text-base'
-                        : `bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/40 dark:border-white/10 text-gray-900 dark:text-white/90 rounded-tl-sm shadow-sm hover:shadow-md dark:shadow-purple-500/10 text-sm sm:text-base ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''} ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-bubble-glow' : ''}`
+                        ? 'bg-[#8B5CF6] text-white [&_*]:!text-white rounded-tr-sm shadow-xl shadow-[#8B5CF6]/30 text-sm sm:text-base border-none user-speech-tail'
+                        : `bg-white/95 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/40 dark:border-white/10 text-gray-900 dark:text-white/90 rounded-tl-sm shadow-sm hover:shadow-md dark:shadow-purple-500/10 text-sm sm:text-base ai-speech-tail ${msg.id === typingMessageId ? 'ai-typing-glow ai-typing-shimmer outline outline-offset-1 outline-primary/20' : ''} ${activeAgent.agentName?.toUpperCase() === 'AISA' ? 'aisa-bubble-glow' : ''}`
                         }`}
                     >
 
@@ -3141,7 +3137,7 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                         </div>
                       ) : (
                         msg.content && (
-                          <div id={`msg-text-${msg.id}`} className={`max-w-full break-words leading-relaxed whitespace-normal ${msg.role === 'user' ? 'text-white' : 'text-maintext'}`}>
+                          <div id={`msg-text-${msg.id}`} className={`max-w-full break-words leading-relaxed whitespace-normal ${msg.role === 'user' ? 'text-white !text-white [&_*]:!text-white' : 'text-maintext'}`}>
                             {msg.role === 'user' && msg.mode === MODES.DEEP_SEARCH && (
                               <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-white/20 rounded-lg w-fit">
                                 <Search size={10} className="text-white" />
@@ -3171,9 +3167,9 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                                     </a>
                                   );
                                 },
-                                p: ({ children }) => <p className={`mb-1.5 last:mb-0 ${msg.role === 'user' ? 'm-0 leading-normal' : 'leading-relaxed'}`}>{children}</p>,
-                                ul: ({ children }) => <ul className="list-disc pl-5 mb-3 last:mb-0 space-y-1.5 marker:text-primary transition-all">{children}</ul>,
-                                ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 last:mb-0 space-y-1.5 marker:text-primary transition-all">{children}</ol>,
+                                p: ({ children }) => <p className={`mb-1.5 last:mb-0 ${msg.role === 'user' ? 'm-0 leading-normal text-white' : 'leading-relaxed'}`}>{children}</p>,
+                                ul: ({ children }) => <ul className={`list-disc pl-5 mb-3 last:mb-0 space-y-1.5 transition-all ${msg.role === 'user' ? 'text-white' : 'marker:text-primary'}`}>{children}</ul>,
+                                ol: ({ children }) => <ol className={`list-decimal pl-5 mb-3 last:mb-0 space-y-1.5 transition-all ${msg.role === 'user' ? 'text-white' : 'marker:text-primary'}`}>{children}</ol>,
                                 li: ({ children }) => <li className="mb-1 last:mb-0 transition-colors">{children}</li>,
                                 h1: ({ children }) => <h1 className="font-bold mb-2 mt-3 block text-[1.4em] text-primary tracking-tight">{children}</h1>,
                                 h2: ({ children }) => <h2 className="font-bold mb-1.5 mt-2 block text-[1.2em] text-primary tracking-tight">{children}</h2>,
@@ -3328,6 +3324,19 @@ For "Remix" requests with an attachment, analyze the attached image, then create
                             )}
                           </div>
                         )
+                      )}
+
+                      {msg.proTip && (
+                        <div className="mt-4 pt-3 border-t border-border/40">
+                          <ReactMarkdown
+                            children={msg.proTip}
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => <p className={`text-sm tracking-tight ${msg.role === 'user' ? 'text-white' : 'text-maintext'}`}>{children}</p>,
+                              strong: ({ children }) => <strong className="font-bold text-primary">{children}</strong>,
+                            }}
+                          />
+                        </div>
                       )}
 
                       {/* File Conversion Download Button */}
