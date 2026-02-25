@@ -805,16 +805,25 @@ const Chat = () => {
       const prompt = overridePrompt || inputRef.current.value;
       setIsLoading(true);
 
-      // Show a message that image generation is in progress
-      const tempId = Date.now().toString();
-      const newMessage = {
-        id: tempId,
-        role: 'assistant',
-        content: `🎨 Generating image from prompt: "${prompt}"\n\nPlease wait, this may take a moment...`, // Use content
+      // Add user's prompt message first (shows on right side like normal chat)
+      const userMsgId = Date.now().toString();
+      const userMessage = {
+        id: userMsgId,
+        role: 'user',
+        content: prompt,
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, newMessage]);
+      // Then show AI generating status message
+      const tempId = (Date.now() + 1).toString();
+      const newMessage = {
+        id: tempId,
+        role: 'assistant',
+        content: `🎨 Generating image from prompt: "${prompt}"\n\nPlease wait, this may take a moment...`,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, userMessage, newMessage]);
       if (inputRef.current) inputRef.current.value = '';
 
       try {
